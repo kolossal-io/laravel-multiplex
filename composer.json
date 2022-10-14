@@ -35,7 +35,7 @@
     "autoload": {
         "psr-4": {
             "Kolossal\\Meta\\": "src",
-            "Kolossal\\Meta\\Database\\Factories\\": "database/factories"
+            "Kolossal\\Meta\\Tests\\Factories\\": "tests/factories"
         }
     },
     "autoload-dev": {
