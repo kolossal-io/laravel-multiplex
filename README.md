@@ -38,7 +38,7 @@ return [
 ## Usage
 
 ```php
-$metaRevision = new Kolossal\MetaRevision();
+$metaRevision = new Kolossal\Meta();
 echo $metaRevision->echoPhrase('Hello, kolossal!');
 ```
 

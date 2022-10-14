@@ -1,9 +1,9 @@
 <?php
 
-namespace Kolossal\MetaRevision\Tests;
+namespace Kolossal\Meta\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Kolossal\MetaRevision\MetaRevisionServiceProvider;
+use Kolossal\Meta\MetaServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
@@ -13,24 +13,19 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Kolossal\\MetaRevision\\Database\\Factories\\'.class_basename($modelName).'Factory'
+            fn (string $modelName) => 'Kolossal\\Meta\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
         );
     }
 
     protected function getPackageProviders($app)
     {
         return [
-            MetaRevisionServiceProvider::class,
+            MetaServiceProvider::class,
         ];
     }
 
     public function getEnvironmentSetUp($app)
     {
         config()->set('database.default', 'testing');
-
-        /*
-        $migration = include __DIR__.'/../database/migrations/create_laravel-meta-revision_table.php.stub';
-        $migration->up();
-        */
     }
 }

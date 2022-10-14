@@ -1,5 +1,5 @@
 <?php
 
-use Kolossal\MetaRevision\Tests\TestCase;
+use Kolossal\Meta\Tests\TestCase;
 
 uses(TestCase::class)->in(__DIR__);
