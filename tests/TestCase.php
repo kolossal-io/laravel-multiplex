@@ -13,8 +13,10 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Kolossal\\Meta\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
+            fn (string $modelName) => 'Kolossal\\Meta\\Tests\\Factories\\' . class_basename($modelName) . 'Factory'
         );
+
+        $this->useDatabase();
     }
 
     protected function getPackageProviders($app)
@@ -26,6 +28,12 @@ class TestCase extends Orchestra
 
     public function getEnvironmentSetUp($app)
     {
-        config()->set('database.default', 'testing');
+        config()->set('database.default', 'sqlite');
+        config()->set('database.connections.sqlite.database', ':memory:');
+    }
+
+    protected function useDatabase()
+    {
+        $this->loadMigrationsFrom(__DIR__ . '/migrations');
     }
 }
