@@ -1,6 +1,6 @@
 <?php
 
-// config for kolossal/MetaRevision
+// config for Kolossal/MetaRevision
 return [
 
 ];

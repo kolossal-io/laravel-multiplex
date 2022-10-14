@@ -1,16 +1,16 @@
 <?php
 
-namespace kolossal\MetaRevision\Facades;
+namespace Kolossal\MetaRevision\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @see \kolossal\MetaRevision\MetaRevision
+ * @see \Kolossal\MetaRevision\MetaRevision
  */
 class MetaRevision extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return \kolossal\MetaRevision\MetaRevision::class;
+        return \Kolossal\MetaRevision\MetaRevision::class;
     }
 }

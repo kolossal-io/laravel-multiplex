@@ -1,9 +1,9 @@
 <?php
 
-namespace kolossal\MetaRevision\Tests;
+namespace Kolossal\MetaRevision\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use kolossal\MetaRevision\MetaRevisionServiceProvider;
+use Kolossal\MetaRevision\MetaRevisionServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
@@ -13,7 +13,7 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'kolossal\\MetaRevision\\Database\\Factories\\'.class_basename($modelName).'Factory'
+            fn (string $modelName) => 'Kolossal\\MetaRevision\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
     }
 

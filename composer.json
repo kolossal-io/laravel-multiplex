@@ -2,11 +2,12 @@
     "name": "kolossal-io/laravel-meta-revision",
     "description": "A Laravel package to attach versioned meta data to Eloquent models.",
     "keywords": [
-        "kolossal-io",
+        "kolossal",
         "laravel",
-        "laravel-meta-revision"
+        "laravel-meta-revision",
+        "eloquent"
     ],
-    "homepage": "https://github.com/kolossal-io/laravel-meta-revision",
+    "homepage": "https://github.com/Kolossal-io/laravel-meta-revision",
     "license": "MIT",
     "authors": [
         {
@@ -34,13 +35,13 @@
     },
     "autoload": {
         "psr-4": {
-            "kolossal\\MetaRevision\\": "src",
-            "kolossal\\MetaRevision\\Database\\Factories\\": "database/factories"
+            "Kolossal\\MetaRevision\\": "src",
+            "Kolossal\\MetaRevision\\Database\\Factories\\": "database/factories"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "kolossal\\MetaRevision\\Tests\\": "tests"
+            "Kolossal\\MetaRevision\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -60,10 +61,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "kolossal\\MetaRevision\\MetaRevisionServiceProvider"
+                "Kolossal\\MetaRevision\\MetaRevisionServiceProvider"
             ],
             "aliases": {
-                "MetaRevision": "kolossal\\MetaRevision\\Facades\\MetaRevision"
+                "MetaRevision": "Kolossal\\MetaRevision\\Facades\\MetaRevision"
             }
         }
     },

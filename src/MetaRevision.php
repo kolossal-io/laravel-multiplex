@@ -1,6 +1,6 @@
 <?php
 
-namespace kolossal\MetaRevision;
+namespace Kolossal\MetaRevision;
 
 class MetaRevision
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace kolossal\MetaRevision;
+namespace Kolossal\MetaRevision;
 
-use kolossal\MetaRevision\Commands\MetaRevisionCommand;
+use Kolossal\MetaRevision\Commands\MetaRevisionCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 

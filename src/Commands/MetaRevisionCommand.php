@@ -1,6 +1,6 @@
 <?php
 
-namespace kolossal\MetaRevision\Commands;
+namespace Kolossal\MetaRevision\Commands;
 
 use Illuminate\Console\Command;
 

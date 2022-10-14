@@ -1,6 +1,6 @@
 <?php
 
-namespace kolossal\MetaRevision\Database\Factories;
+namespace Kolossal\MetaRevision\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
