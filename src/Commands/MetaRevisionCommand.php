@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace kolossal\MetaRevision\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class MetaRevisionCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'laravel-meta-revision';
 
     public $description = 'My command';
 

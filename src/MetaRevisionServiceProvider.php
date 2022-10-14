@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace kolossal\MetaRevision;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use VendorName\Skeleton\Commands\SkeletonCommand;
+use kolossal\MetaRevision\Commands\MetaRevisionCommand;
 
-class SkeletonServiceProvider extends PackageServiceProvider
+class MetaRevisionServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
@@ -16,10 +16,10 @@ class SkeletonServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('skeleton')
+            ->name('laravel-meta-revision')
             ->hasConfigFile()
             ->hasViews()
-            ->hasMigration('create_skeleton_table')
-            ->hasCommand(SkeletonCommand::class);
+            ->hasMigration('create_laravel-meta-revision_table')
+            ->hasCommand(MetaRevisionCommand::class);
     }
 }
