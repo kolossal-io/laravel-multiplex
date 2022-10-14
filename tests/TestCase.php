@@ -3,8 +3,8 @@
 namespace kolossal\MetaRevision\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Orchestra\Testbench\TestCase as Orchestra;
 use kolossal\MetaRevision\MetaRevisionServiceProvider;
+use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {

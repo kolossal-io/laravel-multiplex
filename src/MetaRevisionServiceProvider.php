@@ -2,9 +2,9 @@
 
 namespace kolossal\MetaRevision;
 
+use kolossal\MetaRevision\Commands\MetaRevisionCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use kolossal\MetaRevision\Commands\MetaRevisionCommand;
 
 class MetaRevisionServiceProvider extends PackageServiceProvider
 {
