@@ -5,15 +5,7 @@
 [![GitHub Code Style Action Status](https://img.shields.io/github/workflow/status/kolossal-io/laravel-meta-revision/Fix%20PHP%20code%20style%20issues?label=code%20style)](https://github.com/kolossal-io/laravel-meta-revision/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/kolossal-io/laravel-meta-revision.svg?style=flat-square)](https://packagist.org/packages/kolossal-io/laravel-meta-revision)
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
-
-## Support us
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/laravel-meta-revision.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/laravel-meta-revision)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+A Laravel package to attach versioned meta data to Eloquent models.
 
 ## Installation
 
@@ -52,7 +44,7 @@ php artisan vendor:publish --tag="laravel-meta-revision-views"
 ## Usage
 
 ```php
-$metaRevision = new kolossal\MetaRevision();
+$metaRevision = new Kolossal\MetaRevision();
 echo $metaRevision->echoPhrase('Hello, kolossal!');
 ```
 
@@ -74,11 +66,8 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
 
-## Credits
-
-- [Marijan Barkic](https://github.com/marijoo)
-- [All Contributors](../../contributors)
-
 ## License
+
+Copyright (c) [kolossal](https://kolossal.io)
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
