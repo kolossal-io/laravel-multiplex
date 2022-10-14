@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
  * Handle serialization of Eloquent collections.
  *
  * @copyright Plank Multimedia Inc.
+ *
  * @link https://github.com/plank/laravel-metable
  */
 class ModelCollectionHandler implements HandlerInterface
@@ -69,8 +70,7 @@ class ModelCollectionHandler implements HandlerInterface
     /**
      * Load each model instance, grouped by class.
      *
-     * @param array $items
-     *
+     * @param  array  $items
      * @return array
      */
     private function loadModels(array $items)
@@ -80,7 +80,7 @@ class ModelCollectionHandler implements HandlerInterface
 
         // Retrieve a list of keys to load from each class.
         foreach ($items as $item) {
-            if (!is_null($item['key'])) {
+            if (! is_null($item['key'])) {
                 $classes[$item['class']][] = $item['key'];
             }
         }

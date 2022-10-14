@@ -9,6 +9,7 @@ use DateTimeInterface;
  * Handle serialization of DateTimeInterface objects.
  *
  * @copyright Plank Multimedia Inc.
+ *
  * @link https://github.com/plank/laravel-metable
  */
 class DateTimeHandler implements HandlerInterface

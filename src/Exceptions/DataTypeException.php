@@ -8,6 +8,7 @@ use Exception;
  * Data Type registry exception.
  *
  * @copyright Plank Multimedia Inc.
+ *
  * @link https://github.com/plank/laravel-metable
  */
 class DataTypeException extends Exception

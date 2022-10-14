@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
  * Handle serialization of Eloquent Models.
  *
  * @copyright Plank Multimedia Inc.
+ *
  * @link https://github.com/plank/laravel-metable
  */
 class ModelHandler implements HandlerInterface
@@ -34,7 +35,7 @@ class ModelHandler implements HandlerInterface
     public function serializeValue($value): string
     {
         if ($value->exists) {
-            return get_class($value) . '#' . $value->getKey();
+            return get_class($value).'#'.$value->getKey();
         }
 
         return get_class($value);
@@ -51,7 +52,7 @@ class ModelHandler implements HandlerInterface
         }
 
         // Fetch specific instances.
-        list($class, $id) = explode('#', $value);
+        [$class, $id] = explode('#', $value);
 
         return with(new $class())->findOrFail($id);
     }

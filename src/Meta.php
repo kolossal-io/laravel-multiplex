@@ -57,6 +57,7 @@ class Meta extends Model
      * Successive access will be loaded from cache.
      *
      * @return mixed
+     *
      * @throws Exceptions\DataTypeException
      */
     public function getValueAttribute()
@@ -71,7 +72,8 @@ class Meta extends Model
      *
      * The `type` attribute will be automatically updated to match the datatype of the input.
      *
-     * @param mixed $value
+     * @param  mixed  $value
+     *
      * @throws Exceptions\DataTypeException
      */
     public function setValueAttribute($value): void

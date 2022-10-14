@@ -8,6 +8,7 @@ use Serializable;
  * Handle serialization of Serializable objects.
  *
  * @copyright Plank Multimedia Inc.
+ *
  * @link https://github.com/plank/laravel-metable
  */
 class SerializableHandler implements HandlerInterface

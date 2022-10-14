@@ -14,9 +14,9 @@ use stdClass;
  * Data handler tests.
  *
  * @copyright Plank Multimedia Inc.
+ *
  * @link https://github.com/plank/laravel-metable
  */
-
 class DataTypeHandlerTest extends TestCase
 {
     public function handlerProvider()

@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        if (!Schema::hasTable('meta')) {
+        if (! Schema::hasTable('meta')) {
             Schema::create('meta', function (Blueprint $table) {
                 $table->increments('id');
 
