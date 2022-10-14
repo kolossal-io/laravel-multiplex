@@ -11,18 +11,18 @@ class MetaServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../config/meta.php' => config_path('meta.php'),
+                __DIR__.'/../config/meta.php' => config_path('meta.php'),
             ], 'config');
         }
 
         if (config('meta.migrations', true)) {
-            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+            $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         }
     }
 
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/meta.php', 'meta');
+        $this->mergeConfigFrom(__DIR__.'/../config/meta.php', 'meta');
 
         $this->registerDataTypeRegistry();
     }
@@ -31,6 +31,7 @@ class MetaServiceProvider extends ServiceProvider
      * Add the DataType Registry to the service container.
      *
      * @copyright Plank Multimedia Inc.
+     *
      * @link https://github.com/plank/laravel-metable
      *
      * @return void

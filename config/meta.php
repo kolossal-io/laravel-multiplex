@@ -20,6 +20,7 @@ return [
      * by the first appropriate handler in the list.
      *
      * @copyright Plank Multimedia Inc.
+     *
      * @link https://github.com/plank/laravel-metable
      */
     'datatypes' => [

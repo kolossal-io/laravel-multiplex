@@ -67,11 +67,11 @@ trait HasMeta
     /**
      * Determine if the meta keys are guarded.
      *
-     * @return boolean
+     * @return bool
      */
     public function isMetaGuarded(): bool
     {
-        return !in_array('*', $this->getMetaKeys());
+        return ! in_array('*', $this->getMetaKeys());
     }
 
     /**
@@ -94,7 +94,7 @@ trait HasMeta
             return false;
         }
 
-        if (!$this->isMetaGuarded()) {
+        if (! $this->isMetaGuarded()) {
             return true;
         }
 
@@ -105,13 +105,13 @@ trait HasMeta
      * Determine if model table has a given column.
      *
      * @param  [string]  $column
-     * @return boolean
+     * @return bool
      */
     public function hasColumn($column): bool
     {
         $class = get_class($this);
 
-        if (!isset($this->schemaColumnsCache[$class])) {
+        if (! isset($this->schemaColumnsCache[$class])) {
             $this->schemaColumnsCache[$class] = collect(
                 $this->getConnection()
                     ->getSchemaBuilder()
@@ -145,8 +145,8 @@ trait HasMeta
     /**
      * Add or update the value of the `Meta` at a given key.
      *
-     * @param string|array $key
-     * @param mixed $value
+     * @param  string|array  $key
+     * @param  mixed  $value
      *
      * @throws MetaException if unknown key is used.
      */
@@ -159,12 +159,11 @@ trait HasMeta
         $this->setMetaString($key, $value);
     }
 
-
     protected function setMetaString($key, $value)
     {
         $key = strtolower($key);
 
-        if (!$this->isMetaKey($key)) {
+        if (! $this->isMetaKey($key)) {
             throw MetaException::unknownKey($key);
         }
 
@@ -183,7 +182,7 @@ trait HasMeta
     /**
      * Set meta values from array of $key => $value pairs.
      *
-     * @param array $metas
+     * @param  array  $metas
      * @return Collection
      */
     protected function setMetaArray(array $metas): Collection
@@ -200,11 +199,11 @@ trait HasMeta
      */
     public function getMetaCollection(): Collection
     {
-        if (!is_null($this->metaCollection)) {
+        if (! is_null($this->metaCollection)) {
             return $this->metaCollection;
         }
 
-        if ($this->exists && !is_null($this->meta)) {
+        if ($this->exists && ! is_null($this->meta)) {
             return $this->metaCollection = $this->meta->keyBy('key');
         }
 

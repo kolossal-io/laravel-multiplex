@@ -8,6 +8,7 @@ use Kolossal\Meta\Exceptions\DataTypeException;
  * List of available data type Handlers.
  *
  * @copyright Plank Multimedia Inc.
+ *
  * @link https://github.com/plank/laravel-metable
  */
 class Registry
@@ -22,9 +23,8 @@ class Registry
     /**
      * Append a Handler to use for a given type identifier.
      *
-     * @param HandlerInterface $handler
-     * @param string $type
-     *
+     * @param  HandlerInterface  $handler
+     * @param  string  $type
      * @return void
      */
     public function addHandler(HandlerInterface $handler)
@@ -35,11 +35,10 @@ class Registry
     /**
      * Retrieve the handler assigned to a given type identifier.
      *
-     * @param string $type
+     * @param  string  $type
+     * @return HandlerInterface
      *
      * @throws DataTypeException if no handler is found.
-     *
-     * @return HandlerInterface
      */
     public function getHandlerForType(string $type): HandlerInterface
     {
@@ -53,8 +52,7 @@ class Registry
     /**
      * Check if a handler has been set for a given type identifier.
      *
-     * @param string $type
-     *
+     * @param  string  $type
      * @return bool
      */
     public function hasHandlerForType(string $type): bool
@@ -65,8 +63,7 @@ class Registry
     /**
      * Removes the handler with a given type identifier.
      *
-     * @param string $type
-     *
+     * @param  string  $type
      * @return void
      */
     public function removeHandlerForType(string $type)
@@ -77,11 +74,10 @@ class Registry
     /**
      * Find a data type Handler that is able to operate on the value, return the type identifier associated with it.
      *
-     * @param mixed $value
+     * @param  mixed  $value
+     * @return string
      *
      * @throws DataTypeException if no handler can handle the value.
-     *
-     * @return string
      */
     public function getTypeForValue($value): string
     {

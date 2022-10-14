@@ -6,6 +6,7 @@ namespace Kolossal\Meta\DataType;
  * Handle serialization of scalar values.
  *
  * @copyright Plank Multimedia Inc.
+ *
  * @link https://github.com/plank/laravel-metable
  */
 abstract class ScalarHandler implements HandlerInterface

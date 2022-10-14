@@ -6,6 +6,7 @@ namespace Kolossal\Meta\DataType;
  * Handle serialization of floats.
  *
  * @copyright Plank Multimedia Inc.
+ *
  * @link https://github.com/plank/laravel-metable
  */
 class FloatHandler extends ScalarHandler
