@@ -14,4 +14,9 @@ class Post extends Model
     use SoftDeletes;
 
     protected $table = 'sample_posts';
+
+    public function setTestHasMutatorMeta($value)
+    {
+        return "Test {$value}.";
+    }
 }
