@@ -35,7 +35,7 @@ trait HasMeta
     /**
      * Auto-save meta data when model is saved.
      *
-     * @var boolean
+     * @var bool
      */
     protected bool $autosaveMeta = true;
 
@@ -102,7 +102,7 @@ trait HasMeta
      */
     public function isMetaGuarded(): bool
     {
-        return !in_array('*', $this->getMetaKeys());
+        return ! in_array('*', $this->getMetaKeys());
     }
 
     /**
@@ -135,7 +135,7 @@ trait HasMeta
             return false;
         }
 
-        if (!$this->isMetaGuarded()) {
+        if (! $this->isMetaGuarded()) {
             return true;
         }
 
@@ -152,7 +152,7 @@ trait HasMeta
     {
         $class = get_class($this);
 
-        if (!isset($this->metaSchemaColumnsCache[$class])) {
+        if (! isset($this->metaSchemaColumnsCache[$class])) {
             $this->metaSchemaColumnsCache[$class] = collect(
                 $this->getConnection()
                     ->getSchemaBuilder()
@@ -203,7 +203,7 @@ trait HasMeta
                     ->whereColumn('m.key', 'meta.key')
                     ->orderByDesc('m.published_at')
                     ->orderByDesc('m.id')
-                    ->take(1)
+                    ->take(1),
             ])
             ->whereColumn('id', 'latest_id')
             ->groupBy('key');
@@ -241,7 +241,7 @@ trait HasMeta
      *
      * @param  string|array  $key
      * @param  mixed  $value
-     * @param  string|DateTimeInterface|null   $publishAt
+     * @param  string|DateTimeInterface|null  $publishAt
      *
      * @throws MetaException if invalid key is used.
      */
@@ -287,14 +287,14 @@ trait HasMeta
             throw MetaException::modelAttribute($key);
         }
 
-        if (!$this->isValidMetaKey($key)) {
+        if (! $this->isValidMetaKey($key)) {
             throw MetaException::invalidKey($key);
         }
 
         $meta = $this->getMetaChanges();
 
-        $value = with(Str::camel('set_' . $key . '_meta'), function ($mutator) use ($value) {
-            if (!method_exists($this, $mutator)) {
+        $value = with(Str::camel('set_'.$key.'_meta'), function ($mutator) use ($value) {
+            if (! method_exists($this, $mutator)) {
                 return $value;
             }
 
@@ -316,8 +316,8 @@ trait HasMeta
     /**
      * Determine wether the given meta was changed.
      *
-     * @param string $key
-     * @return boolean
+     * @param  string  $key
+     * @return bool
      */
     public function hasMetaChanged(string $key): bool
     {
@@ -356,7 +356,7 @@ trait HasMeta
 
         $deleted = $keys
             ->each(function ($key) {
-                if (!$this->isValidMetaKey($key)) {
+                if (! $this->isValidMetaKey($key)) {
                     throw MetaException::invalidKey($key);
                 }
             })
@@ -378,7 +378,7 @@ trait HasMeta
      */
     public function getMetaChanges(): Collection
     {
-        if (!is_null($this->metaChanges)) {
+        if (! is_null($this->metaChanges)) {
             return $this->metaChanges;
         }
 
@@ -386,13 +386,13 @@ trait HasMeta
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      *
      * @throws MetaException if invalid key is used.
      */
     public function setAttribute($key, $value)
     {
-        if (!$this->isValidMetaKey($key)) {
+        if (! $this->isValidMetaKey($key)) {
             return parent::setAttribute($key, $value);
         }
 
@@ -418,7 +418,7 @@ trait HasMeta
     /**
      * Store a single Meta model.
      *
-     * @param Meta $meta
+     * @param  Meta  $meta
      * @return Meta|false
      */
     protected function storeMeta(Meta $meta)
@@ -434,9 +434,8 @@ trait HasMeta
      * Store the meta data from the Meta Collection.
      * Returns `true` if all meta was saved successfully.
      *
-     * @param   ?string $key
-     * @param   mixed   $value
-     *
+     * @param  ?string  $key
+     * @param  mixed  $value
      * @return bool
      */
     public function saveMeta(?string $key = null, $value = null): bool
@@ -447,16 +446,19 @@ trait HasMeta
             ), fn () => $this->refreshMeta());
         }
 
-        if (!isset(func_get_args()[1])) {
+        if (! isset(func_get_args()[1])) {
             /** @var Meta $meta */
             $meta = $this->getMetaChanges()->pull($key);
 
-            return tap(!!$this->storeMeta($meta), function ($saved) {
-                if ($saved) $this->refreshMeta();
+            return tap((bool) $this->storeMeta($meta), function ($saved) {
+                if ($saved) {
+                    $this->refreshMeta();
+                }
             });
         }
 
         $this->setMeta($key, $value);
+
         return $this->saveMeta($key);
     }
 
@@ -465,7 +467,7 @@ trait HasMeta
      *
      * @param  ?string  $key
      * @param  mixed  $value
-     * @param  string|DateTimeInterface|null   $publishAt
+     * @param  string|DateTimeInterface|null  $publishAt
      *
      * @throws MetaException if invalid key is used.
      */
