@@ -371,6 +371,59 @@ class HasMetaTest extends TestCase
     }
 
     /** @test */
+    public function it_can_set_meta_from_array()
+    {
+        $model = Post::factory()->create();
+
+        $model->saveMeta([
+            'foo' => 'bar',
+            'bar' => 123,
+        ]);
+
+        $this->assertSame('bar', $model->refresh()->foo);
+        $this->assertSame(123, $model->refresh()->bar);
+    }
+
+    /** @test */
+    public function it_can_set_meta_for_the_future()
+    {
+        $model = Post::factory()->create();
+
+        $model->saveMeta('foo', 'bar');
+        $model->saveMetaAt('foo', 'change', '+1 hour');
+
+        $this->assertSame('bar', $model->refresh()->foo);
+
+        $this->travelTo('+1 hour');
+
+        $this->assertSame('change', $model->refresh()->foo);
+    }
+
+    /** @test */
+    public function it_can_set_meta_for_future_from_array()
+    {
+        $model = Post::factory()->create();
+
+        $model->saveMeta([
+            'foo' => 'bar',
+            'bar' => 123,
+        ]);
+
+        $model->saveMetaAt([
+            'foo' => 'change',
+            'bar' => false,
+        ], '+1 hour');
+
+        $this->assertSame('bar', $model->refresh()->foo);
+        $this->assertSame(123, $model->refresh()->bar);
+
+        $this->travelTo('+1 hour');
+
+        $this->assertSame('change', $model->refresh()->foo);
+        $this->assertSame(false, $model->refresh()->bar);
+    }
+
+    /** @test */
     public function it_will_handle_future_meta_versions_as_non_existent()
     {
         $model = Post::factory()->create();
@@ -843,7 +896,7 @@ class HasMetaTest extends TestCase
     }
 
     /** @test */
-    public function it_will_return_column_value_for_casted_meta_fields_having_equally_column()
+    public function it_will_return_column_value_for_casted_meta_fields_having_equally_named_column()
     {
         $model = Post::factory()->create(['title' => 'Title']);
 
@@ -863,5 +916,164 @@ class HasMetaTest extends TestCase
         $this->travelTo('+10 minutes');
 
         $this->assertSame(8000.99, Post::first()->appendable_foo);
+    }
+
+    /** @test */
+    public function it_can_save_multiple_meta_for_a_given_date()
+    {
+        $model = Post::factory()->create();
+
+        $model->setMeta('foo', 'bar');
+        $model->bar = 125;
+
+        $this->assertTrue($model->saveMetaAt('+1 day'));
+
+        $this->assertNull(Post::first()->foo);
+        $this->assertNull(Post::first()->bar);
+
+        $model->setMeta([
+            'foo' => 'old value',
+            'bar' => false,
+        ]);
+
+        $this->assertTrue($model->saveMetaAt('-1 day'));
+
+        $this->assertSame('old value', Post::first()->foo);
+        $this->assertSame(false, Post::first()->bar);
+
+        $this->travelTo('+1 day');
+
+        $this->assertSame('bar', Post::first()->foo);
+        $this->assertSame(125, Post::first()->bar);
+    }
+
+    /** @test */
+    public function it_can_inspect_model_meta_at_a_given_point_in_time()
+    {
+        $this->travelTo('2022-10-01 12:00:00');
+
+        $model = Post::factory()->create();
+        $keys = ['foo', 'another', 'bar'];
+
+        $model->saveMeta([
+            'foo' => 'bar',
+            'bar' => 125,
+        ]);
+
+        $this->travelTo('+1 day');
+        $model->saveMeta('foo', 'updated');
+
+        $this->travelTo('+2 days');
+        $model->saveMeta('another', true);
+
+        $this->travelTo('+1 day');
+        $model->saveMeta('bar', 999.125);
+
+        $this->assertEquals([
+            'foo' => 'updated',
+            'another' => true,
+            'bar' => 999.125,
+        ], Post::first()->only($keys));
+
+        $this->assertEquals([
+            'foo' => 'bar',
+            'another' => null,
+            'bar' => 125,
+        ], Post::first()->withMetaAt('2022-10-01 15:00:00')->only($keys));
+
+        $post = Post::first()->withMetaAt('2022-10-02 15:00:00');
+
+        $this->assertEquals([
+            'foo' => 'updated',
+            'another' => null,
+            'bar' => 125,
+        ], $post->only($keys));
+
+        $this->assertEquals([
+            'foo' => 'updated',
+            'another' => true,
+            'bar' => 125,
+        ], $post->withMetaAt('2022-10-04 12:15:00')->only($keys));
+
+        $this->assertEquals([
+            'foo' => null,
+            'another' => null,
+            'bar' => null,
+        ], $post->withMetaAt('2022-08-05 12:15:00')->only($keys));
+
+        $this->assertEquals([
+            'foo' => 'updated',
+            'another' => true,
+            'bar' => 999.125,
+        ], $post->withCurrentMeta()->only($keys));
+    }
+
+    /** @test */
+    public function it_can_travel_to_the_future()
+    {
+        $model = Post::factory()->create();
+        $keys = ['foo', 'another', 'bar'];
+
+        $model->saveMetaAt([
+            'foo' => 'updated',
+            'bar' => 999.125,
+            'another' => true,
+        ], '+1 year');
+
+        $this->assertEquals([
+            'foo' => null,
+            'another' => null,
+            'bar' => null,
+        ], Post::first()->only($keys));
+
+        $this->assertEquals([
+            'foo' => 'updated',
+            'another' => true,
+            'bar' => 999.125,
+        ], Post::first()->withMetaAt('+1 year')->only($keys));
+    }
+
+    /** @test */
+    public function it_can_create_meta_along_with_the_model()
+    {
+        Post::factory()->create([
+            'title' => 'Post title',
+            'foo' => 123,
+            'bar' => 'works',
+        ]);
+
+        $this->assertDatabaseCount('meta', 2);
+
+        $this->assertSame('Post title', Post::first()->title);
+        $this->assertSame(123, Post::first()->foo);
+        $this->assertSame('works', Post::first()->bar);
+    }
+
+    /** @test */
+    public function it_will_delete_meta_with_the_model()
+    {
+        Post::factory()->create([
+            'title' => 'Post title',
+            'foo' => 123,
+            'bar' => 'works',
+        ]);
+
+        $this->assertDatabaseCount('meta', 2);
+        $this->assertTrue(Post::first()->forceDelete());
+        $this->assertDatabaseCount('meta', 0);
+    }
+
+    /** @test */
+    public function it_will_not_delete_meta_for_soft_deleted_model()
+    {
+        Post::factory()->create([
+            'title' => 'Post title',
+            'foo' => 123,
+            'bar' => 'works',
+        ]);
+
+        $this->assertDatabaseCount('meta', 2);
+        $this->assertTrue(Post::first()->delete());
+        $this->assertDatabaseCount('meta', 2);
     }
 }

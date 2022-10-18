@@ -58,6 +58,12 @@ trait HasMeta
                 $model->saveMeta();
             }
         });
+
+        static::forceDeleted(function ($model) {
+            if ($model->autosaveMeta === true) {
+                $model->purgeMeta();
+            }
+        });
     }
 
     /**
@@ -241,14 +247,27 @@ trait HasMeta
             return;
         }
 
+        /**
+         * If the given key is not explicitly allowed but exists as a real attribute
+         * let’s not try to find a meta value for the given key.
+         */
         if (! $this->isExplicitlyAllowedMetaKey($key) && ($attr = parent::getAttribute($key)) !== null) {
             return $attr;
         }
 
+        /**
+         * If there is a relation with the same name as the given key load the relation.
+         */
         if ($this->isRelation($key)) {
             return $this->getRelation($key);
         }
 
+        /**
+         * There seems to be no attribute given and no relation so we either have a key
+         * explicitly listed as a meta key or the wildcard (*) was used. Let’s get the meta
+         * value for the given key and pipe the result through an accessor if possible.
+         * Finally delegate back to `parent::getAttribute()` if no meta exists.
+         */
         $value = $this->getMeta($key);
 
         return with(Str::camel('get_'.$key.'_meta'), function ($accessor) use ($value) {
@@ -279,6 +298,10 @@ trait HasMeta
      */
     public function findMeta($key)
     {
+        if (! $this->exists) {
+            return null;
+        }
+
         return $this->meta?->first(fn ($meta) => $meta->key === $key);
     }
 
@@ -370,16 +393,30 @@ trait HasMeta
     {
         $key = strtolower($key);
 
+        /**
+         * If one is trying to set a model attribute as meta without explicitly
+         * whitelisting the attribute throw an exception.
+         */
         if ($this->isModelAttribute($key) && ! $this->isExplicitlyAllowedMetaKey($key)) {
             throw MetaException::modelAttribute($key);
         }
 
+        /**
+         * Check if the given key was whitelisted.
+         */
         if (! $this->isValidMetaKey($key)) {
             throw MetaException::invalidKey($key);
         }
 
+        /**
+         * Get all changed meta from our cache collection.
+         */
         $meta = $this->getMetaChanges();
 
+        /**
+         * Let’s check if there is a mutator for the given meta key and pipe
+         * the given value through it if so.
+         */
         $value = with(Str::camel('set_'.$key.'_meta'), function ($mutator) use ($value) {
             if (! method_exists($this, $mutator)) {
                 return $value;
@@ -390,6 +427,11 @@ trait HasMeta
 
         $attributes = ['value' => $value];
 
+        /**
+         * If `$publishAt` is set the meta should probably be published in the future
+         * or one is trying to create a historic record. Set `published_at` accordingly.
+         * If `published_at` is `null` it will be set to the current date in the `Meta` model.
+         */
         if ($publishAt) {
             $attributes['published_at'] = $publishAt;
         }
@@ -397,6 +439,10 @@ trait HasMeta
         if (($model = $this->findMeta($key))) {
             $model->forceFill($attributes);
 
+            /**
+             * If there already is a persisted meta for the given key, let’s check if the
+             * given value would result in a dirty model – if not skip here.
+             */
             if ($model->isClean()) {
                 return $model;
             }
@@ -404,6 +450,10 @@ trait HasMeta
             $model->forceFill($model->getOriginal());
         }
 
+        /**
+         * Fill the meta with the given attributes and save the changes in our collection.
+         * This will not persist the given meta to the database.
+         */
         return $meta[$key] = (new Meta(['key' => $key]))->forceFill($attributes);
     }
 
@@ -458,6 +508,10 @@ trait HasMeta
 
         $keys = collect(is_array($key) ? $key : [$key]);
 
+        /**
+         * If one of the given keys is invalid throw an exception. Otherwise delete all
+         * meta records for the given keys from the database.
+         */
         $deleted = $keys
             ->each(function ($key) {
                 if (! $this->isValidMetaKey($key)) {
@@ -468,12 +522,29 @@ trait HasMeta
 
         DB::commit();
 
+        /**
+         * Remove the deleted meta models from the collection of changes
+         * and refresh the meta relations to prevent having stale data.
+         */
         if ($deleted) {
             $deleted->each(fn ($key) => $this->resetMetaChanges($key));
             $this->refreshMetaRelations();
         }
 
+        /** Check if all given keys could be deleted. */
         return $deleted->count() === $keys->count();
+    }
+
+    /**
+     * Delete all meta for the given model.
+     *
+     * @return self
+     */
+    public function purgeMeta(): self
+    {
+        $this->allMeta()->delete();
+
+        return $this;
     }
 
     /**
@@ -532,6 +603,9 @@ trait HasMeta
             return false;
         }
 
+        /**
+         * If `$metaTimestamp` is set we probably are storing meta for the future or past.
+         */
         if ($this->metaTimestamp) {
             $meta->published_at ??= $this->metaTimestamp;
         }
@@ -543,25 +617,47 @@ trait HasMeta
      * Store the meta data from the Meta Collection.
      * Returns `true` if all meta was saved successfully.
      *
-     * @param  ?string  $key
-     * @param  mixed  $value
+     * @param  string|array|null  $key
+     * @param  mixed|null  $value
      * @return bool
      */
-    public function saveMeta(?string $key = null, $value = null): bool
+    public function saveMeta($key = null, $value = null): bool
     {
+        /**
+         * If we have exactly two arguments set and save the value for the given key.
+         */
         if (count(func_get_args()) === 2) {
             $this->setMeta($key, $value);
 
             return $this->saveMeta($key);
         }
 
+        /**
+         * Get all pending meta changes.
+         */
         $changes = $this->getMetaChanges();
 
+        /**
+         * If no arguments were passed, all changes should be persisted.
+         */
         if (empty(func_get_args())) {
             return tap($changes->every(function (Meta $meta, $key) use ($changes) {
                 return tap($this->storeMeta($meta), fn ($saved) => $saved && $changes->forget($key));
             }), fn () => $this->refreshMetaRelations());
         }
+
+        /**
+         * If only one argument was passed and it’s an array, let’s assume it
+         * is a key => value pair that should be stored.
+         */
+        if (is_array($key)) {
+            return collect($key)->every(fn ($value, $name) => $this->saveMeta($name, $value));
+        }
+
+        /**
+         * Otherwise pull and delete the given key from the array of changes and
+         * persist the change. Refresh the relations afterwards to prevent stale data.
+         */
 
         /** @var Meta $meta */
         $meta = $changes->pull($key);
@@ -576,13 +672,13 @@ trait HasMeta
     /**
      * Immediately save the given meta for a specific publishing time.
      *
-     * @param  ?string  $key
+     * @param  string|array  $key
      * @param  mixed  $value
      * @param  string|DateTimeInterface|null  $publishAt
      *
      * @throws MetaException if invalid key is used.
      */
-    public function saveMetaAt(?string $key = null, $value = null, $publishAt = null)
+    public function saveMetaAt($key = null, $value = null, $publishAt = null)
     {
         $args = func_get_args();
 
@@ -604,5 +700,34 @@ trait HasMeta
         $this->autosaveMeta = false;
 
         return tap($this->save(), fn () => $this->autosaveMeta = $previousSetting);
+    }
+
+    /**
+     * Travel to the specified point in time for storing or retrieving meta.
+     *
+     * @param  string|DateTimeInterface|null  $time
+     * @return self
+     */
+    public function withMetaAt($time): self
+    {
+        $time = $time ? Carbon::parse($time) : null;
+
+        if (gettype($this->metaTimestamp) !== gettype($time) || ! $this->metaTimestamp?->equalTo($time)) {
+            $this->refreshMetaRelations();
+        }
+
+        $this->metaTimestamp = $time;
+
+        return $this;
+    }
+
+    /**
+     * Travel to the current time for storing or retrieving meta.
+     *
+     * @return self
+     */
+    public function withCurrentMeta(): self
+    {
+        return $this->withMetaAt(null);
     }
 }
