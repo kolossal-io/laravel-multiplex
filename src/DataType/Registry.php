@@ -24,7 +24,6 @@ class Registry
      * Append a Handler to use for a given type identifier.
      *
      * @param  HandlerInterface  $handler
-     * @param  string  $type
      * @return void
      */
     public function addHandler(HandlerInterface $handler)

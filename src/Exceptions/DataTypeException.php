@@ -11,7 +11,7 @@ use Exception;
  *
  * @link https://github.com/plank/laravel-metable
  */
-class DataTypeException extends Exception
+final class DataTypeException extends Exception
 {
     public static function handlerNotFound(string $type): self
     {

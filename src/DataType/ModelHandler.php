@@ -35,7 +35,7 @@ class ModelHandler implements HandlerInterface
     public function serializeValue($value): string
     {
         if ($value->exists) {
-            return get_class($value).'#'.$value->getKey();
+            return get_class($value) . '#' . $value->getKey();
         }
 
         return get_class($value);
@@ -54,6 +54,6 @@ class ModelHandler implements HandlerInterface
         // Fetch specific instances.
         [$class, $id] = explode('#', $value);
 
-        return with(new $class())->findOrFail($id);
+        return (new $class())->findOrFail($id);
     }
 }

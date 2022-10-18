@@ -4,7 +4,7 @@ namespace Kolossal\Meta\Exceptions;
 
 use Exception;
 
-class MetaException extends Exception
+final class MetaException extends Exception
 {
     public static function invalidKey(string $key): self
     {

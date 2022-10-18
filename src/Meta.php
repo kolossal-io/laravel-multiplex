@@ -63,7 +63,7 @@ class Meta extends Model
     public function getValueAttribute()
     {
         return $this->cachedValue ??= $this->getDataTypeRegistry()
-            ->getHandlerForType($this->type)
+            ->getHandlerForType($this->attributes['type'])
             ->unserializeValue($this->attributes['value']);
     }
 
@@ -81,7 +81,9 @@ class Meta extends Model
         $registry = $this->getDataTypeRegistry();
 
         $this->attributes['type'] = $registry->getTypeForValue($value);
-        $this->attributes['value'] = $registry->getHandlerForType($this->type)->serializeValue($value);
+
+        $this->attributes['value'] = $registry->getHandlerForType($this->attributes['type'])
+            ->serializeValue($value);
 
         $this->cachedValue = null;
     }

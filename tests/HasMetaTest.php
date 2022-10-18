@@ -254,6 +254,38 @@ class HasMetaTest extends TestCase
     }
 
     /** @test */
+    public function it_will_return_meta_by_get_accessor()
+    {
+        $model = Post::factory()->create();
+
+        $model->saveMeta('foo', 'bar');
+
+        $this->assertSame('bar', Post::first()->getMeta('foo'));
+    }
+
+    /** @test */
+    public function it_will_return_null_if_meta_is_not_found()
+    {
+        $model = Post::factory()->create();
+
+        $model->saveMeta('bar', 123);
+
+        $this->assertNull(Post::first()->getMeta('foo'));
+        $this->assertSame(123, Post::first()->getMeta('bar'));
+    }
+
+    /** @test */
+    public function it_can_return_fallback_if_meta_is_not_found()
+    {
+        $model = Post::factory()->create();
+
+        $model->saveMeta('bar', 123);
+
+        $this->assertSame('fallback', Post::first()->getMeta('foo', 'fallback'));
+        $this->assertSame(123, Post::first()->getMeta('bar', 'fallback'));
+    }
+
+    /** @test */
     public function it_will_respect_set_meta_mutators()
     {
         $model = Post::factory()->create();
@@ -554,5 +586,36 @@ class HasMetaTest extends TestCase
 
         $this->assertSame('boolean', $model->meta->first()->type);
         $this->assertSame(false, $model->meta->first()->value);
+    }
+
+    /** @test */
+    public function it_will_store_dirty_meta_only()
+    {
+        $this->travelTo('2022-10-01 12:00:00');
+
+        $model = Post::factory()->create();
+
+        $model->saveMeta('foo', 'bar');
+        $model->saveMeta('bar', 123);
+
+        $this->assertDatabaseCount('meta', 2);
+
+        $this->assertSame('bar', $model->getMeta('foo'));
+        $this->assertSame(123, $model->getMeta('bar'));
+        $this->assertTrue($model->meta->pluck('updated_at', 'key')->get('foo')->isSameDay('2022-10-01'));
+        $this->assertTrue($model->meta->pluck('updated_at', 'key')->get('bar')->isSameDay('2022-10-01'));
+
+        $this->travelTo('2022-10-02 12:00:00');
+
+        $model->foo = 'bar';
+        $model->bar = 123.0;
+        $model->save();
+
+        $this->assertDatabaseCount('meta', 3);
+
+        $this->assertSame('bar', $model->getMeta('foo'));
+        $this->assertSame(123.0, $model->getMeta('bar'));
+        $this->assertTrue($model->meta->pluck('updated_at', 'key')->get('foo')->isSameDay('2022-10-01'));
+        $this->assertTrue($model->meta->pluck('updated_at', 'key')->get('bar')->isSameDay('2022-10-02'));
     }
 }

@@ -220,6 +220,29 @@ trait HasMeta
     }
 
     /**
+     * Get meta value for key.
+     *
+     * @param  string  $key
+     * @param   mixed   $default
+     * @return  mixed
+     */
+    public function getMeta(string $key, $default = null)
+    {
+        return $this->findMeta($key)?->value ?? $default;
+    }
+
+    /**
+     * Find current Meta model for the given key.
+     *
+     * @param  string  $key
+     * @return  ?Meta
+     */
+    public function findMeta($key)
+    {
+        return $this->meta?->first(fn ($meta) => $meta->key === $key);
+    }
+
+    /**
      * Add or update the value of the `Meta` at a given key.
      *
      * @param  string|array  $key
@@ -307,10 +330,17 @@ trait HasMeta
             $attributes['published_at'] = $publishAt;
         }
 
-        return $meta[$key] = ($meta->has($key)
-            ? $meta[$key]->replicate(['published_at'])
-            : new Meta(['key' => $key])
-        )->forceFill($attributes);
+        if (($model = $this->findMeta($key))) {
+            $model->forceFill($attributes);
+
+            if ($model->isClean()) {
+                return $model;
+            }
+
+            $model->discardChanges();
+        }
+
+        return $meta[$key] = (new Meta(['key' => $key]))->forceFill($attributes);
     }
 
     /**
@@ -402,9 +432,9 @@ trait HasMeta
     /**
      * Refresh the meta relations.
      *
-     * @return void
+     * @return self
      */
-    public function refreshMeta(): void
+    public function refreshMeta(): self
     {
         if ($this->relationLoaded('allMeta')) {
             $this->unsetRelation('allMeta');
@@ -413,6 +443,8 @@ trait HasMeta
         if ($this->relationLoaded('meta')) {
             $this->unsetRelation('meta');
         }
+
+        return $this;
     }
 
     /**
@@ -421,8 +453,12 @@ trait HasMeta
      * @param Meta $meta
      * @return Meta|false
      */
-    protected function storeMeta(Meta $meta)
+    protected function storeMeta(?Meta $meta)
     {
+        if (!$meta) {
+            return false;
+        }
+
         if ($this->metaTimestamp) {
             $meta->published_at ??= $this->metaTimestamp;
         }
@@ -457,6 +493,7 @@ trait HasMeta
         }
 
         $this->setMeta($key, $value);
+
         return $this->saveMeta($key);
     }
 
