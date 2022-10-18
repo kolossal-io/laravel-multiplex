@@ -3,6 +3,9 @@
 namespace Kolossal\Meta\Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Kolossal\Meta\Exceptions\MetaException;
 use Kolossal\Meta\Meta;
 use Kolossal\Meta\Tests\Mocks\Post;
@@ -34,9 +37,80 @@ class HasMetaTest extends TestCase
         $model = Post::factory()->create();
 
         $this->expectException(MetaException::class);
-        $this->expectExceptionMessage('Meta key `title` seems to be a model attribute. Make sure there is no mutator or `getAttribute` method for the key.');
+        $this->expectExceptionMessage('Meta key `title` seems to be a model attribute. You must explicitly allow this attribute via `$metaKeys`.');
 
         $model->setMeta('title', 'bar');
+    }
+
+    /** @test */
+    public function it_will_allow_real_column_names_allowed_explicitely()
+    {
+        $this->assertDatabaseCount('meta', 0);
+
+        $model = Post::factory()->create(['title' => 'Initial title']);
+
+        $model->metaKeys([
+            'title',
+            'foo',
+        ]);
+
+        $this->assertSame('Initial title', $model->title);
+
+        $model->setMeta('title', 'Changed title');
+        $model->setMeta('foo', 'bar');
+
+        $model->save();
+
+        $this->assertDatabaseCount('meta', 2);
+        $this->assertDatabaseHas('sample_posts', ['title' => 'Initial title']);
+        $this->assertSame('Changed title', $model->getMeta('title'));
+    }
+
+    /** @test */
+    public function it_will_prefer_meta_over_real_columns_if_defined_explicitly()
+    {
+        $model = Post::factory()->create(['title' => 'Initial title']);
+
+        $model->metaKeys([
+            'title',
+            'foo',
+        ]);
+
+        $this->assertSame('Initial title', $model->title);
+
+        $model->setMeta('title', 'Changed title');
+
+        $model->save();
+
+        $this->assertDatabaseHas('sample_posts', ['title' => 'Initial title']);
+        $this->assertSame('Changed title', $model->getMeta('title'));
+        $this->assertSame('Changed title', $model->title);
+
+        $model->saveMeta('title', 'Changed again');
+
+        $this->assertSame('Changed again', $model->title);
+    }
+
+    /** @test */
+    public function it_will_fallback_to_real_columns_for_explicitly_defined_meta_keys()
+    {
+        $model = Post::factory()->create(['title' => 'Initial title']);
+
+        $model->metaKeys([
+            'title',
+            'foo',
+        ]);
+
+        $this->assertSame('Initial title', $model->title);
+
+        $model->saveMeta('title', 'Changed title');
+        $this->assertSame('Changed title', $model->title);
+
+        $model->saveMeta('title', null);
+        $this->assertNull($model->title);
+
+        $model->deleteMeta('title');
+        $this->assertSame('Initial title', $model->title);
     }
 
     /** @test */
@@ -176,9 +250,6 @@ class HasMetaTest extends TestCase
     /** @test */
     public function it_will_throw_for_unallowed_keys()
     {
-        $this->expectException(MetaException::class);
-        $this->expectExceptionMessage('Meta key `bar` is not a valid key.');
-
         $model = Post::factory()->create();
 
         $model->metaKeys([
@@ -186,9 +257,11 @@ class HasMetaTest extends TestCase
         ]);
 
         $model->setMeta('foo', 'bar');
-        $model->setMeta('bar', 125);
 
-        $model->save();
+        $this->expectException(MetaException::class);
+        $this->expectExceptionMessage('Meta key `bar` is not a valid key.');
+
+        $model->setMeta('bar', 125);
     }
 
     /** @test */
@@ -283,6 +356,60 @@ class HasMetaTest extends TestCase
 
         $this->assertSame('fallback', Post::first()->getMeta('foo', 'fallback'));
         $this->assertSame(123, Post::first()->getMeta('bar', 'fallback'));
+    }
+
+    /** @test */
+    public function it_will_show_if_meta_exists()
+    {
+        $model = Post::factory()->create();
+
+        $this->assertFalse($model->hasMeta('foo'));
+
+        $model->saveMeta('foo', 'bar');
+
+        $this->assertTrue($model->hasMeta('foo'));
+    }
+
+    /** @test */
+    public function it_will_handle_future_meta_versions_as_non_existent()
+    {
+        $model = Post::factory()->create();
+
+        $this->assertFalse($model->hasMeta('foo'));
+
+        $model->saveMetaAt('foo', 'bar', '+1 hour');
+
+        $this->assertFalse($model->refresh()->hasMeta('foo'));
+
+        $this->travelTo('+1 hour');
+
+        $this->assertTrue($model->refresh()->hasMeta('foo'));
+    }
+
+    /** @test */
+    public function it_will_return_meta_fluently()
+    {
+        $model = Post::factory()->create(['title' => 'Title']);
+
+        $model->foo = 'bar';
+        $model->save();
+        $model->saveMeta('bar', 123);
+
+        $this->assertSame('Title', Post::first()->title);
+        $this->assertSame('bar', Post::first()->foo);
+        $this->assertSame(123, Post::first()->bar);
+    }
+
+    /** @test */
+    public function it_will_respect_get_meta_accessors()
+    {
+        $model = Post::factory()->create();
+
+        $this->assertSame('Empty', $model->test_has_accessor);
+
+        $model->saveMeta('test_has_accessor', 'passed');
+
+        $this->assertSame('Test passed.', $model->test_has_accessor);
     }
 
     /** @test */
@@ -430,7 +557,7 @@ class HasMetaTest extends TestCase
         $model->setMeta('foo', 'changed');
         $model->bar = 234;
 
-        $model->resetMeta();
+        $model->resetMetaChanges();
         $model->save();
 
         $this->assertDatabaseHas('meta', ['key' => 'foo', 'value' => 'bar']);
@@ -617,5 +744,124 @@ class HasMetaTest extends TestCase
         $this->assertSame(123.0, $model->getMeta('bar'));
         $this->assertTrue($model->meta->pluck('updated_at', 'key')->get('foo')->isSameDay('2022-10-01'));
         $this->assertTrue($model->meta->pluck('updated_at', 'key')->get('bar')->isSameDay('2022-10-02'));
+    }
+
+    /** @test */
+    public function it_will_show_if_meta_is_dirty()
+    {
+        $model = Post::factory()->create();
+
+        $this->assertFalse($model->isMetaDirty());
+        $this->assertCount(0, $model->getDirtyMeta());
+
+        $model->foo = 'bar';
+
+        $this->assertTrue($model->isMetaDirty());
+        $this->assertCount(1, $model->getDirtyMeta());
+
+        $model->setMeta('foo', 'changed');
+        $model->bar = 12;
+
+        $this->assertTrue($model->isMetaDirty());
+        $this->assertCount(2, $model->getDirtyMeta());
+
+        $model->save();
+
+        $this->assertFalse($model->isMetaDirty());
+        $this->assertCount(0, $model->getDirtyMeta());
+    }
+
+    /** @test */
+    public function it_can_add_casted_meta_fields_to_models_visible_fields()
+    {
+        $model = Post::factory()->create(['title' => 'Title']);
+
+        $array = Post::first()->append('appendable_foo')->toArray();
+
+        $this->assertArrayHasKey('title', $array);
+        $this->assertArrayHasKey('appendable_foo', $array);
+        $this->assertNull($array['appendable_foo']);
+
+        $model->saveMeta('appendable_foo', 'this works.');
+
+        $this->assertSame(
+            'this works.',
+            Post::first()->append('appendable_foo')->toArray()['appendable_foo'],
+        );
+    }
+
+    /** @test */
+    public function it_can_set_casted_fields_not_in_whitelist()
+    {
+        $model = Post::factory()->create(['title' => 'Title']);
+
+        $model->metaKeys(['foo']);
+
+        $model->saveMeta('foo', 'bar');
+        $model->saveMeta('appendable_foo', 'this works.');
+
+        $this->assertSame('this works.', Post::first()->appendable_foo);
+
+        $model = Post::first();
+
+        $model->appendable_foo = 'this also works.';
+        $model->save();
+
+        $this->assertSame('bar', Post::first()->foo);
+        $this->assertSame('this also works.', Post::first()->appendable_foo);
+        $this->assertSame('this also works.', Post::first()->append('appendable_foo')->toArray()['appendable_foo']);
+    }
+
+    /** @test */
+    public function it_will_return_correct_datatype_for_casted_meta_attributes()
+    {
+        $model = Post::factory()->create(['title' => 'Title']);
+
+        $model->metaKeys(['foo']);
+
+        $model->saveMeta('appendable_foo', 123);
+        $this->assertSame(123, Post::first()->appendable_foo);
+
+        $model->saveMeta('appendable_foo', false);
+        $this->assertSame(false, Post::first()->appendable_foo);
+
+        $model->saveMeta('appendable_foo', 150.024);
+        $this->assertSame(150.024, Post::first()->appendable_foo);
+
+        $model->saveMeta('appendable_foo', null);
+        $this->assertNull(Post::first()->appendable_foo);
+    }
+
+    /** @test */
+    public function it_will_return_null_for_undefined_casted_meta_field()
+    {
+        $model = Post::factory()->create(['title' => 'Title']);
+
+        $model->metaKeys(['foo']);
+
+        $this->assertNull(Post::first()->appendable_foo);
+    }
+
+    /** @test */
+    public function it_will_return_column_value_for_casted_meta_fields_having_equally_column()
+    {
+        $model = Post::factory()->create(['title' => 'Title']);
+
+        $model->metaKeys(['foo']);
+
+        Schema::table('sample_posts', fn ($table) => $table->string('appendable_foo')->nullable());
+        DB::table('sample_posts')->update(['appendable_foo' => 'Fallback']);
+
+        $this->assertSame('Fallback', Post::first()->appendable_foo);
+
+        $model->saveMetaAt('appendable_foo', 8000.99, Carbon::now()->addDay());
+
+        $this->travelTo('+23 hours 50 minutes');
+
+        $this->assertSame('Fallback', Post::first()->appendable_foo);
+
+        $this->travelTo('+10 minutes');
+
+        $this->assertSame(8000.99, Post::first()->appendable_foo);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Kolossal\Meta;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,10 @@ class Meta extends Model
         'metable_type',
         'metable_id',
         'type',
+    ];
+
+    protected $hidden = [
+        'latest_id',
     ];
 
     protected $casts = [
@@ -106,5 +111,22 @@ class Meta extends Model
     protected function getDataTypeRegistry(): Registry
     {
         return app('meta.datatype.registry');
+    }
+
+    public function scopeGroupByKeyLatest(Builder $query, ?Carbon $now = null): Builder
+    {
+        return $query->addSelect([
+            'latest_id' => Meta::select('m.id')
+                ->from('meta as m')
+                ->where('m.published_at', '<=', $now ?? Carbon::now())
+                ->whereColumn('m.metable_id', 'meta.metable_id')
+                ->whereColumn('m.metable_type', 'meta.metable_type')
+                ->whereColumn('m.key', 'meta.key')
+                ->orderByDesc('m.published_at')
+                ->orderByDesc('m.id')
+                ->take(1),
+        ])
+            ->whereColumn('id', 'latest_id')
+            ->groupBy('key');
     }
 }
