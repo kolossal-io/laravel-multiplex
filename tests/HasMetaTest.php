@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Schema;
 use Kolossal\Meta\Exceptions\MetaException;
 use Kolossal\Meta\Meta;
 use Kolossal\Meta\Tests\Mocks\Post;
+use Kolossal\Meta\Tests\Mocks\PostWithoutSoftDelete;
 use PDOException;
 
 class HasMetaTest extends TestCase
@@ -1075,5 +1076,19 @@ class HasMetaTest extends TestCase
         $this->assertDatabaseCount('meta', 2);
         $this->assertTrue(Post::first()->delete());
         $this->assertDatabaseCount('meta', 2);
+    }
+
+    /** @test */
+    public function it_will_delete_meta_model_without_soft_delete()
+    {
+        PostWithoutSoftDelete::factory()->create([
+            'title' => 'Post title',
+            'foo' => 123,
+            'bar' => 'works',
+        ]);
+
+        $this->assertDatabaseCount('meta', 2);
+        $this->assertTrue(PostWithoutSoftDelete::first()->delete());
+        $this->assertDatabaseCount('meta', 0);
     }
 }

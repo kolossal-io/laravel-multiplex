@@ -3,6 +3,7 @@
 namespace Kolossal\Meta;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -59,11 +60,22 @@ trait HasMeta
             }
         });
 
-        static::forceDeleted(function ($model) {
-            if ($model->autosaveMeta === true) {
+        static::deleted(function ($model) {
+            if (
+                $model->autosaveMeta === true
+                && ! in_array(SoftDeletes::class, class_uses($model))
+            ) {
                 $model->purgeMeta();
             }
         });
+
+        if (method_exists(__CLASS__, 'forceDeleted')) {
+            static::forceDeleted(function ($model) {
+                if ($model->autosaveMeta === true) {
+                    $model->purgeMeta();
+                }
+            });
+        }
     }
 
     /**
