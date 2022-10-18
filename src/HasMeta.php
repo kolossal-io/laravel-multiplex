@@ -102,7 +102,7 @@ trait HasMeta
      */
     public function isMetaGuarded(): bool
     {
-        return ! in_array('*', $this->getMetaKeys());
+        return !in_array('*', $this->getMetaKeys());
     }
 
     /**
@@ -153,7 +153,7 @@ trait HasMeta
             return false;
         }
 
-        return ! $this->isMetaGuarded();
+        return !$this->isMetaGuarded();
     }
 
     /**
@@ -166,7 +166,7 @@ trait HasMeta
     {
         $class = get_class($this);
 
-        if (! isset($this->metaSchemaColumnsCache[$class])) {
+        if (!isset($this->metaSchemaColumnsCache[$class])) {
             $this->metaSchemaColumnsCache[$class] = collect(
                 $this->getConnection()
                     ->getSchemaBuilder()
@@ -237,11 +237,11 @@ trait HasMeta
      */
     public function getAttribute($key)
     {
-        if (! $key) {
+        if (!$key) {
             return;
         }
 
-        if (! $this->isExplicitlyAllowedMetaKey($key) && ($attr = parent::getAttribute($key)) !== null) {
+        if (!$this->isExplicitlyAllowedMetaKey($key) && ($attr = parent::getAttribute($key)) !== null) {
             return $attr;
         }
 
@@ -251,13 +251,13 @@ trait HasMeta
 
         $value = $this->getMeta($key);
 
-        return with(Str::camel('get_'.$key.'_meta'), function ($accessor) use ($value) {
-            if (! method_exists($this, $accessor)) {
+        return with(Str::camel('get_' . $key . '_meta'), function ($accessor) use ($value) {
+            if (!method_exists($this, $accessor)) {
                 return $value;
             }
 
             return $this->{$accessor}($value);
-        }) ?? value(fn () => ! $this->hasMeta($key) ? parent::getAttribute($key) : null);
+        }) ?? value(fn () => !$this->hasMeta($key) ? parent::getAttribute($key) : null);
     }
 
     /**
@@ -370,18 +370,18 @@ trait HasMeta
     {
         $key = strtolower($key);
 
-        if ($this->isModelAttribute($key) && ! $this->isExplicitlyAllowedMetaKey($key)) {
+        if ($this->isModelAttribute($key) && !$this->isExplicitlyAllowedMetaKey($key)) {
             throw MetaException::modelAttribute($key);
         }
 
-        if (! $this->isValidMetaKey($key)) {
+        if (!$this->isValidMetaKey($key)) {
             throw MetaException::invalidKey($key);
         }
 
         $meta = $this->getMetaChanges();
 
-        $value = with(Str::camel('set_'.$key.'_meta'), function ($mutator) use ($value) {
-            if (! method_exists($this, $mutator)) {
+        $value = with(Str::camel('set_' . $key . '_meta'), function ($mutator) use ($value) {
+            if (!method_exists($this, $mutator)) {
                 return $value;
             }
 
@@ -460,7 +460,7 @@ trait HasMeta
 
         $deleted = $keys
             ->each(function ($key) {
-                if (! $this->isValidMetaKey($key)) {
+                if (!$this->isValidMetaKey($key)) {
                     throw MetaException::invalidKey($key);
                 }
             })
@@ -483,7 +483,7 @@ trait HasMeta
      */
     public function getMetaChanges(): Collection
     {
-        if (! is_null($this->metaChanges)) {
+        if (!is_null($this->metaChanges)) {
             return $this->metaChanges;
         }
 
@@ -495,7 +495,7 @@ trait HasMeta
      */
     public function setAttribute($key, $value)
     {
-        if (! $this->isValidMetaKey($key)) {
+        if (!$this->isValidMetaKey($key)) {
             return parent::setAttribute($key, $value);
         }
 
@@ -523,12 +523,12 @@ trait HasMeta
     /**
      * Store a single Meta model.
      *
-     * @param  Meta  $meta
+     * @param   Meta   $meta
      * @return Meta|false
      */
     protected function storeMeta(?Meta $meta)
     {
-        if (! $meta) {
+        if (!$meta) {
             return false;
         }
 
