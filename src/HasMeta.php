@@ -401,7 +401,7 @@ trait HasMeta
                 return $model;
             }
 
-            $model->discardChanges();
+            $model->forceFill($model->getOriginal());
         }
 
         return $meta[$key] = (new Meta(['key' => $key]))->forceFill($attributes);

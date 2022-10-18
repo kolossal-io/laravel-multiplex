@@ -113,6 +113,14 @@ class Meta extends Model
         return app('meta.datatype.registry');
     }
 
+    /**
+     * Scope only the latest meta for any key.
+     * Will only query for meta records from the past by default.
+     *
+     * @param  Builder  $query
+     * @param  Carbon|null  $now
+     * @return Builder
+     */
     public function scopeGroupByKeyLatest(Builder $query, ?Carbon $now = null): Builder
     {
         return $query->addSelect([
