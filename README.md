@@ -40,10 +40,13 @@ $post->setMetaAt('is_outdated', true, '+2 years');
 
 ## Features
 
--   Metadata is saved in versions: Schedule changes to metadata, change history or retrieve metadata from a specific point in time.
+-   Metadata is saved in versions: Schedule changes to metadata,  
+    change history or retrieve metadata from a specific point in time.
 -   Supports fluent syntax: Use your model's metadata as if they were properties.
--   Polymorphic relationship allows adding metadata to any Eloquent model without worrying about the database schema.
--   Type conversion system heavily based on [Laravel-Metable](https://github.com/plank/laravel-metable) allows data of numerous different scalar and object types to be stored and retrieved.
+-   Polymorphic relationship allows adding metadata to any Eloquent model  
+    without worrying about the database schema.
+-   Type conversion system heavily based on [Laravel-Metable](https://github.com/plank/laravel-metable) allows data  
+    of numerous different scalar and object types to be stored and retrieved.
 
 ## Installation
 
@@ -69,7 +72,6 @@ class Post extends Model
 {
     use HasMeta;
 }
-
 ```
 
 ## Attaching Metadata
