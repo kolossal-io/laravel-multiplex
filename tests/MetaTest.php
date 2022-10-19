@@ -122,7 +122,8 @@ class MetaTest extends TestCase
         $this->assertEquals('bar', $meta->value);
     }
 
-    public function test_it_can_get_its_model_relation()
+    /** @test */
+    public function it_can_get_its_model_relation()
     {
         $meta = Meta::factory()->make();
 
@@ -155,5 +156,28 @@ class MetaTest extends TestCase
         $this->assertEquals($type, $meta->type);
         $this->assertEquals($input, $meta->value);
         $this->assertIsString($meta->raw_value);
+    }
+
+    /**
+     * @test
+     * @dataProvider handlerProvider
+     */
+    public function it_can_query_by_value($type, $input)
+    {
+        $this->useDatabase();
+
+        $meta = Meta::factory()->make([
+            'metable_type' => 'Foo\Bar\Model',
+            'metable_id' => 1,
+            'key' => 'dummy',
+        ]);
+
+        $meta->value = $input;
+        $meta->save();
+
+        $result = Meta::whereValue($input)->first();
+
+        $this->assertEquals($input, $result->value);
+        $this->assertEquals($type, $result->type);
     }
 }

@@ -1051,6 +1051,30 @@ class HasMetaTest extends TestCase
     }
 
     /** @test */
+    public function it_can_fill_meta_with_attributes()
+    {
+        $post = Post::factory()->create();
+
+        $post->fillable(['title', 'foo', 'bar']);
+
+        $post->fill([
+            'title' => 'New title',
+            'foo' => true,
+            'bar' => 'also true',
+        ]);
+
+        $this->assertDatabaseCount('meta', 0);
+
+        $post->save();
+
+        $this->assertDatabaseCount('meta', 2);
+
+        $this->assertSame('New title', $post->title);
+        $this->assertSame(true, $post->foo);
+        $this->assertSame('also true', $post->getMeta('bar'));
+    }
+
+    /** @test */
     public function it_will_delete_meta_with_the_model()
     {
         Post::factory()->create([

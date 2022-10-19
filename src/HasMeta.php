@@ -2,6 +2,7 @@
 
 namespace Kolossal\Meta;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -218,6 +219,16 @@ trait HasMeta
     }
 
     /**
+     * Relationship to only published `Meta` models associated with this model.
+     *
+     * @return MorphMany
+     */
+    public function publishedMeta(): MorphMany
+    {
+        return $this->allMeta()->published();
+    }
+
+    /**
      * Relationship to the `Meta` model.
      * Groups by `key` and only shows the latest item that is published yet.
      *
@@ -225,7 +236,7 @@ trait HasMeta
      */
     public function meta(): MorphMany
     {
-        return $this->allMeta()->groupByKeyLatest($this->getMetaTimestamp());
+        return $this->allMeta()->groupByKeyTakeLatest($this->getMetaTimestamp());
     }
 
     /**
@@ -741,5 +752,124 @@ trait HasMeta
     public function withCurrentMeta(): self
     {
         return $this->withMetaAt(null);
+    }
+
+    /**
+     * Query records having meta data for the given key.
+     * Pass an array to find records having meta for at least one of the given keys.
+     *
+     * @param  Builder  $query
+     * @param  string|array  $key
+     * @return void
+     */
+    public function scopeWhereHasMeta(Builder $query, $key): void
+    {
+        $keys = is_array($key) ? $key : [$key];
+
+        $query->whereHas('publishedMeta', function (Builder $query) use ($keys) {
+            $query->whereIn('key', $keys);
+        });
+    }
+
+    /**
+     * Query records not having meta data for the given key.
+     * Pass an array to find records not having meta for any of the given keys.
+     *
+     * @param  Builder  $query
+     * @param  string|array  $key
+     * @return void
+     */
+    public function scopeWhereDoesntHaveMeta(Builder $query, $key): void
+    {
+        $keys = is_array($key) ? $key : [$key];
+
+        $query->whereDoesntHave('publishedMeta', function (Builder $query) use ($keys) {
+            $query->whereIn('key', $keys);
+        });
+    }
+
+    /**
+     * Query records having meta with a specific key and value.
+     * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
+     *
+     * @param  Builder  $query
+     * @param  string  $key
+     * @param  mixed  $operator
+     * @param  mixed  $value
+     * @return void
+     */
+    public function scopeWhereMeta(Builder $query, string $key, $operator, $value = null): void
+    {
+        if (! isset($value)) {
+            $value = $operator;
+            $operator = '=';
+        }
+
+        $query->whereHas('publishedMeta', function (Builder $query) use ($key, $operator, $value) {
+            $query->groupByKeyTakeLatest()->where('meta.key', $key)->whereValue($value, $operator);
+        });
+    }
+
+    /**
+     * Query records having raw meta with a specific key and value without checking type.
+     * Make sure that the supplied $value is a string or string castable.
+     * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
+     *
+     * @param  Builder  $query
+     * @param  string  $key
+     * @param  mixed  $operator
+     * @param  mixed  $value
+     * @return void
+     */
+    public function scopeWhereRawMeta(Builder $query, string $key, $operator, $value = null): void
+    {
+        if (! isset($value)) {
+            $value = $operator;
+            $operator = '=';
+        }
+
+        $query->whereHas('publishedMeta', function (Builder $query) use ($key, $operator, $value) {
+            $query->groupByKeyTakeLatest()->where('meta.key', $key)->where('value', $operator, $value);
+        });
+    }
+
+    /**
+     * Query records having meta with a specific value and the given type.
+     * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
+     *
+     * Available types can be found in `config('meta.datatypes')`.
+     *
+     * @param  Builder  $query
+     * @param  string  $type
+     * @param  string  $key
+     * @param  mixed  $operator
+     * @param  mixed  $value
+     * @return void
+     */
+    public function scopeWhereMetaOfType(Builder $query, string $type, string $key, $operator, $value = null): void
+    {
+        if (! isset($value)) {
+            $value = $operator;
+            $operator = '=';
+        }
+
+        $query->whereHas('publishedMeta', function (Builder $query) use ($type, $key, $operator, $value) {
+            $query->groupByKeyTakeLatest()->where('meta.key', $key)->whereValue($value, $operator, $type);
+        });
+    }
+
+    /**
+     * Query records having one of the given values for the given key.
+     *
+     * @param  Builder  $query
+     * @param  string  $key
+     * @param  array  $values
+     * @return void
+     */
+    public function scopeWhereMetaIn(Builder $query, string $key, array $values): void
+    {
+        $query->whereHas('publishedMeta', function (Builder $query) use ($key, $values) {
+            $query->groupByKeyTakeLatest()->where('meta.key', $key)->whereValueIn($values);
+        });
     }
 }

@@ -32,6 +32,24 @@ class Registry
     }
 
     /**
+     * Get array of type and the serialized version of the given value.
+     *
+     * @param  mixed  $value
+     * @return array
+     *
+     * @throws DataTypeException if no handler can handle the value.
+     */
+    public function getTypeAndSerializedValue($value): array
+    {
+        $type = $this->getTypeForValue($value);
+
+        return [
+            $type,
+            $this->getHandlerForType($type)->serializeValue($value),
+        ];
+    }
+
+    /**
      * Retrieve the handler assigned to a given type identifier.
      *
      * @param  string  $type
