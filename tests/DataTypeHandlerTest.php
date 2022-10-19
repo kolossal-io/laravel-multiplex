@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Kolossal\Meta\DataType;
 use Kolossal\Meta\DataType\HandlerInterface;
-use Kolossal\Meta\Tests\Mocks\Post;
+use Kolossal\Meta\Tests\Mocks\Dummy;
 use Kolossal\Meta\Tests\Mocks\SampleSerializable;
 use stdClass;
 
@@ -62,13 +62,13 @@ class DataTypeHandlerTest extends TestCase
             'model' => [
                 new DataType\ModelHandler,
                 'model',
-                new Post,
+                new Dummy,
                 [new stdClass()],
             ],
             'model collection' => [
                 new DataType\ModelCollectionHandler,
                 'collection',
-                new Collection([new Post]),
+                new Collection([new Dummy]),
                 [collect()],
             ],
             'null' => [

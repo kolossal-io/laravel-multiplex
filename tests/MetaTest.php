@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Kolossal\Meta\Meta;
-use Kolossal\Meta\Tests\Mocks\Post;
+use Kolossal\Meta\Tests\Mocks\Dummy;
 use Kolossal\Meta\Tests\Mocks\SampleSerializable;
 use stdClass;
 
@@ -47,11 +47,11 @@ class MetaTest extends TestCase
             ],
             'model' => [
                 'model',
-                new Post,
+                new Dummy,
             ],
             'model collection' => [
                 'collection',
-                new Collection([new Post]),
+                new Collection([new Dummy]),
             ],
             'null' => [
                 'null',

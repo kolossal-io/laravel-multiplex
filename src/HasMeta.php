@@ -53,7 +53,7 @@ trait HasMeta
      *
      * @return void
      */
-    public static function bootHasMeta()
+    public static function bootHasMeta(): void
     {
         static::saved(function ($model) {
             if ($model->autosaveMeta === true) {
@@ -76,6 +76,18 @@ trait HasMeta
                     $model->purgeMeta();
                 }
             });
+        }
+    }
+
+    /**
+     * Initialize the HasMeta trait.
+     *
+     * @return void
+     */
+    public function initializeHasMeta()
+    {
+        if (($key = $this->getPublishDateKey())) {
+            $this->mergeFillable([$key]);
         }
     }
 
@@ -173,6 +185,31 @@ trait HasMeta
         }
 
         return ! $this->isMetaGuarded();
+    }
+
+    /**
+     * Get the publish date magic key from config.
+     * See config `meta.publish_date_key` for more information.
+     *
+     * @return string|null
+     */
+    protected function getPublishDateKey(): ?string
+    {
+        $config = config('meta.publish_date_key');
+
+        return $config && is_string($config) ? $config : null;
+    }
+
+    /**
+     * Determine wether the given key matches the magic key defined in config.
+     * See config `meta.publish_date_key` for more information.
+     *
+     * @param  string  $key
+     * @return bool
+     */
+    protected function isPublishDateKey(string $key): bool
+    {
+        return $this->getPublishDateKey() === $key;
     }
 
     /**
@@ -319,7 +356,7 @@ trait HasMeta
      * @param  string  $key
      * @return  ?Meta
      */
-    public function findMeta($key)
+    public function findMeta($key): ?Meta
     {
         if (! $this->exists) {
             return null;
@@ -589,6 +626,12 @@ trait HasMeta
      */
     public function setAttribute($key, $value)
     {
+        if ($this->isPublishDateKey($key)) {
+            $this->metaTimestamp = Carbon::parse($value);
+
+            return;
+        }
+
         if (! $this->isValidMetaKey($key)) {
             return parent::setAttribute($key, $value);
         }
