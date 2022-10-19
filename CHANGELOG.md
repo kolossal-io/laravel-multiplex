@@ -1,3 +1,3 @@
 # Changelog
 
-All notable changes to `laravel-meta-revision` will be documented in this file.
+All notable changes to `laravel-multiplex` will be documented in this file.

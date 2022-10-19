@@ -1,9 +1,9 @@
 <?php
 
-namespace Kolossal\Meta\Tests;
+namespace Kolossal\Multiplex\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Kolossal\Meta\MetaServiceProvider;
+use Kolossal\Multiplex\MultiplexServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
@@ -13,7 +13,7 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Kolossal\\Meta\\Tests\\Factories\\'.class_basename($modelName).'Factory'
+            fn (string $modelName) => 'Kolossal\\Multiplex\\Tests\\Factories\\'.class_basename($modelName).'Factory'
         );
 
         $this->useDatabase();
@@ -22,7 +22,7 @@ class TestCase extends Orchestra
     protected function getPackageProviders($app)
     {
         return [
-            MetaServiceProvider::class,
+            MultiplexServiceProvider::class,
         ];
     }
 

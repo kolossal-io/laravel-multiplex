@@ -1,6 +1,6 @@
 <?php
 
-namespace Kolossal\Meta;
+namespace Kolossal\Multiplex;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -9,7 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Kolossal\Meta\Exceptions\MetaException;
+use Kolossal\Multiplex\Exceptions\MetaException;
 
 trait HasMeta
 {
@@ -189,20 +189,20 @@ trait HasMeta
 
     /**
      * Get the publish date magic key from config.
-     * See config `meta.publish_date_key` for more information.
+     * See config `multiplex.publish_date_key` for more information.
      *
      * @return string|null
      */
     protected function getPublishDateKey(): ?string
     {
-        $config = config('meta.publish_date_key');
+        $config = config('multiplex.publish_date_key');
 
         return $config && is_string($config) ? $config : null;
     }
 
     /**
      * Determine wether the given key matches the magic key defined in config.
-     * See config `meta.publish_date_key` for more information.
+     * See config `multiplex.publish_date_key` for more information.
      *
      * @param  string  $key
      * @return bool
@@ -283,7 +283,7 @@ trait HasMeta
      */
     protected function getMetaClassName(): string
     {
-        return config('meta.model', Meta::class);
+        return config('multiplex.model', Meta::class);
     }
 
     /**
@@ -880,7 +880,7 @@ trait HasMeta
      * Query records having meta with a specific value and the given type.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
      *
-     * Available types can be found in `config('meta.datatypes')`.
+     * Available types can be found in `config('multiplex.datatypes')`.
      *
      * @param  Builder  $query
      * @param  string  $type

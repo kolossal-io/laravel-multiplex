@@ -1,12 +1,12 @@
 <?php
 
-namespace Kolossal\Meta\Tests\Mocks;
+namespace Kolossal\Multiplex\Tests\Mocks;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Kolossal\Meta\HasMeta;
-use Kolossal\Meta\MetaAttribute;
+use Kolossal\Multiplex\HasMeta;
+use Kolossal\Multiplex\MetaAttribute;
 
 class Post extends Model
 {

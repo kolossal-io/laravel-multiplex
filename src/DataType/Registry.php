@@ -1,8 +1,8 @@
 <?php
 
-namespace Kolossal\Meta\DataType;
+namespace Kolossal\Multiplex\DataType;
 
-use Kolossal\Meta\Exceptions\DataTypeException;
+use Kolossal\Multiplex\Exceptions\DataTypeException;
 
 /**
  * List of available data type Handlers.

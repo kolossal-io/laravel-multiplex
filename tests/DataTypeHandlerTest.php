@@ -1,13 +1,13 @@
 <?php
 
-namespace Kolossal\Meta\Tests;
+namespace Kolossal\Multiplex\Tests;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Kolossal\Meta\DataType;
-use Kolossal\Meta\DataType\HandlerInterface;
-use Kolossal\Meta\Tests\Mocks\Dummy;
-use Kolossal\Meta\Tests\Mocks\SampleSerializable;
+use Kolossal\Multiplex\DataType;
+use Kolossal\Multiplex\DataType\HandlerInterface;
+use Kolossal\Multiplex\Tests\Mocks\Dummy;
+use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
 use stdClass;
 
 /**

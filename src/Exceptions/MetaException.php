@@ -1,6 +1,6 @@
 <?php
 
-namespace Kolossal\Meta\Exceptions;
+namespace Kolossal\Multiplex\Exceptions;
 
 use Exception;
 

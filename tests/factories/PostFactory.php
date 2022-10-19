@@ -1,9 +1,9 @@
 <?php
 
-namespace Kolossal\Meta\Tests\Factories;
+namespace Kolossal\Multiplex\Tests\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Kolossal\Meta\Tests\Mocks\Post;
+use Kolossal\Multiplex\Tests\Mocks\Post;
 
 class PostFactory extends Factory
 {

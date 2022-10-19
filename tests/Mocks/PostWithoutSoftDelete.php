@@ -1,10 +1,10 @@
 <?php
 
-namespace Kolossal\Meta\Tests\Mocks;
+namespace Kolossal\Multiplex\Tests\Mocks;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Kolossal\Meta\HasMeta;
+use Kolossal\Multiplex\HasMeta;
 
 class PostWithoutSoftDelete extends Model
 {

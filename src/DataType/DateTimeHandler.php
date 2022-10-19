@@ -1,6 +1,6 @@
 <?php
 
-namespace Kolossal\Meta\DataType;
+namespace Kolossal\Multiplex\DataType;
 
 use Carbon\Carbon;
 use DateTimeInterface;

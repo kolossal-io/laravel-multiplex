@@ -1,14 +1,14 @@
 <?php
 
-namespace Kolossal\Meta\Tests;
+namespace Kolossal\Multiplex\Tests;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
-use Kolossal\Meta\Meta;
-use Kolossal\Meta\Tests\Mocks\Dummy;
-use Kolossal\Meta\Tests\Mocks\SampleSerializable;
+use Kolossal\Multiplex\Meta;
+use Kolossal\Multiplex\Tests\Mocks\Dummy;
+use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
 use stdClass;
 
 class MetaTest extends TestCase

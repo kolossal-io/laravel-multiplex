@@ -1,6 +1,6 @@
 <?php
 
-namespace Kolossal\Meta;
+namespace Kolossal\Multiplex;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Kolossal\Meta\DataType\Registry;
+use Kolossal\Multiplex\DataType\Registry;
 
 class Meta extends Model
 {
@@ -121,7 +121,7 @@ class Meta extends Model
      */
     public static function getDataTypeRegistry(): Registry
     {
-        return app('meta.datatype.registry');
+        return app('multiplex.datatype.registry');
     }
 
     /**

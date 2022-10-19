@@ -1,6 +1,6 @@
 <?php
 
-namespace Kolossal\Meta\Tests\Mocks;
+namespace Kolossal\Multiplex\Tests\Mocks;
 
 use Serializable;
 

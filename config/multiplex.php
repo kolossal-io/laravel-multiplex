@@ -4,7 +4,7 @@ return [
     /**
      * Model to use for Meta.
      */
-    'model' => Kolossal\Meta\Meta::class,
+    'model' => Kolossal\Multiplex\Meta::class,
 
     /**
      * Determine wethere packages migrations should be loaded automatically.
@@ -33,16 +33,16 @@ return [
      * @link https://github.com/plank/laravel-metable
      */
     'datatypes' => [
-        Kolossal\Meta\DataType\BooleanHandler::class,
-        Kolossal\Meta\DataType\NullHandler::class,
-        Kolossal\Meta\DataType\IntegerHandler::class,
-        Kolossal\Meta\DataType\FloatHandler::class,
-        Kolossal\Meta\DataType\StringHandler::class,
-        Kolossal\Meta\DataType\DateTimeHandler::class,
-        Kolossal\Meta\DataType\ArrayHandler::class,
-        Kolossal\Meta\DataType\ModelHandler::class,
-        Kolossal\Meta\DataType\ModelCollectionHandler::class,
-        Kolossal\Meta\DataType\SerializableHandler::class,
-        Kolossal\Meta\DataType\ObjectHandler::class,
+        Kolossal\Multiplex\DataType\BooleanHandler::class,
+        Kolossal\Multiplex\DataType\NullHandler::class,
+        Kolossal\Multiplex\DataType\IntegerHandler::class,
+        Kolossal\Multiplex\DataType\FloatHandler::class,
+        Kolossal\Multiplex\DataType\StringHandler::class,
+        Kolossal\Multiplex\DataType\DateTimeHandler::class,
+        Kolossal\Multiplex\DataType\ArrayHandler::class,
+        Kolossal\Multiplex\DataType\ModelHandler::class,
+        Kolossal\Multiplex\DataType\ModelCollectionHandler::class,
+        Kolossal\Multiplex\DataType\SerializableHandler::class,
+        Kolossal\Multiplex\DataType\ObjectHandler::class,
     ],
 ];

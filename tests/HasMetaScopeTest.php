@@ -1,14 +1,14 @@
 <?php
 
-namespace Kolossal\Meta\Tests;
+namespace Kolossal\Multiplex\Tests;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
-use Kolossal\Meta\Meta;
-use Kolossal\Meta\Tests\Mocks\Post;
-use Kolossal\Meta\Tests\Mocks\SampleSerializable;
+use Kolossal\Multiplex\Meta;
+use Kolossal\Multiplex\Tests\Mocks\Post;
+use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
 use stdClass;
 
 class HasMetaScopeTest extends TestCase

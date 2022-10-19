@@ -1,6 +1,6 @@
 <?php
 
-namespace Kolossal\Meta;
+namespace Kolossal\Multiplex;
 
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 

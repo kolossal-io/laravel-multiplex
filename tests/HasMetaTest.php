@@ -1,15 +1,15 @@
 <?php
 
-namespace Kolossal\Meta\Tests;
+namespace Kolossal\Multiplex\Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Kolossal\Meta\Exceptions\MetaException;
-use Kolossal\Meta\Meta;
-use Kolossal\Meta\Tests\Mocks\Post;
-use Kolossal\Meta\Tests\Mocks\PostWithoutSoftDelete;
+use Kolossal\Multiplex\Exceptions\MetaException;
+use Kolossal\Multiplex\Meta;
+use Kolossal\Multiplex\Tests\Mocks\Post;
+use Kolossal\Multiplex\Tests\Mocks\PostWithoutSoftDelete;
 use PDOException;
 
 class HasMetaTest extends TestCase
@@ -1167,7 +1167,7 @@ class HasMetaTest extends TestCase
     /** @test */
     public function it_can_rename_meta_publishing_date_magic_attribute()
     {
-        config(['meta.publish_date_key' => 'foo']);
+        config(['multiplex.publish_date_key' => 'foo']);
 
         $post = Post::factory()->create();
 
@@ -1194,7 +1194,7 @@ class HasMetaTest extends TestCase
     /** @test */
     public function it_can_disable_magic_attribute()
     {
-        config(['meta.publish_date_key' => null]);
+        config(['multiplex.publish_date_key' => null]);
 
         $post = Post::factory()->create();
 

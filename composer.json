@@ -1,13 +1,13 @@
 {
-    "name": "kolossal-io/laravel-meta-revision",
+    "name": "kolossal-io/laravel-multiplex",
     "description": "A Laravel package to attach versioned meta data to Eloquent models.",
     "keywords": [
         "kolossal",
         "laravel",
-        "laravel-meta-revision",
+        "laravel-multiplex",
         "eloquent"
     ],
-    "homepage": "https://github.com/Kolossal-io/laravel-meta-revision",
+    "homepage": "https://github.com/Kolossal-io/laravel-multiplex",
     "license": "MIT",
     "authors": [
         {
@@ -34,13 +34,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Kolossal\\Meta\\": "src",
-            "Kolossal\\Meta\\Tests\\Factories\\": "tests/factories"
+            "Kolossal\\Multiplex\\": "src",
+            "Kolossal\\Multiplex\\Tests\\Factories\\": "tests/factories"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Kolossal\\Meta\\Tests\\": "tests"
+            "Kolossal\\Multiplex\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -60,7 +60,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Kolossal\\Meta\\MetaServiceProvider"
+                "Kolossal\\Multiplex\\MultiplexServiceProvider"
             ]
         }
     },

@@ -1,28 +1,28 @@
 <?php
 
-namespace Kolossal\Meta;
+namespace Kolossal\Multiplex;
 
 use Illuminate\Support\ServiceProvider;
-use Kolossal\Meta\DataType\Registry;
+use Kolossal\Multiplex\DataType\Registry;
 
-class MetaServiceProvider extends ServiceProvider
+class MultiplexServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/meta.php' => config_path('meta.php'),
+                __DIR__.'/../config/multiplex.php' => config_path('multiplex.php'),
             ], 'config');
         }
 
-        if (config('meta.migrations', true)) {
+        if (config('multiplex.migrations', true)) {
             $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         }
     }
 
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/meta.php', 'meta');
+        $this->mergeConfigFrom(__DIR__.'/../config/multiplex.php', 'multiplex');
 
         $this->registerDataTypeRegistry();
     }
@@ -41,13 +41,13 @@ class MetaServiceProvider extends ServiceProvider
         $this->app->singleton(Registry::class, function () {
             $registry = new Registry();
 
-            foreach (config('meta.datatypes') as $handler) {
+            foreach (config('multiplex.datatypes') as $handler) {
                 $registry->addHandler(new $handler());
             }
 
             return $registry;
         });
 
-        $this->app->alias(Registry::class, 'meta.datatype.registry');
+        $this->app->alias(Registry::class, 'multiplex.datatype.registry');
     }
 }

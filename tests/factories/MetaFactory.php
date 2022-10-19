@@ -1,9 +1,9 @@
 <?php
 
-namespace Kolossal\Meta\Tests\Factories;
+namespace Kolossal\Multiplex\Tests\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Kolossal\Meta\Meta;
+use Kolossal\Multiplex\Meta;
 
 class MetaFactory extends Factory
 {

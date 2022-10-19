@@ -1,6 +1,6 @@
 <?php
 
-namespace Kolossal\Meta\DataType;
+namespace Kolossal\Multiplex\DataType;
 
 /**
  * Provides means to serialize and unserialize values of different data types.
