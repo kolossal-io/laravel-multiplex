@@ -71,7 +71,7 @@ trait HasMeta
         static::deleted(function ($model) {
             if (
                 $model->autosaveMeta === true
-                && ! in_array(SoftDeletes::class, class_uses($model))
+                && !in_array(SoftDeletes::class, class_uses($model))
             ) {
                 $model->purgeMeta();
             }
@@ -144,7 +144,7 @@ trait HasMeta
      */
     public function isMetaGuarded(): bool
     {
-        return ! in_array('*', $this->getMetaKeys());
+        return !in_array('*', $this->getMetaKeys());
     }
 
     /**
@@ -195,7 +195,7 @@ trait HasMeta
             return false;
         }
 
-        return ! $this->isMetaGuarded();
+        return !$this->isMetaGuarded();
     }
 
     /**
@@ -233,7 +233,7 @@ trait HasMeta
     {
         $class = get_class($this);
 
-        if (! isset($this->metaSchemaColumnsCache[$class])) {
+        if (!isset($this->metaSchemaColumnsCache[$class])) {
             $this->metaSchemaColumnsCache[$class] = collect(
                 $this->getConnection()
                     ->getSchemaBuilder()
@@ -323,7 +323,7 @@ trait HasMeta
          * let’s not try to find a meta value for the given key.
          */
         if (
-            ! $this->isExplicitlyAllowedMetaKey($key)
+            !$this->isExplicitlyAllowedMetaKey($key)
             && ($attr = parent::getAttribute($key)) !== null
         ) {
             return $attr;
@@ -338,12 +338,12 @@ trait HasMeta
         $value = $this->getMeta($key);
 
         return with(Str::camel('get_'.$key.'_meta'), function ($accessor) use ($value) {
-            if (! method_exists($this, $accessor)) {
+            if (!method_exists($this, $accessor)) {
                 return $value;
             }
 
             return $this->{$accessor}($value);
-        }) ?? value(fn () => ! $this->hasMeta($key) ? parent::getAttribute($key) : null);
+        }) ?? value(fn () => !$this->hasMeta($key) ? parent::getAttribute($key) : null);
     }
 
     /**
@@ -365,7 +365,7 @@ trait HasMeta
      */
     public function findMeta($key): ?Meta
     {
-        if (! $this->exists) {
+        if (!$this->exists) {
             return null;
         }
 
@@ -464,14 +464,14 @@ trait HasMeta
          * If one is trying to set a model attribute as meta without explicitly
          * whitelisting the attribute throw an exception.
          */
-        if ($this->isModelAttribute($key) && ! $this->isExplicitlyAllowedMetaKey($key)) {
+        if ($this->isModelAttribute($key) && !$this->isExplicitlyAllowedMetaKey($key)) {
             throw MetaException::modelAttribute($key);
         }
 
         /**
          * Check if the given key was whitelisted.
          */
-        if (! $this->isValidMetaKey($key)) {
+        if (!$this->isValidMetaKey($key)) {
             throw MetaException::invalidKey($key);
         }
 
@@ -485,7 +485,7 @@ trait HasMeta
          * the given value through it if so.
          */
         $value = with(Str::camel('set_'.$key.'_meta'), function ($mutator) use ($value) {
-            if (! method_exists($this, $mutator)) {
+            if (!method_exists($this, $mutator)) {
                 return $value;
             }
 
@@ -570,7 +570,7 @@ trait HasMeta
          */
         $deleted = $keys
             ->each(function ($key) {
-                if (! $this->isValidMetaKey($key)) {
+                if (!$this->isValidMetaKey($key)) {
                     throw MetaException::invalidKey($key);
                 }
             })
@@ -610,7 +610,7 @@ trait HasMeta
      */
     public function getMetaChanges(): Collection
     {
-        if (! is_null($this->metaChanges)) {
+        if (!is_null($this->metaChanges)) {
             return $this->metaChanges;
         }
 
@@ -628,7 +628,7 @@ trait HasMeta
             return;
         }
 
-        if (! $this->isValidMetaKey($key)) {
+        if (!$this->isValidMetaKey($key)) {
             return parent::setAttribute($key, $value);
         }
 
@@ -720,7 +720,7 @@ trait HasMeta
          * Otherwise pull and delete the given key from the array of changes and
          * persist the change. Refresh the relations afterwards to prevent stale data.
          */
-        if (! $changes->has($key)) {
+        if (!$changes->has($key)) {
             return false;
         }
 
@@ -777,7 +777,7 @@ trait HasMeta
     {
         $time = $time ? Carbon::parse($time) : null;
 
-        if (gettype($this->metaTimestamp) !== gettype($time) || ! $this->metaTimestamp?->equalTo($time)) {
+        if (gettype($this->metaTimestamp) !== gettype($time) || !$this->metaTimestamp?->equalTo($time)) {
             $this->refreshMetaRelations();
         }
 
@@ -863,7 +863,7 @@ trait HasMeta
      */
     public function scopeWhereMeta(Builder $query, string $key, $operator, $value = null): void
     {
-        if (! isset($value)) {
+        if (!isset($value)) {
             $value = $operator;
             $operator = '=';
         }
@@ -887,7 +887,7 @@ trait HasMeta
      */
     public function scopeWhereRawMeta(Builder $query, string $key, $operator, $value = null): void
     {
-        if (! isset($value)) {
+        if (!isset($value)) {
             $value = $operator;
             $operator = '=';
         }
@@ -913,7 +913,7 @@ trait HasMeta
      */
     public function scopeWhereMetaOfType(Builder $query, string $type, string $key, $operator, $value = null): void
     {
-        if (! isset($value)) {
+        if (!isset($value)) {
             $value = $operator;
             $operator = '=';
         }

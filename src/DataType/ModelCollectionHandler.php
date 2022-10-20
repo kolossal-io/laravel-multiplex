@@ -80,7 +80,7 @@ class ModelCollectionHandler implements HandlerInterface
 
         // Retrieve a list of keys to load from each class.
         foreach ($items as $item) {
-            if (! is_null($item['key'])) {
+            if (!is_null($item['key'])) {
                 $classes[$item['class']][] = $item['key'];
             }
         }
