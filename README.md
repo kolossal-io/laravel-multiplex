@@ -143,7 +143,7 @@ $model->saveMeta([
 ]);
 ```
 
-Multiplex will take care of serializing and unserializing datatypes for you. The polymorphic `meta` table may look something like this:
+Multiplex will take care of serializing and unserializing datatypes for you. The underlying polymorphic `meta` table may look something like this:
 
 | metable_type      | metable_id | key     |  value | type      | …   |
 | ----------------- | ---------: | ------- | -----: | --------- | --- |
@@ -152,26 +152,38 @@ Multiplex will take care of serializing and unserializing datatypes for you. The
 | `App\Models\Post` |        `2` | `color` | `#fff` | `string`  | …   |
 | `App\Models\Post` |        `2` | `hide`  | `true` | `boolean` | …   |
 
+The corresponding meta values would look like this:
+
+```php
+Post::find(1)->color; // string(4) "#000"
+Post::find(1)->likes; // int(24)
+
+Post::find(2)->color; // string(4) "#fff"
+Post::find(2)->hide; // bool(true)
+```
+
 ### Schedule Metadata
 
 You can save metadata for a specific publishing date.
 
 ```php
-$post->saveMeta('favorite_band', 'The Mars Volta');
-$post->saveMetaAt('favorite_band', 'Portishead', '+1 week');
+$user = Auth::user();
+
+$user->saveMeta('favorite_band', 'The Mars Volta');
+$user->saveMetaAt('favorite_band', 'Portishead', '+1 week');
 
 // Changing taste in music: This will return `The Mars Volta` now but `Portishead` in a week.
-$post->favorite_band;
+$user->favorite_band;
 ```
 
 This way you can change historic data as well.
 
 ```php
-$post->saveMetaAt('favorite_band', 'Arctic Monkeys', '-5 years');
-$post->saveMetaAt('favorite_band', 'Tool', '-1 year');
+$user->saveMetaAt('favorite_band', 'Arctic Monkeys', '-5 years');
+$user->saveMetaAt('favorite_band', 'Tool', '-1 year');
 
 // This will return `Tool` – which is true since this is indeed a good band.
-$post->favorite_band;
+$user->favorite_band;
 ```
 
 ## Retrieving Metadata
@@ -183,7 +195,7 @@ $post->likes; // (int) 24
 $post->color; // (string) '#000'
 ```
 
-Or use the `getMeta` method to specify a callback value for non-existent meta.
+Or use the `getMeta()` method to specify a fallback value for non-existent meta.
 
 ```php
 $post->getMeta('likes', 0); // Use `0` as a fallback.
@@ -304,9 +316,9 @@ Post::whereMetaOfType('null', 'foo', '')->get();
 You can get the metadata for a model at a specific point in time.
 
 ```php
-$post = Post::first()->withMetaAt('-1 week');
-$post->favorite_band; // Tool
-$post->withMetaAt(Carbon::now())->favorite_band; // The Mars Volta
+$user = Auth::user()->withMetaAt('-1 week');
+$user->favorite_band; // Tool
+$user->withMetaAt(Carbon::now())->favorite_band; // The Mars Volta
 ```
 
 This way you can inspect the whole set of metadata that was valid at the time.
