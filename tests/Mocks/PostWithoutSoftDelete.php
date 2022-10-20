@@ -12,4 +12,6 @@ class PostWithoutSoftDelete extends Model
     use HasFactory;
 
     protected $table = 'sample_posts';
+
+    protected $metaKeys = ['*'];
 }
