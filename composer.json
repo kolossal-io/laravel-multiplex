@@ -5,7 +5,9 @@
         "kolossal",
         "laravel",
         "laravel-multiplex",
-        "eloquent"
+        "eloquent",
+        "meta",
+        "metadata"
     ],
     "homepage": "https://github.com/Kolossal-io/laravel-multiplex",
     "license": "MIT",
