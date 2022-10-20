@@ -42,7 +42,14 @@ trait HasMeta
     protected bool $autosaveMeta = true;
 
     /**
-     * The timestamp used to determine which meta is published yet.
+     * Static timestamp used to determine which meta is published yet.
+     *
+     * @var Carbon|null
+     */
+    protected static ?Carbon $staticMetaTimestamp = null;
+
+    /**
+     * The timestamp used to determine which meta is published yet for this model.
      *
      * @var Carbon|null
      */
@@ -240,8 +247,12 @@ trait HasMeta
      */
     public function getMetaTimestamp(): Carbon
     {
-        return $this->metaTimestamp
-            ? Carbon::parse($this->metaTimestamp)
+        if ($this->metaTimestamp) {
+            return Carbon::parse($this->metaTimestamp);
+        }
+
+        return static::$staticMetaTimestamp
+            ? Carbon::parse(static::$staticMetaTimestamp)
             : Carbon::now();
     }
 
@@ -262,7 +273,7 @@ trait HasMeta
      */
     public function publishedMeta(): MorphMany
     {
-        return $this->allMeta()->published();
+        return $this->allMeta()->published($this->getMetaTimestamp());
     }
 
     /**
@@ -774,7 +785,7 @@ trait HasMeta
      * @param  string|DateTimeInterface|null  $time
      * @return self
      */
-    public function withMetaAt($time): self
+    public function withMetaAt($time = null): self
     {
         $time = $time ? Carbon::parse($time) : null;
 
@@ -798,6 +809,27 @@ trait HasMeta
     }
 
     /**
+     * Travel to the specified point in time for storing or retrieving meta.
+     *
+     * @param  string|DateTimeInterface|null  $time
+     * @return void
+     */
+    public function scopeTravelTo(Builder $query, $time = null): void
+    {
+        static::$staticMetaTimestamp = $time ? Carbon::parse($time) : null;
+    }
+
+    /**
+     * Travel to the current time for storing or retrieving meta.
+     *
+     * @return void
+     */
+    public function scopeTravelBack(Builder $query): void
+    {
+        $query->travelTo();
+    }
+
+    /**
      * Query records having meta data for the given key.
      * Pass an array to find records having meta for at least one of the given keys.
      *
@@ -809,8 +841,8 @@ trait HasMeta
     {
         $keys = is_array($key) ? $key : [$key];
 
-        $query->whereHas('publishedMeta', function (Builder $query) use ($keys) {
-            $query->whereIn('key', $keys);
+        $query->whereHas('allMeta', function (Builder $query) use ($keys) {
+            $query->published($this->getMetaTimestamp())->whereIn('key', $keys);
         });
     }
 
@@ -826,8 +858,8 @@ trait HasMeta
     {
         $keys = is_array($key) ? $key : [$key];
 
-        $query->whereDoesntHave('publishedMeta', function (Builder $query) use ($keys) {
-            $query->whereIn('key', $keys);
+        $query->whereDoesntHave('allMeta', function (Builder $query) use ($keys) {
+            $query->published($this->getMetaTimestamp())->whereIn('key', $keys);
         });
     }
 
@@ -848,8 +880,9 @@ trait HasMeta
             $operator = '=';
         }
 
-        $query->whereHas('publishedMeta', function (Builder $query) use ($key, $operator, $value) {
-            $query->groupByKeyTakeLatest()->where('meta.key', $key)->whereValue($value, $operator);
+        $query->whereHas('allMeta', function (Builder $query) use ($key, $operator, $value) {
+            $query->groupByKeyTakeLatest($this->getMetaTimestamp())
+                ->where('meta.key', $key)->whereValue($value, $operator);
         });
     }
 
@@ -871,8 +904,9 @@ trait HasMeta
             $operator = '=';
         }
 
-        $query->whereHas('publishedMeta', function (Builder $query) use ($key, $operator, $value) {
-            $query->groupByKeyTakeLatest()->where('meta.key', $key)->where('value', $operator, $value);
+        $query->whereHas('allMeta', function (Builder $query) use ($key, $operator, $value) {
+            $query->groupByKeyTakeLatest($this->getMetaTimestamp())
+                ->where('meta.key', $key)->where('value', $operator, $value);
         });
     }
 
@@ -896,8 +930,9 @@ trait HasMeta
             $operator = '=';
         }
 
-        $query->whereHas('publishedMeta', function (Builder $query) use ($type, $key, $operator, $value) {
-            $query->groupByKeyTakeLatest()->where('meta.key', $key)->whereValue($value, $operator, $type);
+        $query->whereHas('allMeta', function (Builder $query) use ($type, $key, $operator, $value) {
+            $query->groupByKeyTakeLatest($this->getMetaTimestamp())
+                ->where('meta.key', $key)->whereValue($value, $operator, $type);
         });
     }
 
@@ -911,8 +946,9 @@ trait HasMeta
      */
     public function scopeWhereMetaIn(Builder $query, string $key, array $values): void
     {
-        $query->whereHas('publishedMeta', function (Builder $query) use ($key, $values) {
-            $query->groupByKeyTakeLatest()->where('meta.key', $key)->whereValueIn($values);
+        $query->whereHas('allMeta', function (Builder $query) use ($key, $values) {
+            $query->groupByKeyTakeLatest($this->getMetaTimestamp())
+                ->where('meta.key', $key)->whereValueIn($values);
         });
     }
 }

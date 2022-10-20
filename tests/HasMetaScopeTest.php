@@ -15,6 +15,13 @@ class HasMetaScopeTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Post::travelBack();
+    }
+
     /** @test */
     public function it_scopes_where_has_meta()
     {
@@ -213,6 +220,41 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMetaIn('foo', ['one', 'three', '2']), 'b');
         $this->testScope(Post::whereMetaIn('foo', [2, 4, 5]), 'a,c');
         $this->testScope(Post::whereMetaIn('foo', ['one', 2, 4.0]), 'a,b');
+    }
+
+    /** @test */
+    public function it_scopes_after_time_traveling()
+    {
+        $a = Post::factory()->create(['title' => 'a']);
+        $b = Post::factory()->create(['title' => 'b']);
+        $c = Post::factory()->create(['title' => 'c']);
+
+        $a->saveMeta('foo', 'bar');
+        $a->saveMetaAt('foo', 'history', '-1 day');
+        $a->saveMetaAt('foo', 'future', '+1 day');
+
+        $b->saveMeta('bar', 'foo');
+        $b->saveMetaAt('bar', 'future', '+2 days');
+
+        $c->saveMetaAt('bar', 120, '-3 days');
+        $c->saveMetaAt('foo', true, '-2 days');
+        $c->saveMeta('bar', false);
+        $c->saveMeta('foo', false);
+        $c->saveMetaAt('bar', 123, '+2 days');
+
+        $this->testScope(Post::whereMetaIn('foo', [false, 'bar']), 'a,c');
+        $this->testScope(Post::travelTo('-23 hours')->whereMetaIn('foo', [false, 'bar']));
+        $this->testScope(Post::travelTo('-23 hours')->whereMetaIn('foo', [true, 'history']), 'a,c');
+        $this->testScope(Post::whereMetaIn('foo', [true, 'history'])->travelTo('-23 hours'), 'a,c');
+        $this->testScope(Post::travelTo('-25 hours')->whereMetaIn('foo', [true, 'history']), 'c');
+        $this->testScope(Post::travelTo('+1 day')->whereMetaIn('foo', [false, 'history']), 'c');
+        $this->testScope(Post::travelTo('+2 days')->whereMetaIn('foo', [false, 'future']), 'a,c');
+
+        $this->testScope(Post::travelTo('-2 days')->whereMeta('bar', 'foo'));
+        $this->testScope(Post::travelBack()->whereMeta('bar', 'foo'), 'b');
+
+        $this->testScope(Post::travelTo('-50 hours')->whereMeta('bar', '>=', 123));
+        $this->testScope(Post::travelTo('+3 days')->whereMeta('bar', '>=', 123), 'c');
     }
 
     protected function seedModels()

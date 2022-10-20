@@ -16,6 +16,13 @@ class HasMetaTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Post::travelBack();
+    }
+
     /** @test */
     public function it_can_set_any_keys_as_meta_by_default()
     {
