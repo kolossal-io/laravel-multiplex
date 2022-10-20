@@ -14,9 +14,12 @@
 </p>
 
 <p align="center">
+    <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/badge/Laravel-^9.0-green.svg?style=flat-square" alt="Laravel"></a>
     <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/packagist/v/kolossal-io/laravel-multiplex.svg?style=flat-square" alt="Latest Version on Packagist"></a>
-    <a href="https://github.com/kolossal-io/laravel-multiplex/actions/workflows/run-tests.yml"><img src="https://github.com/kolossal-io/laravel-multiplex/actions/workflows/run-tests.yml/badge.svg" alt="GitHub Tests Action Status"></a>
-    <a href="https://github.com/kolossal-io/laravel-multiplex/actions/workflows/fix-php-code-style-issues.yml?query=workflow%3A"><img src="https://github.com/kolossal-io/laravel-multiplex/actions/workflows/fix-php-code-style-issues.yml/badge.svg" alt="GitHub Code Style Action Status"></a>
+    <a href="https://codecov.io/gh/kolossal-io/laravel-multiplex" > 
+    <img src="https://codecov.io/gh/kolossal-io/laravel-multiplex/branch/main/graph/badge.svg?token=330354GI30"/> 
+    </a>
+    <a href="https://github.com/kolossal-io/laravel-multiplex/actions/workflows/tests.yml"><img src="https://github.com/kolossal-io/laravel-multiplex/actions/workflows/tests.yml/badge.svg" alt="GitHub Tests Action Status"></a>
 </p>
 
 ---
