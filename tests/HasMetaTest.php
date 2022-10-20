@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Kolossal\Multiplex\Exceptions\MetaException;
 use Kolossal\Multiplex\Meta;
+use Kolossal\Multiplex\Tests\Mocks\Dummy;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\PostWithoutSoftDelete;
 use PDOException;
@@ -394,6 +395,44 @@ class HasMetaTest extends TestCase
 
     /** @test */
     public function it_can_set_meta_for_the_future()
+    {
+        $model = Post::factory()->create();
+
+        $model->setMeta('foo', 'bar');
+        $model->setMetaAt('foo', 'change', '+1 hour');
+
+        $model->save();
+
+        $this->assertNull(Post::first()->foo);
+
+        $this->travelTo('+1 hour');
+
+        $this->assertSame('change', Post::first()->foo);
+    }
+
+    /** @test */
+    public function it_can_set_meta_for_the_future_by_array()
+    {
+        $model = Post::factory()->create();
+
+        $model->setMetaAt([
+            'foo' => 'bar',
+            'bar' => true,
+        ], '+1 hour');
+
+        $model->save();
+
+        $this->assertNull(Post::first()->foo);
+        $this->assertNull(Post::first()->bar);
+
+        $this->travelTo('+1 hour');
+
+        $this->assertSame('bar', Post::first()->foo);
+        $this->assertSame(true, Post::first()->bar);
+    }
+
+    /** @test */
+    public function it_can_save_meta_for_the_future()
     {
         $model = Post::factory()->create();
 
@@ -852,6 +891,16 @@ class HasMetaTest extends TestCase
     }
 
     /** @test */
+    public function it_will_return_null_for_casted_meta_field_without_trait()
+    {
+        $model = new Dummy;
+
+        $this->assertNull(
+            $model->append('appendable_foo')->toArray()['appendable_foo']
+        );
+    }
+
+    /** @test */
     public function it_can_set_casted_fields_not_in_whitelist()
     {
         $model = Post::factory()->create(['title' => 'Title']);
@@ -1219,5 +1268,95 @@ class HasMetaTest extends TestCase
         $this->assertDatabaseCount('meta', 3);
         $this->assertCount(3, Post::first()->meta);
         $this->assertSame('2023-12-01 12:00:00', Post::first()->getMeta('meta_publish_at'));
+    }
+
+    /** @test */
+    public function it_loads_meta_relation()
+    {
+        $post = Post::factory()->create();
+
+        $post->saveMetaAt('foo', false, '-1 day');
+        $post->saveMeta('foo', true);
+        $post->saveMetaAt('bar', false, '-1 day');
+        $post->saveMetaAt('future', false, '+1 day');
+
+        $this->assertDatabaseCount('meta', 4);
+        $this->assertCount(2, Post::first()->meta);
+    }
+
+    /** @test */
+    public function it_loads_published_meta_relation()
+    {
+        $post = Post::factory()->create();
+
+        $post->saveMetaAt('foo', false, '-1 day');
+        $post->saveMeta('foo', true);
+        $post->saveMetaAt('bar', false, '-1 day');
+        $post->saveMetaAt('future', false, '+1 day');
+
+        $this->assertDatabaseCount('meta', 4);
+        $this->assertCount(3, Post::first()->publishedMeta);
+    }
+
+    /** @test */
+    public function it_loads_all_meta_relation()
+    {
+        $post = Post::factory()->create();
+
+        $post->saveMetaAt('foo', false, '-1 day');
+        $post->saveMeta('foo', true);
+        $post->saveMetaAt('bar', false, '-1 day');
+        $post->saveMetaAt('future', false, '+1 day');
+
+        $this->assertDatabaseCount('meta', 4);
+        $this->assertCount(4, Post::first()->allMeta);
+    }
+
+    /** @test */
+    public function it_will_prefer_relations_over_meta()
+    {
+        $post = Post::factory()->create();
+
+        $post->saveMeta('meta', 'Meta Value');
+        $post->saveMeta('other', 'Other Value');
+
+        $this->assertDatabaseCount('meta', 2);
+
+        $this->assertSame('Meta Value', $post->getMeta('meta'));
+        $this->assertNotEquals('Meta Value', $post->meta);
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $post->meta);
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $post->getAttribute('meta'));
+
+        $this->assertSame('Other Value', $post->getMeta('other'));
+        $this->assertSame('Other Value', $post->other);
+        $this->assertIsString($post->other);
+        $this->assertIsString($post->getAttribute('other'));
+    }
+
+    /** @test */
+    public function it_refreshes_relations_after_save()
+    {
+        $post = Post::factory()->create();
+
+        $post->saveMeta([
+            'foo' => 'bar',
+            'bar' => true,
+        ]);
+
+        $post->saveMetaAt('foo', 'old', '-1 day');
+        $post->saveMetaAt('bar', false, '+1 day');
+
+        $post = Post::first();
+
+        $this->assertCount(2, $post->meta);
+        $this->assertCount(3, $post->publishedMeta);
+        $this->assertCount(4, $post->allMeta);
+
+        $post->foo = 'changed';
+        $post->saveMeta();
+
+        $this->assertCount(2, $post->meta);
+        $this->assertCount(4, $post->publishedMeta);
+        $this->assertCount(5, $post->allMeta);
     }
 }

@@ -24,6 +24,7 @@ class MetaAttribute implements CastsAttributes
         return $value;
     }
 
+    // @codeCoverageIgnoreStart
     /**
      * Transform the attribute to its underlying model values.
      *
@@ -37,4 +38,5 @@ class MetaAttribute implements CastsAttributes
     {
         return $value;
     }
+    // @codeCoverageIgnoreEnd
 }

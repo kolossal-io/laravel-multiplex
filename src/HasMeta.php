@@ -314,23 +314,15 @@ trait HasMeta
      */
     public function getAttribute($key)
     {
-        if (! $key) {
-            return;
-        }
-
         /**
          * If the given key is not explicitly allowed but exists as a real attribute
          * let’s not try to find a meta value for the given key.
          */
-        if (! $this->isExplicitlyAllowedMetaKey($key) && ($attr = parent::getAttribute($key)) !== null) {
+        if (
+            ! $this->isExplicitlyAllowedMetaKey($key)
+            && ($attr = parent::getAttribute($key)) !== null
+        ) {
             return $attr;
-        }
-
-        /**
-         * If there is a relation with the same name as the given key load the relation.
-         */
-        if ($this->isRelation($key)) {
-            return $this->getRelation($key);
         }
 
         /**
@@ -529,17 +521,6 @@ trait HasMeta
     }
 
     /**
-     * Determine wether the given meta was changed.
-     *
-     * @param  string  $key
-     * @return bool
-     */
-    public function hasMetaChanged(string $key): bool
-    {
-        return $this->getMetaChanges()->has($key);
-    }
-
-    /**
      * Reset the meta changes collection for the given key.
      * Resets the entire collection if nothing is passed.
      *
@@ -661,6 +642,10 @@ trait HasMeta
             $this->unsetRelation('allMeta');
         }
 
+        if ($this->relationLoaded('publishedMeta')) {
+            $this->unsetRelation('publishedMeta');
+        }
+
         if ($this->relationLoaded('meta')) {
             $this->unsetRelation('meta');
         }
@@ -674,12 +659,8 @@ trait HasMeta
      * @param  Meta  $meta
      * @return Meta|false
      */
-    protected function storeMeta(?Meta $meta)
+    protected function storeMeta(Meta $meta)
     {
-        if (! $meta) {
-            return false;
-        }
-
         /**
          * If `$metaTimestamp` is set we probably are storing meta for the future or past.
          */
