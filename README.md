@@ -19,7 +19,7 @@
     <a href="https://codecov.io/gh/kolossal-io/laravel-multiplex" > 
     <img src="https://codecov.io/gh/kolossal-io/laravel-multiplex/branch/main/graph/badge.svg?token=330354GI30"/> 
     </a>
-    <a href="https://github.com/kolossal-io/laravel-multiplex/actions/workflows/tests.yml"><img src="https://github.com/kolossal-io/laravel-multiplex/actions/workflows/tests.yml/badge.svg" alt="GitHub Tests Action Status"></a>
+    <a href="https://github.com/kolossal-io/laravel-multiplex/actions/workflows/run-tests.yml"><img src="https://github.com/kolossal-io/laravel-multiplex/actions/workflows/run-tests.yml/badge.svg" alt="GitHub Tests Action Status"></a>
 </p>
 
 ---
