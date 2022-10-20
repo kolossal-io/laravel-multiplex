@@ -209,7 +209,7 @@ class Meta extends Model
          * so let's find the record that was last saved by querying for the maximum `id` in a join.
          */
         $maxId = $query->clone()
-            ->select(DB::raw('key AS key_aggregate'), 'published_at', DB::raw('MAX(id) as id_aggregate'))
+            ->select(DB::raw('`key` AS key_aggregate'), 'published_at', DB::raw('MAX(id) as id_aggregate'))
             ->groupBy('key', 'published_at');
 
         /**
