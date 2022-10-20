@@ -30,7 +30,7 @@ class MultiplexServiceProviderTest extends TestCase
         $provider = new MultiplexServiceProvider(app());
         $provider->boot();
 
-        $expected = realpath(dirname(__DIR__).'/database/migrations');
+        $expected = realpath(dirname(__DIR__) . '/database/migrations');
 
         $this->assertSame($expected, realpath(app('migrator')->paths()[0]));
     }

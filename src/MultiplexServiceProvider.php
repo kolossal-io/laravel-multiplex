@@ -11,18 +11,18 @@ class MultiplexServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/multiplex.php' => config_path('multiplex.php'),
+                __DIR__ . '/../config/multiplex.php' => config_path('multiplex.php'),
             ], 'config');
         }
 
         if (config('multiplex.migrations', true)) {
-            $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         }
     }
 
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/multiplex.php', 'multiplex');
+        $this->mergeConfigFrom(__DIR__ . '/../config/multiplex.php', 'multiplex');
 
         $this->registerDataTypeRegistry();
     }

@@ -1,6 +1,7 @@
 {
     "preset": "laravel",
     "rules": {
-        "not_operator_with_successor_space": false
+        "not_operator_with_successor_space": false,
+        "concat_space": false
     }
 }

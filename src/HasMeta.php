@@ -337,7 +337,7 @@ trait HasMeta
          */
         $value = $this->getMeta($key);
 
-        return with(Str::camel('get_'.$key.'_meta'), function ($accessor) use ($value) {
+        return with(Str::camel('get_' . $key . '_meta'), function ($accessor) use ($value) {
             if (!method_exists($this, $accessor)) {
                 return $value;
             }
@@ -484,7 +484,7 @@ trait HasMeta
          * Let’s check if there is a mutator for the given meta key and pipe
          * the given value through it if so.
          */
-        $value = with(Str::camel('set_'.$key.'_meta'), function ($mutator) use ($value) {
+        $value = with(Str::camel('set_' . $key . '_meta'), function ($mutator) use ($value) {
             if (!method_exists($this, $mutator)) {
                 return $value;
             }
