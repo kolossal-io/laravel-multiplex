@@ -16,9 +16,9 @@ trait HasMeta
     /**
      * The allowed meta keys.
      *
-     * @var array
+     * @var array<string>
      */
-    protected array $metaKeys = ['*'];
+    protected array $_metaKeys = ['*'];
 
     /**
      * Collection of the changed meta data for this model.
@@ -117,7 +117,11 @@ trait HasMeta
      */
     public function getMetaKeys(): array
     {
-        return $this->metaKeys;
+        if (property_exists($this, 'metaKeys') && is_array($this->metaKeys)) {
+            return $this->metaKeys;
+        }
+
+        return $this->_metaKeys;
     }
 
     /**
@@ -128,7 +132,7 @@ trait HasMeta
      */
     public function metaKeys(array $metaKeys): static
     {
-        $this->metaKeys = $metaKeys;
+        $this->_metaKeys = $metaKeys;
 
         return $this;
     }
