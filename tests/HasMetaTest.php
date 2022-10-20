@@ -1359,4 +1359,17 @@ class HasMetaTest extends TestCase
         $this->assertCount(4, $post->publishedMeta);
         $this->assertCount(5, $post->allMeta);
     }
+
+    /** @test */
+    public function it_will_not_store_clean_meta()
+    {
+        $model = Post::factory()->create();
+
+        $this->assertTrue($model->saveMeta('foo', 'bar'));
+        $this->assertFalse($model->saveMeta('foo', 'bar'));
+        $this->assertFalse($model->saveMeta('foo', 'bar'));
+        $this->assertTrue($model->saveMeta('foo', 'changed'));
+
+        $this->assertDatabaseCount('meta', 2);
+    }
 }

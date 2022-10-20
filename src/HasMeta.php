@@ -720,6 +720,9 @@ trait HasMeta
          * Otherwise pull and delete the given key from the array of changes and
          * persist the change. Refresh the relations afterwards to prevent stale data.
          */
+        if (! $changes->has($key)) {
+            return false;
+        }
 
         /** @var Meta $meta */
         $meta = $changes->pull($key);
