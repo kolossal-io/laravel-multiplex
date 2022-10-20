@@ -418,7 +418,7 @@ This package is heavily based on and inspired by [Laravel-Metable](https://githu
 
 ## License
 
-<picture style="display: block; margin: 1.5em 0 1em;">
+<picture style="display: block; margin: 2rem 0;">
     <source media="(prefers-color-scheme: dark)" srcset="./.github/kolossal-logo-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="./.github/kolossal-logo-light.svg">
     <img alt="Multiplex" src="./.github/kolossal-log-light.svg" width="138" height="32" style="max-width: 100%;">
