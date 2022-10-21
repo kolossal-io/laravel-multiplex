@@ -22,6 +22,10 @@
     <a href="https://github.com/kolossal-io/laravel-multiplex/actions/workflows/run-tests.yml"><img src="https://github.com/kolossal-io/laravel-multiplex/actions/workflows/run-tests.yml/badge.svg" alt="GitHub Tests Action Status"></a>
 </p>
 
+<p align="center">
+    <a href="#table-of-contents">View Table of Contents</a>
+</p>
+
 ---
 
 ## What it Does
@@ -48,8 +52,23 @@ $post->setMetaAt('likes', 6000, '+2 years');
 -   Supports fluent syntax: Use your model’s metadata as if they were properties.
 -   Polymorphic relationship allows adding metadata to any Eloquent model  
     without worrying about the database schema.
+-   Easy to try: Extend existing database columns of your model with versionable  
+    metadata without touching or deleting your original columns.
 -   Type conversion system heavily based on [Laravel-Metable](https://github.com/plank/laravel-metable) allows data  
     of numerous different scalar and object types to be stored and retrieved.
+
+## Table of Contents
+
+-   [Installation](#installation)
+-   [Attaching Metadata](#attaching-metadata)
+-   [Retrieving Metadata](#retrieving-metadata)
+-   [Query by Metadata](#query-by-metadata)
+-   [Time Traveling](#time-traveling)
+-   [Limit Meta Keys](#limit-meta-keys)
+-   [Extending Database Columns](#extending-database-columns)
+-   [Deleting Metadata](#deleting-metadata)
+-   [Performance](#performance)
+-   [Configuration](#configuration)
 
 ## Installation
 
@@ -430,7 +449,7 @@ class Post extends Model
 
 **Note** that casting an attribute to `MetaAttribute::class` on your model will also add the attribute to the valid meta keys `$metaKeys`.
 
-## Delete Metadata
+## Deleting Metadata
 
 You can delete any metadata associated with the model from the database.
 
