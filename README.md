@@ -47,15 +47,11 @@ $post->setMetaAt('likes', 6000, '+2 years');
 
 ## Features
 
--   Metadata is saved in versions: Schedule changes to metadata,  
-    change history or retrieve metadata for a specific point in time.
+-   Metadata is saved in versions: Schedule changes to metadata, change history or retrieve metadata for a specific point in time.
 -   Supports fluent syntax: Use your model’s metadata as if they were properties.
--   Polymorphic relationship allows adding metadata to any Eloquent model  
-    without worrying about the database schema.
--   Easy to try: Extend existing database columns of your model with versionable  
-    metadata without touching or deleting your original columns.
--   Type conversion system heavily based on [Laravel-Metable](https://github.com/plank/laravel-metable) allows data  
-    of numerous different scalar and object types to be stored and retrieved.
+-   Polymorphic relationship allows adding metadata to any Eloquent model without worrying about the database schema.
+-   Easy to try: Extend existing database columns of your model with versionable metadata without touching or deleting your original columns.
+-   Type conversion system heavily based on [Laravel-Metable](https://github.com/plank/laravel-metable) allows data of numerous different scalar and object types to be stored and retrieved.
 
 ## Table of Contents
 
