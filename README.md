@@ -345,6 +345,36 @@ Post::travelBack();
 Post::where('category', 'tech')->get(); // Find current meta.
 ```
 
+## Limit Meta Keys
+
+You can limit which keys can be used for metadata by setting `$metaKeys` on the model.
+
+```php
+class Post extends Model
+{
+    use HasMeta;
+
+    protected array $metaKeys = [
+        'color',
+        'hide',
+    ];
+}
+```
+
+By default all keys are allowed.
+
+```php
+protected array $metaKeys = ['*'];
+```
+
+You can also change the allowed meta keys dynamically.
+
+```php
+$model->metaKeys(['color', 'hide']);
+```
+
+Trying to assign a value to a meta key that is not allowed will throw a `Kolossal\Multiplex\Exceptions\MetaException`.
+
 ## Extending Database Columns
 
 By default Multiplex will not touch columns of your model. But sometimes it might be useful to have meta records as an extension for your existing table columns.
@@ -379,6 +409,27 @@ $post->deleteMeta('body');
 $post->body; // A body.
 ```
 
+In case of using Multiplex for extending table columns, Multiplex will remove the original column when retrieving models from the database so you don’t get stale data.
+
+If you want to still have those fields on your model, i. e. when calling the `toArray()` method, you can add the fields to `$appends` and cast them using the `MetaAttribute` Cast.
+
+```php
+class Post extends Model
+{
+    use HasMeta;
+
+    protected $appends = [
+        'body',
+    ];
+
+    protected $casts = [
+        'body' => MetaAttribute::class,
+    ];
+}
+```
+
+**Note** that casting an attribute to `MetaAttribute::class` on your model will also add the attribute to the valid meta keys `$metaKeys`.
+
 ## Delete Metadata
 
 You can delete any metadata associated with the model from the database.
@@ -391,32 +442,22 @@ $post->deleteMeta('color');
 $post->purgeMeta();
 ```
 
-## Limit Meta Keys
+## Performance
 
-You can limit which keys can be used for metadata by setting `$metaKeys` on the model.
+Since Multiplex stores metadata in a polymorphic [One To Many](https://laravel.com/docs/9.x/eloquent-relationships#one-to-many-polymorphic-relations) relationship querying your models could easily result in a [`N+1` query problem](https://laravel.com/docs/9.x/eloquent-relationships#eager-loading).
 
-```php
-class Post extends Model
-{
-    use HasMeta;
-
-    protected array $metaKeys = [
-        'color',
-        'hide',
-    ];
-}
-```
-
-By default all keys are allowed.
+Depending on your use case you should consider eager loading the `meta` relation, for example using `$with` on your model. This might be especially useful if you are [extending database columns](#extending-database-columns).
 
 ```php
-protected array $metaKeys = ['*'];
-```
+// Worst case: 26 queries if `color` is a meta value.
+$colors = Post::take(25)->get()->map(
+    fn ($post) => $post->color;
+);
 
-You can also change the allowed meta keys dynamically.
-
-```php
-$model->metaKeys(['color', 'hide']);
+// Same result with only 2 queries.
+$colors = Post::with('meta')->take(25)->get()->map(
+    fn ($post) => $post->color;
+);
 ```
 
 ## Configuration

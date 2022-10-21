@@ -39,90 +39,6 @@ class HasMetaTest extends TestCase
     }
 
     /** @test */
-    public function it_will_throw_for_keys_equal_to_real_column_names()
-    {
-        $this->assertDatabaseCount('meta', 0);
-
-        $model = Post::factory()->create();
-
-        $this->expectException(MetaException::class);
-        $this->expectExceptionMessage('Meta key `title` seems to be a model attribute. You must explicitly allow this attribute via `$metaKeys`.');
-
-        $model->setMeta('title', 'bar');
-    }
-
-    /** @test */
-    public function it_will_allow_real_column_names_allowed_explicitely()
-    {
-        $this->assertDatabaseCount('meta', 0);
-
-        $model = Post::factory()->create(['title' => 'Initial title']);
-
-        $model->metaKeys([
-            'title',
-            'foo',
-        ]);
-
-        $this->assertSame('Initial title', $model->title);
-
-        $model->setMeta('title', 'Changed title');
-        $model->setMeta('foo', 'bar');
-
-        $model->save();
-
-        $this->assertDatabaseCount('meta', 2);
-        $this->assertDatabaseHas('sample_posts', ['title' => 'Initial title']);
-        $this->assertSame('Changed title', $model->getMeta('title'));
-    }
-
-    /** @test */
-    public function it_will_prefer_meta_over_real_columns_if_defined_explicitly()
-    {
-        $model = Post::factory()->create(['title' => 'Initial title']);
-
-        $model->metaKeys([
-            'title',
-            'foo',
-        ]);
-
-        $this->assertSame('Initial title', $model->title);
-
-        $model->setMeta('title', 'Changed title');
-
-        $model->save();
-
-        $this->assertDatabaseHas('sample_posts', ['title' => 'Initial title']);
-        $this->assertSame('Changed title', $model->getMeta('title'));
-        $this->assertSame('Changed title', $model->title);
-
-        $model->saveMeta('title', 'Changed again');
-
-        $this->assertSame('Changed again', $model->title);
-    }
-
-    /** @test */
-    public function it_will_fallback_to_real_columns_for_explicitly_defined_meta_keys()
-    {
-        $model = Post::factory()->create(['title' => 'Initial title']);
-
-        $model->metaKeys([
-            'title',
-            'foo',
-        ]);
-
-        $this->assertSame('Initial title', $model->title);
-
-        $model->saveMeta('title', 'Changed title');
-        $this->assertSame('Changed title', $model->title);
-
-        $model->saveMeta('title', null);
-        $this->assertNull($model->title);
-
-        $model->deleteMeta('title');
-        $this->assertSame('Initial title', $model->title);
-    }
-
-    /** @test */
     public function it_can_set_meta_fluently()
     {
         $this->assertDatabaseCount('meta', 0);
@@ -134,22 +50,6 @@ class HasMetaTest extends TestCase
         $model->save();
 
         $this->assertDatabaseCount('meta', 2);
-    }
-
-    /** @test */
-    public function it_will_set_real_columns_as_expected()
-    {
-        $this->assertDatabaseCount('meta', 0);
-
-        $model = Post::factory()->create();
-
-        $model->title = 'New title';
-        $model->foo = 'bar';
-
-        $model->save();
-
-        $this->assertSame('New title', $model->refresh()->title);
-        $this->assertDatabaseCount('meta', 1);
     }
 
     /** @test */

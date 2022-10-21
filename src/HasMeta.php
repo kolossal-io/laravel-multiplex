@@ -3,8 +3,10 @@
 namespace Kolossal\Multiplex;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -21,11 +23,25 @@ trait HasMeta
     protected array $_metaKeys = ['*'];
 
     /**
+     * Cached array of explicitly allowed meta keys.
+     *
+     * @var array<string>
+     */
+    protected ?array $explicitlyAllowedMetaKeys = null;
+
+    /**
      * Collection of the changed meta data for this model.
      *
      * @var Collection|null
      */
     protected ?Collection $metaChanges = null;
+
+    /**
+     * Collection database columns overridden by meta.
+     *
+     * @var Collection|null
+     */
+    protected ?Collection $fallbackValues = null;
 
     /**
      * Cache storage for table column names.
@@ -62,13 +78,21 @@ trait HasMeta
      */
     public static function bootHasMeta(): void
     {
-        static::saved(function ($model) {
+        static::retrieved(function (Model $model) {
+            foreach ($model->getExplicitlyAllowedMetaKeys() as $key) {
+                if (isset($model->attributes[$key])) {
+                    $model->setFallbackValue($key, Arr::pull($model->attributes, $key));
+                }
+            }
+        });
+
+        static::saved(function (Model $model) {
             if ($model->autosaveMeta === true) {
                 $model->saveMeta();
             }
         });
 
-        static::deleted(function ($model) {
+        static::deleted(function (Model $model) {
             if (
                 $model->autosaveMeta === true
                 && !in_array(SoftDeletes::class, class_uses($model))
@@ -78,7 +102,7 @@ trait HasMeta
         });
 
         if (method_exists(__CLASS__, 'forceDeleted')) {
-            static::forceDeleted(function ($model) {
+            static::forceDeleted(function (Model $model) {
                 if ($model->autosaveMeta === true) {
                     $model->purgeMeta();
                 }
@@ -96,6 +120,31 @@ trait HasMeta
         if (($key = $this->getPublishDateKey())) {
             $this->mergeFillable([$key]);
         }
+    }
+
+    /**
+     * Add value to the list of columns overridden by meta.
+     *
+     * @param  string  $key
+     * @param  mixed  $value
+     * @return self
+     */
+    public function setFallbackValue(string $key, $value = null)
+    {
+        ($this->fallbackValues ??= new Collection)->put($key, $value);
+
+        return $this;
+    }
+
+    /**
+     * Get the fallback value for the given key.
+     *
+     * @param  string  $key
+     * @return mixed|null
+     */
+    public function getFallbackValue(string $key)
+    {
+        return $this->fallbackValues?->get($key) ?? null;
     }
 
     /**
@@ -134,6 +183,8 @@ trait HasMeta
     {
         $this->_metaKeys = $metaKeys;
 
+        $this->getExplicitlyAllowedMetaKeys(false);
+
         return $this;
     }
 
@@ -166,6 +217,28 @@ trait HasMeta
     }
 
     /**
+     * Get the meta keys explicitly allowed by using `$metaKeys`
+     * or by typecasting to `MetaAttribute::class`.
+     *
+     * @return array
+     */
+    public function getExplicitlyAllowedMetaKeys(bool $fromCache = true): array
+    {
+        if ($this->explicitlyAllowedMetaKeys && $fromCache) {
+            return $this->explicitlyAllowedMetaKeys;
+        }
+
+        return $this->explicitlyAllowedMetaKeys = collect($this->getCasts())
+            ->filter(fn ($cast) => $cast === MetaAttribute::class)
+            ->flip()
+            ->values()
+            ->concat($this->getMetaKeys())
+            ->filter(fn ($key) => $key !== '*')
+            ->unique()
+            ->toArray();
+    }
+
+    /**
      * Determine if the given key was explicitly allowed.
      *
      * @param  string  $key
@@ -173,10 +246,7 @@ trait HasMeta
      */
     public function isExplicitlyAllowedMetaKey(string $key): bool
     {
-        return in_array($key, $this->getMetaKeys())
-            || with($this->getCasts(), function ($casts) use ($key) {
-                return isset($casts[$key]) && $casts[$key] === MetaAttribute::class;
-            });
+        return in_array($key, $this->getExplicitlyAllowedMetaKeys());
     }
 
     /**
@@ -333,17 +403,29 @@ trait HasMeta
          * There seems to be no attribute given and no relation so we either have a key
          * explicitly listed as a meta key or the wildcard (*) was used. Let’s get the meta
          * value for the given key and pipe the result through an accessor if possible.
-         * Finally delegate back to `parent::getAttribute()` if no meta exists.
+         * If the value is still `null` check if there is a fallback value which typically
+         * means there is an equal named database column which we pulled the value from earlier.
          */
-        $value = $this->getMeta($key);
+        $value = with($this->getMeta($key), function ($value) use ($key) {
+            $accessor = Str::camel('get_' . $key . '_meta');
 
-        return with(Str::camel('get_' . $key . '_meta'), function ($accessor) use ($value) {
             if (!method_exists($this, $accessor)) {
                 return $value;
             }
 
             return $this->{$accessor}($value);
-        }) ?? value(fn () => !$this->hasMeta($key) ? parent::getAttribute($key) : null);
+        });
+
+        if ($value === null && !$this->hasMeta($key)) {
+            $value = $this->getFallbackValue($key);
+        }
+
+        /**
+         * Finally delegate back to `parent::getAttribute()` if no meta exists.
+         */
+        return $value ?? value(
+            fn () => !$this->hasMeta($key) ? parent::getAttribute($key) : null
+        );
     }
 
     /**

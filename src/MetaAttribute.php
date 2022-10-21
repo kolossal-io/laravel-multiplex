@@ -17,8 +17,9 @@ class MetaAttribute implements CastsAttributes
      */
     public function get($model, $key, $value, $attributes)
     {
-        if (method_exists($model, 'getMeta')) {
-            return $model->getMeta($key, $value);
+        if (in_array(HasMeta::class, class_uses($model))) {
+            /** @phpstan-ignore-next-line */
+            return $model->getMeta($key, $value ?? $model->getFallbackValue($key));
         }
 
         return $value;
