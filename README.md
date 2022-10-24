@@ -291,6 +291,9 @@ Post::whereMeta('color', '!=', 'black')->get();
 
 // Find posts that are `visible`.
 Post::whereMeta('visible', true)->get();
+
+// There are alternatives for building `or` clauses for all scopes.
+Post::whereMeta('visible', true)->orWhere('hidden', false)->get();
 ```
 
 Multiplex will take care of finding the right datatype for the passed query.

@@ -31,6 +31,8 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereHasMeta('two'), ['a', 'b']);
         $this->testScope(Post::whereHasMeta('three'), ['c']);
         $this->testScope(Post::whereHasMeta('four'));
+        $this->testScope(Post::whereHasMeta('one')->whereHasMeta('two'), 'a');
+        $this->testScope(Post::whereHasMeta('one')->orWhereHasMeta('three'), 'a,c');
     }
 
     /** @test */
@@ -40,6 +42,7 @@ class HasMetaScopeTest extends TestCase
 
         $this->testScope(Post::whereHasMeta(['one', 'two']), ['a', 'b']);
         $this->testScope(Post::whereHasMeta(['two', 'three']), ['a', 'b', 'c']);
+        $this->testScope(Post::whereHasMeta(['one', 'two'])->orWhereHasMeta('three'), 'a,b,c');
     }
 
     /** @test */
@@ -51,6 +54,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereDoesntHaveMeta('two'), 'c');
         $this->testScope(Post::whereDoesntHaveMeta('three'), 'a,b');
         $this->testScope(Post::whereDoesntHaveMeta('four'), 'a,b,c');
+        $this->testScope(Post::whereHasMeta('three')->orWhereDoesntHaveMeta('one'), 'b,c');
     }
 
     /** @test */
@@ -76,10 +80,12 @@ class HasMetaScopeTest extends TestCase
 
         Post::factory()
             ->has(Meta::factory(3)->state(['key' => 'foo', 'value' => false]))
+            ->has(Meta::factory()->state(['key' => 'bar', 'value' => 12]))
             ->create(['title' => 'c']);
 
         $this->testScope(Post::whereMeta('foo', false), 'a,c');
         $this->testScope(Post::whereMeta('foo', true), 'b');
+        $this->testScope(Post::whereMeta('foo', true)->orWhereMeta('bar', 12), 'b,c');
     }
 
     /**
@@ -135,6 +141,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMeta('foo', '=', true));
         $this->testScope(Post::whereMeta('foo', '=', false), 'c');
         $this->testScope(Post::whereMeta('foo', '!=', true), 'c');
+        $this->testScope(Post::whereMeta('foo', '!=', true)->orWhereMeta('bar', '<', 0), 'c,d');
     }
 
     /** @test */
@@ -170,6 +177,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereRawMeta('foo', '=', 'true'));
         $this->testScope(Post::whereRawMeta('foo', '=', ''), 'c');
         $this->testScope(Post::whereRawMeta('foo', '!=', ''), 'a,b');
+        $this->testScope(Post::whereRawMeta('foo', '!=', '')->orWhereRawMeta('foo', '<', '0'), 'a,b,c');
     }
 
     /** @test */
@@ -197,6 +205,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMeta('bar', -4), 'd');
         $this->testScope(Post::whereMetaOfType('string', 'bar', -4));
         $this->testScope(Post::whereMetaOfType('integer', 'bar', -4), 'd');
+        $this->testScope(Post::whereMetaOfType('integer', 'bar', -4)->orWhereMetaOfType('null', 'foo', ''), 'c,d');
     }
 
     /** @test */
@@ -220,6 +229,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMetaIn('foo', ['one', 'three', '2']), 'b');
         $this->testScope(Post::whereMetaIn('foo', [2, 4, 5]), 'a,c');
         $this->testScope(Post::whereMetaIn('foo', ['one', 2, 4.0]), 'a,b');
+        $this->testScope(Post::whereMeta('foo', 'one')->orWhereMetaIn('foo', [2, 3, 4]), 'a,b,c');
     }
 
     /** @test */

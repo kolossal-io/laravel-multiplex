@@ -946,15 +946,30 @@ trait HasMeta
      *
      * @param  Builder  $query
      * @param  string|array  $key
+     * @param  string  $boolean
      * @return void
      */
-    public function scopeWhereHasMeta(Builder $query, $key): void
+    public function scopeWhereHasMeta(Builder $query, $key, string $boolean = 'and'): void
     {
         $keys = is_array($key) ? $key : [$key];
+        $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
-        $query->whereHas('allMeta', function (Builder $query) use ($keys) {
+        $query->{$method}('allMeta', function (Builder $query) use ($keys) {
             $query->published($this->getMetaTimestamp())->whereIn('key', $keys);
         });
+    }
+
+    /**
+     * Query records having meta data for the given key with "or" where clause.
+     * Pass an array to find records having meta for at least one of the given keys.
+     *
+     * @param  Builder  $query
+     * @param  string|array  $key
+     * @return void
+     */
+    public function scopeOrWhereHasMeta(Builder $query, $key): void
+    {
+        $query->whereHasMeta($key, 'or');
     }
 
     /**
@@ -963,15 +978,30 @@ trait HasMeta
      *
      * @param  Builder  $query
      * @param  string|array  $key
+     * @param  string  $boolean
      * @return void
      */
-    public function scopeWhereDoesntHaveMeta(Builder $query, $key): void
+    public function scopeWhereDoesntHaveMeta(Builder $query, $key, string $boolean = 'and'): void
     {
         $keys = is_array($key) ? $key : [$key];
+        $method = $boolean === 'or' ? 'orWhereDoesntHave' : 'whereDoesntHave';
 
-        $query->whereDoesntHave('allMeta', function (Builder $query) use ($keys) {
+        $query->{$method}('allMeta', function (Builder $query) use ($keys) {
             $query->published($this->getMetaTimestamp())->whereIn('key', $keys);
         });
+    }
+
+    /**
+     * Query records not having meta data for the given key  with "or" where clause..
+     * Pass an array to find records not having meta for any of the given keys.
+     *
+     * @param  Builder  $query
+     * @param  string|array  $key
+     * @return void
+     */
+    public function scopeOrWhereDoesntHaveMeta(Builder $query, $key): void
+    {
+        $query->whereDoesntHaveMeta($key, 'or');
     }
 
     /**
@@ -982,19 +1012,37 @@ trait HasMeta
      * @param  string  $key
      * @param  mixed  $operator
      * @param  mixed  $value
+     * @param  string  $boolean
      * @return void
      */
-    public function scopeWhereMeta(Builder $query, string $key, $operator, $value = null): void
+    public function scopeWhereMeta(Builder $query, string $key, $operator, $value = null, $boolean = 'and'): void
     {
         if (!isset($value)) {
             $value = $operator;
             $operator = '=';
         }
 
-        $query->whereHas('allMeta', function (Builder $query) use ($key, $operator, $value) {
+        $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
+
+        $query->{$method}('allMeta', function (Builder $query) use ($key, $operator, $value) {
             $query->groupByKeyTakeLatest($this->getMetaTimestamp())
                 ->where('meta.key', $key)->whereValue($value, $operator);
         });
+    }
+
+    /**
+     * Query records having meta with a specific key and value with "or" clause.
+     * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
+     *
+     * @param  Builder  $query
+     * @param  string  $key
+     * @param  mixed  $operator
+     * @param  mixed  $value
+     * @return void
+     */
+    public function scopeOrWhereMeta(Builder $query, string $key, $operator, $value = null): void
+    {
+        $query->whereMeta($key, $operator, $value, 'or');
     }
 
     /**
@@ -1006,19 +1054,38 @@ trait HasMeta
      * @param  string  $key
      * @param  mixed  $operator
      * @param  mixed  $value
+     * @param  string  $boolean
      * @return void
      */
-    public function scopeWhereRawMeta(Builder $query, string $key, $operator, $value = null): void
+    public function scopeWhereRawMeta(Builder $query, string $key, $operator, $value = null, $boolean = 'and'): void
     {
         if (!isset($value)) {
             $value = $operator;
             $operator = '=';
         }
 
-        $query->whereHas('allMeta', function (Builder $query) use ($key, $operator, $value) {
+        $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
+
+        $query->{$method}('allMeta', function (Builder $query) use ($key, $operator, $value) {
             $query->groupByKeyTakeLatest($this->getMetaTimestamp())
                 ->where('meta.key', $key)->where('value', $operator, $value);
         });
+    }
+
+    /**
+     * Query records having raw meta with a specific key and value without checking type with "or" clause.
+     * Make sure that the supplied $value is a string or string castable.
+     * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
+     *
+     * @param  Builder  $query
+     * @param  string  $key
+     * @param  mixed  $operator
+     * @param  mixed  $value
+     * @return void
+     */
+    public function scopeOrWhereRawMeta(Builder $query, string $key, $operator, $value = null): void
+    {
+        $query->whereRawMeta($key, $operator, $value, 'or');
     }
 
     /**
@@ -1032,19 +1099,40 @@ trait HasMeta
      * @param  string  $key
      * @param  mixed  $operator
      * @param  mixed  $value
+     * @param  string  $boolean
      * @return void
      */
-    public function scopeWhereMetaOfType(Builder $query, string $type, string $key, $operator, $value = null): void
+    public function scopeWhereMetaOfType(Builder $query, string $type, string $key, $operator, $value = null, $boolean = 'and'): void
     {
         if (!isset($value)) {
             $value = $operator;
             $operator = '=';
         }
 
-        $query->whereHas('allMeta', function (Builder $query) use ($type, $key, $operator, $value) {
+        $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
+
+        $query->{$method}('allMeta', function (Builder $query) use ($type, $key, $operator, $value) {
             $query->groupByKeyTakeLatest($this->getMetaTimestamp())
                 ->where('meta.key', $key)->whereValue($value, $operator, $type);
         });
+    }
+
+    /**
+     * Query records having meta with a specific value and the given type with "or" clause.
+     * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
+     *
+     * Available types can be found in `config('multiplex.datatypes')`.
+     *
+     * @param  Builder  $query
+     * @param  string  $type
+     * @param  string  $key
+     * @param  mixed  $operator
+     * @param  mixed  $value
+     * @return void
+     */
+    public function scopeOrWhereMetaOfType(Builder $query, string $type, string $key, $operator, $value = null): void
+    {
+        $query->whereMetaOfType($type, $key, $operator, $value, 'or');
     }
 
     /**
@@ -1053,13 +1141,29 @@ trait HasMeta
      * @param  Builder  $query
      * @param  string  $key
      * @param  array  $values
+     * @param  string  $boolean
      * @return void
      */
-    public function scopeWhereMetaIn(Builder $query, string $key, array $values): void
+    public function scopeWhereMetaIn(Builder $query, string $key, array $values, $boolean = 'and'): void
     {
-        $query->whereHas('allMeta', function (Builder $query) use ($key, $values) {
+        $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
+
+        $query->{$method}('allMeta', function (Builder $query) use ($key, $values) {
             $query->groupByKeyTakeLatest($this->getMetaTimestamp())
                 ->where('meta.key', $key)->whereValueIn($values);
         });
+    }
+
+    /**
+     * Query records having one of the given values for the given key with "or" clause.
+     *
+     * @param  Builder  $query
+     * @param  string  $key
+     * @param  array  $values
+     * @return void
+     */
+    public function scopeOrWhereMetaIn(Builder $query, string $key, array $values): void
+    {
+        $query->whereMetaIn($key, $values, 'or');
     }
 }
