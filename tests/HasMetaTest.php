@@ -213,6 +213,51 @@ class HasMetaTest extends TestCase
     }
 
     /** @test */
+    public function it_can_unguard_meta_keys()
+    {
+        $model = Post::factory()->create();
+
+        $model->metaKeys([
+            'foo',
+        ]);
+
+        $this->assertFalse(Post::isMetaUnguarded());
+
+        Post::unguardMeta();
+
+        $model->setMeta('foo', 'bar');
+        $model->bar = 125;
+
+        $model->save();
+
+        $this->assertTrue(Post::isMetaUnguarded());
+        $this->assertDatabaseCount('meta', 2);
+
+        Post::unguardMeta(false);
+    }
+
+    /** @test */
+    public function it_can_reguard_meta_keys()
+    {
+        $this->expectException(MetaException::class);
+        $this->expectExceptionMessage('Meta key `bar` is not a valid key.');
+
+        $model = Post::factory()->create();
+
+        $model->metaKeys([
+            'foo',
+        ]);
+
+        Post::unguardMeta();
+        $this->assertTrue(Post::isMetaUnguarded());
+
+        Post::reguardMeta();
+
+        $model->setMeta('foo', 'bar');
+        $model->setMeta('bar', 125);
+    }
+
+    /** @test */
     public function it_can_contain_wildcard_mixed_with_allowed_keys()
     {
         $model = Post::factory()->create();

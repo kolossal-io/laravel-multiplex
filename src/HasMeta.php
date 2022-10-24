@@ -72,6 +72,13 @@ trait HasMeta
     protected ?Carbon $metaTimestamp = null;
 
     /**
+     * Indicates if all meta assignment is unguarded.
+     *
+     * @var bool
+     */
+    protected static $metaUnguarded = false;
+
+    /**
      * Boot the model trait.
      *
      * @return void
@@ -120,6 +127,37 @@ trait HasMeta
         if (($key = $this->getPublishDateKey())) {
             $this->mergeFillable([$key]);
         }
+    }
+
+    /**
+     * Disable all meta key restrictions.
+     *
+     * @param  bool  $state
+     * @return void
+     */
+    public static function unguardMeta(bool $state = true): void
+    {
+        static::$metaUnguarded = $state;
+    }
+
+    /**
+     * Re-enable the meta key restrictions.
+     *
+     * @return void
+     */
+    public static function reguardMeta(): void
+    {
+        static::$metaUnguarded = false;
+    }
+
+    /**
+     * Determine if meta keys are unguarded
+     *
+     * @return bool
+     */
+    public static function isMetaUnguarded(): bool
+    {
+        return static::$metaUnguarded;
     }
 
     /**
@@ -189,13 +227,13 @@ trait HasMeta
     }
 
     /**
-     * Determine if the meta keys are guarded.
+     * Determine if the meta key wildcard (*) is set.
      *
      * @return bool
      */
-    public function isMetaGuarded(): bool
+    public function isMetaWildcardSet(): bool
     {
-        return !in_array('*', $this->getMetaKeys());
+        return in_array('*', $this->getMetaKeys());
     }
 
     /**
@@ -256,6 +294,10 @@ trait HasMeta
      */
     public function isValidMetaKey(string $key): bool
     {
+        if ($this->isMetaUnguarded()) {
+            return true;
+        }
+
         if ($this->isExplicitlyAllowedMetaKey($key)) {
             return true;
         }
@@ -264,7 +306,7 @@ trait HasMeta
             return false;
         }
 
-        return !$this->isMetaGuarded();
+        return $this->isMetaWildcardSet();
     }
 
     /**
