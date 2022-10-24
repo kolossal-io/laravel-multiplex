@@ -275,7 +275,7 @@ class HasMetaScopeTest extends TestCase
     {
         Post::factory()
             ->has(Meta::factory()->state(['key' => 'foo', 'value' => '']))
-            ->has(Meta::factory()->state(['key' => 'foo', 'value' => 12]))
+            ->has(Meta::factory()->state(['key' => 'foo', 'value' => 0]))
             ->create(['title' => 'a']);
 
         Post::factory()
