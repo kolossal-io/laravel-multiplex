@@ -230,8 +230,7 @@ trait HasMeta
 
         return $this->explicitlyAllowedMetaKeys = collect($this->getCasts())
             ->filter(fn ($cast) => $cast === MetaAttribute::class)
-            ->flip()
-            ->values()
+            ->keys()
             ->concat($this->getMetaKeys())
             ->filter(fn ($key) => $key !== '*')
             ->unique()

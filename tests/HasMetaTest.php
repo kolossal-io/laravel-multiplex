@@ -1272,4 +1272,23 @@ class HasMetaTest extends TestCase
 
         $this->assertDatabaseCount('meta', 2);
     }
+
+    /** @test */
+    public function it_can_assign_meta_when_creating_by_array()
+    {
+        $this->assertDatabaseCount('meta', 0);
+
+        Post::unguard();
+
+        Post::create([
+            'foo' => 'bar',
+            'title' => 'Title',
+        ]);
+
+        $this->assertDatabaseCount('meta', 1);
+        $this->assertDatabaseHas('sample_posts', ['title' => 'Title']);
+
+        $this->assertSame('Title', Post::first()->title);
+        $this->assertSame('bar', Post::first()->foo);
+    }
 }

@@ -16,9 +16,11 @@ class PostWithExistingColumn extends Model
 
     protected $appends = [
         'title',
+        'body',
     ];
 
     protected $casts = [
         'title' => MetaAttribute::class,
+        'body' => MetaAttribute::class,
     ];
 }

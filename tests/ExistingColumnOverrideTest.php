@@ -383,6 +383,25 @@ class ExistingColumnOverrideTest extends TestCase
         });
     }
 
+    /** @test */
+    public function it_can_assign_meta_when_creating_by_array()
+    {
+        $this->assertDatabaseCount('meta', 0);
+
+        PostWithExistingColumn::unguard();
+
+        PostWithExistingColumn::create([
+            'foo' => 'bar',
+            'title' => 'Title',
+        ]);
+
+        $this->assertDatabaseCount('meta', 2);
+        $this->assertDatabaseHas('sample_posts', ['title' => null]);
+
+        $this->assertSame('Title', PostWithExistingColumn::first()->title);
+        $this->assertSame('bar', PostWithExistingColumn::first()->foo);
+    }
+
     protected function getProtectedProperty($model, string $property)
     {
         $reflectedClass = new ReflectionClass($model);

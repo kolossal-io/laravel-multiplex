@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('sample_posts', function (Blueprint $table) {
             $table->increments('id');
             $table->string('title')->nullable();
+            $table->text('body')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
