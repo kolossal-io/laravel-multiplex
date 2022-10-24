@@ -125,6 +125,28 @@ class Meta extends Model
     }
 
     /**
+     * Query records where value is considered empty.
+     *
+     * @param  Builder  $query
+     * @return void
+     */
+    public function scopeWhereValueEmpty(Builder $query): void
+    {
+        $query->where('value', '=', '');
+    }
+
+    /**
+     * Query records where value is considered not empty.
+     *
+     * @param  Builder  $query
+     * @return void
+     */
+    public function scopeWhereValueNotEmpty(Builder $query): void
+    {
+        $query->where('value', '!=', '');
+    }
+
+    /**
      * Query records where value equals the serialized version of the given value.
      * If `$type` is omited the type will be taken from the data type registry.
      *

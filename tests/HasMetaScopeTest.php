@@ -55,6 +55,8 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereDoesntHaveMeta('three'), 'a,b');
         $this->testScope(Post::whereDoesntHaveMeta('four'), 'a,b,c');
         $this->testScope(Post::whereHasMeta('three')->orWhereDoesntHaveMeta('one'), 'b,c');
+        $this->testScope(Post::whereDoesntHaveMeta(['one', 'two']), 'c');
+        $this->testScope(Post::whereDoesntHaveMeta(['one', 'three']), 'b');
     }
 
     /** @test */
@@ -164,8 +166,8 @@ class HasMetaScopeTest extends TestCase
             ->has(Meta::factory(2)->state(['key' => 'bar', 'value' => -4]))
             ->create(['title' => 'd']);
 
-        $this->testScope(Post::whereRawMeta('foo', ''), 'c');
-        $this->testScope(Post::whereRawMeta('foo', '!=', ''), 'a,b');
+        $this->testScope(Post::whereRawMeta('foo', '0'), 'c');
+        $this->testScope(Post::whereRawMeta('foo', '!=', ''), 'a,b,c');
         $this->testScope(Post::whereRawMeta('foo', '!=', 4), 'b,c');
         $this->testScope(Post::whereRawMeta('foo', '<', '2021-09-01 00:00:00'), 'c');
         $this->testScope(Post::whereRawMeta('foo', '<', '2022-02-01 00:00:00'), 'b,c');
@@ -175,8 +177,9 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereRawMeta('bar', '<', 0), 'd');
         $this->testScope(Post::whereRawMeta('foo', '<=', true), 'c');
         $this->testScope(Post::whereRawMeta('foo', '=', 'true'));
-        $this->testScope(Post::whereRawMeta('foo', '=', ''), 'c');
-        $this->testScope(Post::whereRawMeta('foo', '!=', ''), 'a,b');
+        $this->testScope(Post::whereRawMeta('foo', '=', ''));
+        $this->testScope(Post::whereRawMeta('foo', '=', '0'), 'c');
+        $this->testScope(Post::whereRawMeta('foo', '!=', ''), 'a,b,c');
         $this->testScope(Post::whereRawMeta('foo', '!=', '')->orWhereRawMeta('foo', '<', '0'), 'a,b,c');
     }
 
@@ -265,6 +268,68 @@ class HasMetaScopeTest extends TestCase
 
         $this->testScope(Post::travelTo('-50 hours')->whereMeta('bar', '>=', 123));
         $this->testScope(Post::travelTo('+3 days')->whereMeta('bar', '>=', 123), 'c');
+    }
+
+    /** @test */
+    public function it_scopes_where_meta_empty()
+    {
+        Post::factory()
+            ->has(Meta::factory()->state(['key' => 'foo', 'value' => '']))
+            ->has(Meta::factory()->state(['key' => 'foo', 'value' => 12]))
+            ->create(['title' => 'a']);
+
+        Post::factory()
+            ->has(Meta::factory()->state(['key' => 'foo', 'value' => null]))
+            ->create(['title' => 'b']);
+
+        Post::factory()
+            ->has(Meta::factory()->state(['key' => 'foo', 'value' => '']))
+            ->create(['title' => 'c']);
+
+        Post::factory()
+            ->has(Meta::factory()->state(['key' => 'foo', 'value' => true]))
+            ->has(Meta::factory()->state(['key' => 'foo', 'value' => false]))
+            ->create(['title' => 'd']);
+
+        Post::factory()
+            ->has(Meta::factory()->state(['key' => 'bar', 'value' => true]))
+            ->create(['title' => 'e']);
+
+        $this->testScope(Post::whereMetaEmpty('foo'), 'b,c,e');
+        $this->testScope(Post::whereMeta('foo', false)->orWhereMetaEmpty('bar'), 'a,b,c,d');
+    }
+
+    /** @test */
+    public function it_scopes_where_meta_not_empty()
+    {
+        Post::factory()
+            ->has(Meta::factory()->state(['key' => 'foo', 'value' => '']))
+            ->has(Meta::factory()->state(['key' => 'foo', 'value' => 12]))
+            ->create(['title' => 'a']);
+
+        Post::factory()
+            ->has(Meta::factory()->state(['key' => 'foo', 'value' => null]))
+            ->has(Meta::factory()->state(['key' => 'bar', 'value' => false]))
+            ->create(['title' => 'b']);
+
+        Post::factory()
+            ->has(Meta::factory()->state(['key' => 'foo', 'value' => '']))
+            ->create(['title' => 'c']);
+
+        Post::factory()
+            ->has(Meta::factory()->state(['key' => 'foo', 'value' => true]))
+            ->has(Meta::factory()->state(['key' => 'foo', 'value' => false]))
+            ->has(Meta::factory()->state(['key' => 'bar', 'value' => false]))
+            ->create(['title' => 'd']);
+
+        Post::factory()
+            ->has(Meta::factory()->state(['key' => 'bar', 'value' => true]))
+            ->create(['title' => 'e']);
+
+        $this->testScope(Post::whereMetaNotEmpty('foo'), 'a,d');
+        $this->testScope(Post::whereMeta('foo', false)->orWhereMetaNotEmpty('bar'), 'b,d,e');
+        $this->testScope(Post::whereMetaNotEmpty(['foo', 'bar']), 'd');
+        $this->testScope(Post::whereMetaNotEmpty(['foo', 'bar', 'another']));
     }
 
     protected function seedModels()

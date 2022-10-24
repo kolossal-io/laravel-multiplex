@@ -329,6 +329,17 @@ Post::whereMetaOfType('integer', 'count', '0')->get();
 Post::whereMetaOfType('null', 'foo', '')->get();
 ```
 
+### Querying empty or non-empty Metadata
+
+You can query for empty or non-empty metadata where `null` or empty strings would be considered being empty.
+
+```php
+Post::whereMetaEmpty('favorite_band')->get();
+
+// Get all posts having meta names `likes` and `comments` where *both* of them are not empty.
+Post::whereMetaNotEmpty(['likes', 'comments'])->get();
+```
+
 ## Time Traveling
 
 You can get the metadata for a model at a specific point in time.

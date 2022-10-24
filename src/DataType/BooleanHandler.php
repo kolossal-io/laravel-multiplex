@@ -15,4 +15,12 @@ class BooleanHandler extends ScalarHandler
      * {@inheritdoc}
      */
     protected $type = 'boolean';
+
+    /**
+     * {@inheritdoc}
+     */
+    public function serializeValue($value): string
+    {
+        return $value ? '1' : '0';
+    }
 }

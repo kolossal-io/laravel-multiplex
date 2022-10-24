@@ -2,6 +2,7 @@
 
 namespace Kolossal\Multiplex;
 
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -988,7 +989,7 @@ trait HasMeta
 
         $query->{$method}('allMeta', function (Builder $query) use ($keys) {
             $query->published($this->getMetaTimestamp())->whereIn('key', $keys);
-        });
+        }, '=', count($keys));
     }
 
     /**
@@ -1009,13 +1010,13 @@ trait HasMeta
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
      *
      * @param  Builder  $query
-     * @param  string  $key
+     * @param  string|\Closure  $key
      * @param  mixed  $operator
      * @param  mixed  $value
      * @param  string  $boolean
      * @return void
      */
-    public function scopeWhereMeta(Builder $query, string $key, $operator, $value = null, $boolean = 'and'): void
+    public function scopeWhereMeta(Builder $query, $key, $operator = null, $value = null, $boolean = 'and'): void
     {
         if (!isset($value)) {
             $value = $operator;
@@ -1026,7 +1027,11 @@ trait HasMeta
 
         $query->{$method}('allMeta', function (Builder $query) use ($key, $operator, $value) {
             $query->groupByKeyTakeLatest($this->getMetaTimestamp())
-                ->where('meta.key', $key)->whereValue($value, $operator);
+                ->when(
+                    $key instanceof Closure
+                        ? $key
+                        : fn ($q) => $q->where('meta.key', $key)->whereValue($value, $operator)
+                );
         });
     }
 
@@ -1035,12 +1040,12 @@ trait HasMeta
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
      *
      * @param  Builder  $query
-     * @param  string  $key
+     * @param  string|\Closure  $key
      * @param  mixed  $operator
      * @param  mixed  $value
      * @return void
      */
-    public function scopeOrWhereMeta(Builder $query, string $key, $operator, $value = null): void
+    public function scopeOrWhereMeta(Builder $query, $key, $operator = null, $value = null): void
     {
         $query->whereMeta($key, $operator, $value, 'or');
     }
@@ -1165,5 +1170,68 @@ trait HasMeta
     public function scopeOrWhereMetaIn(Builder $query, string $key, array $values): void
     {
         $query->whereMetaIn($key, $values, 'or');
+    }
+
+    /**
+     * Query records where meta does not exist or is empty.
+     *
+     * @param  Builder  $query
+     * @param  string|array  $key
+     * @param  string  $boolean
+     * @return void
+     */
+    public function scopeWhereMetaEmpty(Builder $query, $key, string $boolean = 'and'): void
+    {
+        $keys = is_array($key) ? $key : [$key];
+
+        $query->where(function (Builder $query) use ($keys) {
+            $query->whereDoesntHaveMeta($keys)->orWhereMeta(
+                fn (Builder $q) => $q->whereIn('meta.key', $keys)->whereValueEmpty()
+            );
+        }, null, null, $boolean);
+    }
+
+    /**
+     * Query records where meta does not exist or is empty with "or" clause.
+     *
+     * @param  Builder  $query
+     * @param  string|array  $key
+     * @return void
+     */
+    public function scopeOrWhereMetaEmpty(Builder $query, $key): void
+    {
+        $query->whereMetaEmpty($key, 'or');
+    }
+
+    /**
+     * Query records where meta exists and is not empty.
+     *
+     * @param  Builder  $query
+     * @param  string|array  $key
+     * @param  string  $boolean
+     * @return void
+     */
+    public function scopeWhereMetaNotEmpty(Builder $query, $key, string $boolean = 'and'): void
+    {
+        $keys = is_array($key) ? $key : [$key];
+        $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
+
+        $query->{$method}('allMeta', function (Builder $query) use ($keys) {
+            $query->groupByKeyTakeLatest($this->getMetaTimestamp())
+                ->whereIn('meta.key', $keys)
+                ->whereValueNotEmpty();
+        }, '=', count($keys));
+    }
+
+    /**
+     * Query records where meta exists and is not empty with "or" clause.
+     *
+     * @param  Builder  $query
+     * @param  string|array  $key
+     * @return void
+     */
+    public function scopeOrWhereMetaNotEmpty(Builder $query, $key): void
+    {
+        $query->whereMetaNotEmpty($key, 'or');
     }
 }
