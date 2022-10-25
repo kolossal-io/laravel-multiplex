@@ -505,7 +505,7 @@ $colors = Post::with('meta')->take(25)->get()->map(
 There is no need to configure anything but if you like, you can publish the config file with:
 
 ```bash
-php artisan vendor:publish --tag="laravel-multiplex-config"
+php artisan vendor:publish --tag="multiplex-config"
 ```
 
 ## Credits

@@ -12,7 +12,7 @@ class MultiplexServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../config/multiplex.php' => config_path('multiplex.php'),
-            ], 'config');
+            ], 'multiplex-config');
         }
 
         if (config('multiplex.migrations', true)) {
