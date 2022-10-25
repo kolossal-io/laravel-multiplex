@@ -136,7 +136,7 @@ class MetaTest extends TestCase
     }
 
     /** @test */
-    public function it_can_determine_if_is_current()
+    public function it_can_determine_if_it_is_current()
     {
         $model = Post::factory()->create();
 
@@ -153,6 +153,22 @@ class MetaTest extends TestCase
         $this->assertFalse($meta->get(1)->is_current);
         $this->assertTrue($meta->get(2)->is_current);
         $this->assertFalse($meta->get(3)->is_current);
+    }
+
+    /** @test */
+    public function it_can_determine_if_it_is_planned()
+    {
+        $model = Post::factory()->create();
+
+        $model->saveMetaAt('foo', 1, '-1 day');
+        $model->saveMeta('foo', 2);
+        $model->saveMetaAt('foo', 3, '+1 day');
+
+        $meta = Meta::orderBy('id')->get();
+
+        $this->assertFalse($meta->get(0)->is_planned);
+        $this->assertFalse($meta->get(1)->is_planned);
+        $this->assertTrue($meta->get(2)->is_planned);
     }
 
     /**

@@ -252,6 +252,15 @@ If you want to inspect _all_ metadata including unpublished records, use the `al
 $post->allMeta->toArray();
 ```
 
+You can determine if a `Meta` instance is the most recent published record for the related model or if it is not yet released.
+
+```php
+$meta = $post->allMeta->first();
+
+$meta->is_current; // (bool)
+$meta->is_planned; // (bool)
+```
+
 ## Query by Metadata
 
 ### Querying Metadata Existence

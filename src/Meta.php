@@ -11,6 +11,12 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Kolossal\Multiplex\DataType\Registry;
 
+/**
+ * Kolossal\Multiplex\Meta
+ *
+ * @property string $key
+ * @property \Carbon\Carbon|null $published_at
+ */
 class Meta extends Model
 {
     use HasFactory;
@@ -128,8 +134,18 @@ class Meta extends Model
     public function getIsCurrentAttribute(): bool
     {
         return $this->metable->meta
-            ?->first(fn ($meta) => $meta->key === $this->key)
-            ?->is($this);
+            ?->first(fn (Meta $meta) => $meta->key === $this->key)
+            ?->is($this) ?? false;
+    }
+
+    /**
+     * Determine if this is a planned record not yet published.
+     *
+     * @return bool
+     */
+    public function getIsPlannedAttribute(): bool
+    {
+        return $this->published_at?->isFuture() ?? false;
     }
 
     /**
