@@ -121,6 +121,18 @@ class Meta extends Model
     }
 
     /**
+     * Determine if this is the most recent meta for this key.
+     *
+     * @return bool
+     */
+    public function getIsCurrentAttribute(): bool
+    {
+        return $this->metable->meta
+            ?->first(fn ($meta) => $meta->key === $this->key)
+            ?->is($this);
+    }
+
+    /**
      * Retrieve the underlying serialized value.
      *
      * @return ?string

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
+use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
 use stdClass;
 
@@ -134,14 +135,32 @@ class MetaTest extends TestCase
         $this->assertEquals('metable_id', $relation->getForeignKeyName());
     }
 
+    /** @test */
+    public function it_can_determine_if_is_current()
+    {
+        $model = Post::factory()->create();
+
+        $model->saveMeta('foo', 1);
+        $model->saveMeta('foo', 2);
+        $model->saveMeta('foo', 3);
+        $model->saveMetaAt('foo', 4, '+1 day');
+
+        $this->assertCount(4, $model->allMeta);
+
+        $meta = Meta::orderBy('id')->get();
+
+        $this->assertFalse($meta->get(0)->is_current);
+        $this->assertFalse($meta->get(1)->is_current);
+        $this->assertTrue($meta->get(2)->is_current);
+        $this->assertFalse($meta->get(3)->is_current);
+    }
+
     /**
      * @test
      * @dataProvider handlerProvider
      */
     public function it_can_store_and_retrieve_datatypes($type, $input)
     {
-        $this->useDatabase();
-
         $meta = Meta::factory()->make([
             'metable_type' => 'Foo\Bar\Model',
             'metable_id' => 1,
@@ -164,8 +183,6 @@ class MetaTest extends TestCase
      */
     public function it_can_query_by_value($type, $input)
     {
-        $this->useDatabase();
-
         $meta = Meta::factory()->make([
             'metable_type' => 'Foo\Bar\Model',
             'metable_id' => 1,
