@@ -40,5 +40,5 @@ interface HandlerInterface
      * @param  string  $serializedValue
      * @return mixed
      */
-    public function unserializeValue(string $serializedValue);
+    public function unserializeValue(?string $serializedValue);
 }

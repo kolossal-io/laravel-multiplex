@@ -204,11 +204,11 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMetaOfType('integer', 'bar', '0'), 'b');
         $this->testScope(Post::whereMeta('foo', null), 'c');
         $this->testScope(Post::whereMetaOfType('boolean', 'foo', null));
-        $this->testScope(Post::whereMetaOfType('null', 'foo', ''), 'c');
+        $this->testScope(Post::whereMetaOfType('null', 'foo', null), 'c');
         $this->testScope(Post::whereMeta('bar', -4), 'd');
         $this->testScope(Post::whereMetaOfType('string', 'bar', -4));
         $this->testScope(Post::whereMetaOfType('integer', 'bar', -4), 'd');
-        $this->testScope(Post::whereMetaOfType('integer', 'bar', -4)->orWhereMetaOfType('null', 'foo', ''), 'c,d');
+        $this->testScope(Post::whereMetaOfType('integer', 'bar', -4)->orWhereMetaOfType('null', 'foo', null), 'c,d');
     }
 
     /** @test */

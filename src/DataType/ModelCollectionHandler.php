@@ -48,8 +48,12 @@ class ModelCollectionHandler implements HandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function unserializeValue(string $value)
+    public function unserializeValue(?string $value)
     {
+        if (is_null($value)) {
+            return $value;
+        }
+
         $data = json_decode($value, true);
 
         $collection = new $data['class']();

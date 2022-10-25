@@ -155,7 +155,7 @@ class MetaTest extends TestCase
 
         $this->assertEquals($type, $meta->type);
         $this->assertEquals($input, $meta->value);
-        $this->assertIsString($meta->raw_value);
+        $this->assertTrue(is_string($meta->raw_value) || is_null($meta->raw_value));
     }
 
     /**

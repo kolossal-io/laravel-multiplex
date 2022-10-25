@@ -199,17 +199,45 @@ trait HasMeta
     }
 
     /**
-     * Get the allowed meta keys for the model.
+     * Get the value from the $metaKeys property if set or a fallback.
      *
-     * @return array<string>
+     * @return array
      */
-    public function getMetaKeys(): array
+    protected function getMetaKeysProperty(): array
     {
         if (property_exists($this, 'metaKeys') && is_array($this->metaKeys)) {
             return $this->metaKeys;
         }
 
         return $this->_metaKeys;
+    }
+
+    /**
+     * Get the allowed meta keys for the model.
+     *
+     * @return array<string>
+     */
+    public function getMetaKeys(): array
+    {
+        return collect($this->getMetaKeysProperty())->map(
+            fn ($value, $key) => is_string($key) ? $key : $value
+        )->toArray();
+    }
+
+    /**
+     * Get the forced typecast for the given meta key if there is any.
+     *
+     * @return ?string
+     */
+    public function getCastForMetaKey(string $key): ?string
+    {
+        /** @var ?string $cast */
+        $cast = with(
+            $this->getMetaKeysProperty(),
+            fn ($metaKeys) => isset($metaKeys[$key]) ? $metaKeys[$key] : null
+        );
+
+        return $cast;
     }
 
     /**
@@ -220,7 +248,11 @@ trait HasMeta
      */
     public function metaKeys(array $metaKeys): static
     {
-        $this->_metaKeys = $metaKeys;
+        if (property_exists($this, 'metaKeys')) {
+            $this->metaKeys = $metaKeys;
+        } else {
+            $this->_metaKeys = $metaKeys;
+        }
 
         $this->getExplicitlyAllowedMetaKeys(false);
 
@@ -628,7 +660,9 @@ trait HasMeta
         }
 
         if (($model = $this->findMeta($key))) {
-            $model->forceFill($attributes);
+            $model
+                ->forceType($this->getCastForMetaKey($key))
+                ->forceFill($attributes);
 
             /**
              * If there already is a persisted meta for the given key, let’s check if the
@@ -645,7 +679,9 @@ trait HasMeta
          * Fill the meta with the given attributes and save the changes in our collection.
          * This will not persist the given meta to the database.
          */
-        return $meta[$key] = (new Meta(['key' => $key]))->forceFill($attributes);
+        return $meta[$key] = (new Meta(['key' => $key]))
+            ->forceType($this->getCastForMetaKey($key))
+            ->forceFill($attributes);
     }
 
     /**

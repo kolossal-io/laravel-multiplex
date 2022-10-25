@@ -421,6 +421,19 @@ class Post extends Model
 
 Trying to assign a value to a meta key that is not allowed will throw a `Kolossal\Multiplex\Exceptions\MetaException`.
 
+## Typecast Meta Keys
+
+Sometimes you may wish to force typecasting of meta attributes. You can bypass guessing the correct type and define which type should be used for specific meta keys.
+
+```php
+protected array $metaKeys = [
+    'foo',
+    'count' => 'integer',
+    'color' => 'string',
+    'hide' => 'boolean',
+];
+```
+
 ## Extending Database Columns
 
 By default Multiplex will not touch columns of your model. But sometimes it might be useful to have meta records as an extension for your existing table columns.

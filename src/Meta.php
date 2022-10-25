@@ -45,6 +45,8 @@ class Meta extends Model
 
     protected $cachedValue;
 
+    protected ?string $forceType = null;
+
     public static function boot()
     {
         parent::boot();
@@ -63,6 +65,19 @@ class Meta extends Model
     public function metable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * Set forced type to be used.
+     *
+     * @param  ?string  $value
+     * @return self
+     */
+    public function forceType(?string $value): self
+    {
+        $this->forceType = $value;
+
+        return $this;
     }
 
     /**
@@ -96,10 +111,11 @@ class Meta extends Model
     {
         $registry = $this->getDataTypeRegistry();
 
-        $this->attributes['type'] = $registry->getTypeForValue($value);
+        $this->attributes['type'] = $this->forceType ?? $registry->getTypeForValue($value);
 
-        $this->attributes['value'] = $registry->getHandlerForType($this->attributes['type'])
-            ->serializeValue($value);
+        $this->attributes['value'] = is_null($value)
+            ? $value
+            : $registry->getHandlerForType($this->attributes['type'])->serializeValue($value);
 
         $this->cachedValue = null;
     }
@@ -107,11 +123,11 @@ class Meta extends Model
     /**
      * Retrieve the underlying serialized value.
      *
-     * @return string
+     * @return ?string
      */
-    public function getRawValueAttribute(): string
+    public function getRawValueAttribute(): ?string
     {
-        return $this->attributes['value'];
+        return $this->attributes['value'] ?? null;
     }
 
     /**
@@ -132,7 +148,7 @@ class Meta extends Model
      */
     public function scopeWhereValueEmpty(Builder $query): void
     {
-        $query->where('value', '=', '');
+        $query->where(fn ($q) => $q->whereNull('value')->orWhere('value', '=', ''));
     }
 
     /**
@@ -143,7 +159,7 @@ class Meta extends Model
      */
     public function scopeWhereValueNotEmpty(Builder $query): void
     {
-        $query->where('value', '!=', '');
+        $query->where(fn ($q) => $q->whereNotNull('value')->where('value', '!=', ''));
     }
 
     /**
@@ -161,7 +177,10 @@ class Meta extends Model
         $registry = $this->getDataTypeRegistry();
 
         $type ??= $registry->getTypeForValue($value);
-        $serializedValue = $registry->getHandlerForType($type)->serializeValue($value);
+
+        $serializedValue = is_null($value)
+            ? $value
+            : $registry->getHandlerForType($type)->serializeValue($value);
 
         $query->where('type', $type)->where('value', $operator, $serializedValue);
     }

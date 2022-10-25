@@ -47,8 +47,12 @@ abstract class ScalarHandler implements HandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function unserializeValue(string $value)
+    public function unserializeValue(?string $value)
     {
+        if (is_null($value)) {
+            return $value;
+        }
+
         settype($value, $this->type);
 
         return $value;

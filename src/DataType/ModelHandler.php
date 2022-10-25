@@ -35,7 +35,7 @@ class ModelHandler implements HandlerInterface
     public function serializeValue($value): string
     {
         if ($value->exists) {
-            return get_class($value).'#'.$value->getKey();
+            return get_class($value) . '#' . $value->getKey();
         }
 
         return get_class($value);
@@ -44,8 +44,12 @@ class ModelHandler implements HandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function unserializeValue(string $value)
+    public function unserializeValue(?string $value)
     {
+        if (is_null($value)) {
+            return $value;
+        }
+
         // Return blank instances.
         if (strpos($value, '#') === false) {
             return new $value();
