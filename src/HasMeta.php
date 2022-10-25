@@ -49,7 +49,7 @@ trait HasMeta
      *
      * @var array
      */
-    protected array $metaSchemaColumnsCache = [];
+    protected static array $metaSchemaColumnsCache = [];
 
     /**
      * Auto-save meta data when model is saved.
@@ -381,15 +381,15 @@ trait HasMeta
     {
         $class = get_class($this);
 
-        if (!isset($this->metaSchemaColumnsCache[$class])) {
-            $this->metaSchemaColumnsCache[$class] = collect(
+        if (!isset(static::$metaSchemaColumnsCache[$class])) {
+            static::$metaSchemaColumnsCache[$class] = collect(
                 $this->getConnection()
                     ->getSchemaBuilder()
                     ->getColumnListing($this->getTable()) ?? []
             )->map(fn ($item) => strtolower($item))->toArray();
         }
 
-        return in_array(strtolower($column), $this->metaSchemaColumnsCache[$class]);
+        return in_array(strtolower($column), static::$metaSchemaColumnsCache[$class]);
     }
 
     /**
@@ -466,6 +466,10 @@ trait HasMeta
      */
     public function getAttribute($key)
     {
+        if (!$this->isValidMetaKey($key)) {
+            return parent::getAttribute($key);
+        }
+
         /**
          * If the given key is not explicitly allowed but exists as a real attribute
          * let’s not try to find a meta value for the given key.
