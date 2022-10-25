@@ -92,7 +92,7 @@ class HasMetaCastTest extends TestCase
         $this->assertSame(0, $model->int);
         $this->assertSame('0', $model->str);
         $this->assertSame(false, $model->bool);
-        $this->assertTrue($model->date->equalTo('1970-01-01'));
+        $this->assertSame('1970-01-01 00:00:00', $model->date->format('Y-m-d H:i:s'));
         $this->assertSame(0.0, $model->dbl);
     }
 
