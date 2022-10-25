@@ -42,6 +42,10 @@ class DateTimeHandler implements HandlerInterface
      */
     public function serializeValue($value): string
     {
+        if ($value === '') {
+            return '';
+        }
+
         return Carbon::parse($value)->format($this->format);
     }
 
@@ -50,8 +54,8 @@ class DateTimeHandler implements HandlerInterface
      */
     public function unserializeValue(?string $value)
     {
-        if (is_null($value)) {
-            return $value;
+        if (is_null($value) || $value === '') {
+            return null;
         }
 
         return Carbon::createFromFormat($this->format, $value);

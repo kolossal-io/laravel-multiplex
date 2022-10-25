@@ -96,6 +96,30 @@ class HasMetaCastTest extends TestCase
         $this->assertSame(0.0, $model->dbl);
     }
 
+    /** @test */
+    public function it_will_handle_empty_values()
+    {
+        $model = $this->getModel();
+
+        $model->forceFill([
+            'foo' => '',
+            'int' => '',
+            'str' => '',
+            'bool' => '',
+            'date' => '',
+            'dbl' => '',
+        ])->save();
+
+        $model->refresh();
+
+        $this->assertSame('', $model->foo);
+        $this->assertSame(0, $model->int);
+        $this->assertSame('', $model->str);
+        $this->assertSame(false, $model->bool);
+        $this->assertNull($model->date?->format('Y-m-d H:i:s'));
+        $this->assertSame(0.0, $model->dbl);
+    }
+
     protected function getModel(): Post
     {
         $model = Post::factory()->create();
