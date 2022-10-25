@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v0.4.2 - 2022-10-25
+
+Experimental release
+
 ## v0.4.1 - 2022-10-25
 
 Experimental release
