@@ -131,4 +131,14 @@ class DataTypeHandlerTest extends TestCase
 
         $this->assertEquals($value, $unserialized);
     }
+
+    /**
+     * @test
+     * @dataProvider handlerProvider
+     */
+    public function it_can_handle_null_values(HandlerInterface $handler)
+    {
+        $unserialized = $handler->unserializeValue(null);
+        $this->assertNull($unserialized);
+    }
 }
