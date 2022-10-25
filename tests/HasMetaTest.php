@@ -1391,4 +1391,28 @@ class HasMetaTest extends TestCase
         $this->assertSame('Title', Post::first()->title);
         $this->assertSame('bar', Post::first()->foo);
     }
+
+    /** @test */
+    public function it_can_get_meta_when_selecting_with_id()
+    {
+        Post::factory(2)->has(Meta::factory()->state(['key' => 'foo']))->create();
+
+        $this->assertDatabaseCount('sample_posts', 2);
+
+        $this->assertEquals(2, Post::select('id', 'title')->get()->filter(function ($model) {
+            return $model->foo;
+        })->count());
+    }
+
+    /** @test */
+    public function it_cannot_get_meta_when_selecting_without_id()
+    {
+        Post::factory(2)->has(Meta::factory()->state(['key' => 'foo']))->create();
+
+        $this->assertDatabaseCount('sample_posts', 2);
+
+        $this->assertEquals(0, Post::select('title')->get()->filter(function ($model) {
+            return $model->foo;
+        })->count());
+    }
 }

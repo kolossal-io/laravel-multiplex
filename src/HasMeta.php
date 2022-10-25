@@ -525,7 +525,7 @@ trait HasMeta
      */
     public function findMeta($key): ?Meta
     {
-        if (!$this->exists) {
+        if (!$this->exists || !isset($this->id)) {
             return null;
         }
 
