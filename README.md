@@ -402,6 +402,23 @@ You can also change the allowed meta keys dynamically.
 $model->metaKeys(['color', 'hide']);
 ```
 
+You might as well cast your attributes using the `MetaAttribute` cast which will automatically allow the attribute being used as a meta key.
+
+```php
+use Kolossal\Multiplex\MetaAttribute;
+
+class Post extends Model
+{
+    use HasMeta;
+
+    protected $metaKeys = [];
+
+    protected $casts = [
+        'body' => MetaAttribute::class,
+    ];
+}
+```
+
 Trying to assign a value to a meta key that is not allowed will throw a `Kolossal\Multiplex\Exceptions\MetaException`.
 
 ## Extending Database Columns
@@ -439,25 +456,6 @@ $post->body; // A body.
 ```
 
 In case of using Multiplex for extending table columns, Multiplex will remove the original column when retrieving models from the database so you don’t get stale data.
-
-If you want to still have those fields on your model, i. e. when calling the `toArray()` method, you can add the fields to `$appends` and cast them using the `MetaAttribute` Cast.
-
-```php
-class Post extends Model
-{
-    use HasMeta;
-
-    protected $appends = [
-        'body',
-    ];
-
-    protected $casts = [
-        'body' => MetaAttribute::class,
-    ];
-}
-```
-
-**Note** that casting an attribute to `MetaAttribute::class` on your model will also add the attribute to the valid meta keys `$metaKeys`.
 
 ## Deleting Metadata
 
