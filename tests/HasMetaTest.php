@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Kolossal\Multiplex\Exceptions\MetaException;
 use Kolossal\Multiplex\Meta;
+use Kolossal\Multiplex\MetaAttribute;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\PostWithoutSoftDelete;
@@ -154,6 +155,60 @@ class HasMetaTest extends TestCase
         $model->save();
 
         $this->assertDatabaseCount('meta', 2);
+    }
+
+    /** @test */
+    public function it_will_use_meta_keys_from_property()
+    {
+        /** @var PostWithoutSoftDelete */
+        $model = $this->partialMock(PostWithoutSoftDelete::class, function ($mock) {
+            $reflectionClass = new \ReflectionClass($mock);
+
+            tap($reflectionClass->getProperty('metaKeys'), function ($property) use ($mock) {
+                $property->setAccessible(true);
+                $property->setValue($mock, ['foo', 'bar']);
+            });
+
+            tap($reflectionClass->getProperty('casts'), function ($property) use ($mock) {
+                $property->setAccessible(true);
+                $property->setValue($mock, ['title' => MetaAttribute::class]);
+            });
+        });
+
+        $this->assertEquals(['foo', 'bar'], $model->metaKeys());
+        $this->assertEquals(['title', 'foo', 'bar'], $model->getExplicitlyAllowedMetaKeys());
+    }
+
+    /** @test */
+    public function it_will_use_meta_keys_from_method()
+    {
+        /** @var PostWithoutSoftDelete */
+        $model = $this->partialMock(PostWithoutSoftDelete::class, function ($mock) {
+            $reflectionClass = new \ReflectionClass($mock);
+
+            tap($reflectionClass->getProperty('metaKeys'), function ($property) use ($mock) {
+                $property->setAccessible(true);
+                $property->setValue($mock, ['foo']);
+            });
+
+            tap($reflectionClass->getProperty('casts'), function ($property) use ($mock) {
+                $property->setAccessible(true);
+                $property->setValue($mock, ['title' => MetaAttribute::class]);
+            });
+        });
+
+        $model->metaKeys(['bar']);
+
+        $this->assertEquals(['bar'], $model->metaKeys());
+        $this->assertEquals(['title', 'bar'], $model->getExplicitlyAllowedMetaKeys());
+    }
+
+    /** @test */
+    public function it_will_use_default_meta_keys_as_fallback()
+    {
+        $model = Post::factory()->create();
+        $this->assertEquals(['*'], $model->metaKeys());
+        $this->assertEquals(['appendable_foo'], $model->getExplicitlyAllowedMetaKeys());
     }
 
     /** @test */

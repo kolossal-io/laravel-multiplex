@@ -241,13 +241,17 @@ trait HasMeta
     }
 
     /**
-     * Set the allowed meta keys for the model.
+     * Get or set the allowed meta keys for the model.
      *
-     * @param  array<string>  $fillable
+     * @param  array<string>|null  $fillable
      * @return $this
      */
-    public function metaKeys(array $metaKeys): static
+    public function metaKeys(?array $metaKeys = null): array
     {
+        if (!$metaKeys) {
+            return $this->getMetaKeysProperty();
+        }
+
         if (property_exists($this, 'metaKeys')) {
             $this->metaKeys = $metaKeys;
         } else {
@@ -256,7 +260,7 @@ trait HasMeta
 
         $this->getExplicitlyAllowedMetaKeys(false);
 
-        return $this;
+        return $this->getMetaKeysProperty();
     }
 
     /**
