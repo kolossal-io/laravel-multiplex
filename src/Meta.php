@@ -14,8 +14,41 @@ use Kolossal\Multiplex\DataType\Registry;
 /**
  * Kolossal\Multiplex\Meta
  *
+ * @property int $id
+ * @property string $metable_type
+ * @property int $metable_id
  * @property string $key
- * @property \Carbon\Carbon|null $published_at
+ * @property mixed $value
+ * @property string|null $type
+ * @property Carbon|null $published_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read bool $is_current
+ * @property-read bool $is_planned
+ * @property-read ?string $raw_value
+ * @property-read MorphTo $metable
+ *
+ * @method static Builder|Meta joinLatest($now = null, string $operator = '=')
+ * @method static Builder|Meta newModelQuery()
+ * @method static Builder|Meta newQuery()
+ * @method static Builder|Meta onlyCurrent($now = null)
+ * @method static Builder|Meta published()
+ * @method static Builder|Meta publishedBefore($time = null)
+ * @method static Builder|Meta query()
+ * @method static Builder|Meta whereCreatedAt($value)
+ * @method static Builder|Meta whereId($value)
+ * @method static Builder|Meta whereKey($value)
+ * @method static Builder|Meta whereMetableId($value)
+ * @method static Builder|Meta whereMetableType($value)
+ * @method static Builder|Meta wherePublishedAt($value)
+ * @method static Builder|Meta whereType($value)
+ * @method static Builder|Meta whereUpdatedAt($value)
+ * @method static Builder|Meta whereValue($value)
+ * @method static Builder|Meta whereValueEmpty()
+ * @method static Builder|Meta whereValueIn(array $values, ?string $type = null)
+ * @method static Builder|Meta whereValueNotEmpty()
+ * @method static Builder|Meta withoutCurrent($now = null)
+ * @mixin \Eloquent
  */
 class Meta extends Model
 {
@@ -133,6 +166,7 @@ class Meta extends Model
      */
     public function getIsCurrentAttribute(): bool
     {
+        /** @phpstan-ignore-next-line  */
         return $this->metable->meta
             ?->first(fn (Meta $meta) => $meta->key === $this->key)
             ?->is($this) ?? false;
@@ -217,7 +251,7 @@ class Meta extends Model
      * Query records where value equals the serialized version of one of the given values.
      * If `$type` is omited the type will be taken from the data type registry.
      *
-     * @param  Builder  $query
+     * @param  Builder<Meta>  $query
      * @param  array  $values
      * @param  ?string  $type
      * @return void
@@ -245,7 +279,7 @@ class Meta extends Model
     /**
      * Query published meta only.
      *
-     * @param  Builder  $query
+     * @param  Builder<Meta>  $query
      * @return void
      */
     public function scopePublished(Builder $query): void
@@ -256,8 +290,8 @@ class Meta extends Model
     /**
      * Query meta published before given timestamp.
      *
-     * @param  Builder  $query
-     * @param  string|DateTimeInterface|null  $time
+     * @param  Builder<Meta>  $query
+     * @param  string|\DateTimeInterface|null  $time
      * @return void
      */
     public function scopePublishedBefore(Builder $query, $time = null): void
@@ -268,8 +302,8 @@ class Meta extends Model
     /**
      * Query records not being the latest meta for any key.
      *
-     * @param  Builder  $query
-     * @param  string|DateTimeInterface|null  $now
+     * @param  Builder<Meta>  $query
+     * @param  string|\DateTimeInterface|null  $now
      * @return void
      */
     public function scopeWithoutCurrent(Builder $query, $now = null): void
@@ -280,8 +314,8 @@ class Meta extends Model
     /**
      * Query only the latest meta for any key.
      *
-     * @param  Builder  $query
-     * @param  string|DateTimeInterface|null  $now
+     * @param  Builder<Meta>  $query
+     * @param  string|\DateTimeInterface|null  $now
      * @return void
      */
     public function scopeOnlyCurrent(Builder $query, $now = null): void
@@ -293,8 +327,8 @@ class Meta extends Model
      * Add a join to find only records matching or not matching the latest published record per key.
      * Will only query for meta records from the past by default.
      *
-     * @param  Builder  $query
-     * @param  string|DateTimeInterface|null  $now
+     * @param  Builder<Meta>  $query
+     * @param  string|\DateTimeInterface|null  $now
      * @param  string  $operator
      * @return void
      */
