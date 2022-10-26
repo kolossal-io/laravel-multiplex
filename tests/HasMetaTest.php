@@ -11,6 +11,7 @@ use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\MetaAttribute;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
 use Kolossal\Multiplex\Tests\Mocks\Post;
+use Kolossal\Multiplex\Tests\Mocks\PostWithExistingColumn;
 use Kolossal\Multiplex\Tests\Mocks\PostWithoutSoftDelete;
 use PDOException;
 
@@ -1414,5 +1415,35 @@ class HasMetaTest extends TestCase
         $this->assertEquals(0, Post::select('title')->get()->filter(function ($model) {
             return $model->foo;
         })->count());
+    }
+
+    /** @test */
+    public function it_can_pluck_meta_values()
+    {
+        $a = Post::factory()->create();
+        $b = PostWithExistingColumn::factory()->create();
+
+        $a->metaKeys([
+            'foo',
+            'bar',
+        ]);
+
+        $a->saveMeta('foo', 'bar');
+
+        $b->title = 'Title';
+        $b->another = 123;
+        $b->save();
+
+        $this->assertEquals([
+            'appendable_foo' => null,
+            'foo' => 'bar',
+            'bar' => null,
+        ], $a->pluckMeta()->toArray());
+
+        $this->assertEquals([
+            'title' => 'Title',
+            'body' => null,
+            'another' => 123,
+        ], $b->pluckMeta()->toArray());
     }
 }

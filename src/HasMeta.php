@@ -462,6 +462,18 @@ trait HasMeta
     }
 
     /**
+     * Get all meta values as a key => value collection.
+     *
+     * @return  Collection
+     */
+    public function pluckMeta(): Collection
+    {
+        return collect($this->getExplicitlyAllowedMetaKeys())
+            ->mapWithKeys(fn ($key) => [$key => null])
+            ->merge($this->meta->pluck('value', 'key'));
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function getAttribute($key)

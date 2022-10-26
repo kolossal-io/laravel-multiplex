@@ -239,6 +239,27 @@ $post->meta->pluck('value', 'key');
  */
 ```
 
+There is a shorthand to pluck all the current meta data attached to the model. This will include all [explicitly defined meta keys](#limit-meta-keys) with a default of `null`.
+
+```php
+// Allow any meta key and explicitly allow `foo` and `bar`.
+$post->metaKeys(['*', 'foo', 'bar']);
+
+$post->saveMeta('foo', 'a value');
+$post->saveMeta('another', true);
+
+$post->pluckMeta();
+/**
+ * Illuminate\Support\Collection {
+ *   all: [
+ *     "foo" => "a value",
+ *     "bar" => null,
+ *     "another" => true,
+ *   ],
+ * }
+ */
+```
+
 If you instead want to retrieve all meta that was published yet, use the `publishedMeta` relation.
 
 ```php
