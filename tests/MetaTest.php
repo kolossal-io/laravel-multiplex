@@ -171,6 +171,88 @@ class MetaTest extends TestCase
         $this->assertTrue($meta->get(2)->is_planned);
     }
 
+    /** @test */
+    public function it_can_query_published_meta()
+    {
+        $model = Post::factory()->create();
+
+        $model->saveMetaAt('foo', 1, '-1 day');
+        $model->saveMeta('foo', 2);
+        $model->saveMetaAt('foo', 3, '+1 day');
+
+        $meta = Meta::published()->get();
+
+        $this->assertCount(2, $meta);
+        $this->assertContains(1, $meta->pluck('value'));
+        $this->assertContains(2, $meta->pluck('value'));
+        $this->assertNotContains(3, $meta->pluck('value'));
+    }
+
+    /** @test */
+    public function it_can_query_published_meta_by_date()
+    {
+        $model = Post::factory()->create();
+
+        $model->saveMetaAt('foo', 1, '-1 day');
+        $model->saveMeta('foo', 2);
+        $model->saveMetaAt('foo', 3, '+1 day');
+
+        $meta = Meta::publishedBefore('-1 minute')->get();
+
+        $this->assertCount(1, $meta);
+        $this->assertContains(1, $meta->pluck('value'));
+        $this->assertNotContains(2, $meta->pluck('value'));
+        $this->assertNotContains(3, $meta->pluck('value'));
+    }
+
+    /** @test */
+    public function it_can_exclude_current()
+    {
+        $model = Post::factory()->create();
+
+        $model->saveMetaAt('foo', 1, '-1 day');
+        $model->saveMeta('foo', 2);
+        $model->saveMetaAt('foo', 3, '+1 day');
+
+        $meta = Meta::withoutCurrent()->get();
+
+        $this->assertCount(2, $meta);
+        $this->assertContains(1, $meta->pluck('value'));
+        $this->assertNotContains(2, $meta->pluck('value'));
+        $this->assertContains(3, $meta->pluck('value'));
+
+        $meta = Meta::withoutCurrent('-15 minutes')->get();
+
+        $this->assertCount(2, $meta);
+        $this->assertNotContains(1, $meta->pluck('value'));
+        $this->assertContains(2, $meta->pluck('value'));
+        $this->assertContains(3, $meta->pluck('value'));
+    }
+
+    /** @test */
+    public function it_can_include_only_current()
+    {
+        $model = Post::factory()->create();
+
+        $model->saveMetaAt('foo', 1, '-1 day');
+        $model->saveMeta('foo', 2);
+        $model->saveMetaAt('foo', 3, '+1 day');
+
+        $meta = Meta::onlyCurrent()->get();
+
+        $this->assertCount(1, $meta);
+        $this->assertNotContains(1, $meta->pluck('value'));
+        $this->assertContains(2, $meta->pluck('value'));
+        $this->assertNotContains(3, $meta->pluck('value'));
+
+        $meta = Meta::onlyCurrent('-15 minutes')->get();
+
+        $this->assertCount(1, $meta);
+        $this->assertContains(1, $meta->pluck('value'));
+        $this->assertNotContains(2, $meta->pluck('value'));
+        $this->assertNotContains(3, $meta->pluck('value'));
+    }
+
     /**
      * @test
      * @dataProvider handlerProvider

@@ -425,7 +425,7 @@ trait HasMeta
      */
     public function publishedMeta(): MorphMany
     {
-        return $this->allMeta()->published($this->getMetaTimestamp());
+        return $this->allMeta()->publishedBefore($this->getMetaTimestamp());
     }
 
     /**
@@ -436,7 +436,7 @@ trait HasMeta
      */
     public function meta(): MorphMany
     {
-        return $this->allMeta()->groupByKeyTakeLatest($this->getMetaTimestamp());
+        return $this->allMeta()->onlyCurrent($this->getMetaTimestamp());
     }
 
     /**
@@ -1012,7 +1012,7 @@ trait HasMeta
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
         $query->{$method}('allMeta', function (Builder $query) use ($keys) {
-            $query->published($this->getMetaTimestamp())->whereIn('key', $keys);
+            $query->publishedBefore($this->getMetaTimestamp())->whereIn('key', $keys);
         });
     }
 
@@ -1044,7 +1044,7 @@ trait HasMeta
         $method = $boolean === 'or' ? 'orWhereDoesntHave' : 'whereDoesntHave';
 
         $query->{$method}('allMeta', function (Builder $query) use ($keys) {
-            $query->published($this->getMetaTimestamp())->whereIn('key', $keys);
+            $query->publishedBefore($this->getMetaTimestamp())->whereIn('key', $keys);
         }, '=', count($keys));
     }
 
@@ -1082,7 +1082,7 @@ trait HasMeta
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
         $query->{$method}('allMeta', function (Builder $query) use ($key, $operator, $value) {
-            $query->groupByKeyTakeLatest($this->getMetaTimestamp())
+            $query->onlyCurrent($this->getMetaTimestamp())
                 ->when(
                     $key instanceof Closure
                         ? $key
@@ -1128,7 +1128,7 @@ trait HasMeta
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
         $query->{$method}('allMeta', function (Builder $query) use ($key, $operator, $value) {
-            $query->groupByKeyTakeLatest($this->getMetaTimestamp())
+            $query->onlyCurrent($this->getMetaTimestamp())
                 ->where('meta.key', $key)->where('value', $operator, $value);
         });
     }
@@ -1173,7 +1173,7 @@ trait HasMeta
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
         $query->{$method}('allMeta', function (Builder $query) use ($type, $key, $operator, $value) {
-            $query->groupByKeyTakeLatest($this->getMetaTimestamp())
+            $query->onlyCurrent($this->getMetaTimestamp())
                 ->where('meta.key', $key)->whereValue($value, $operator, $type);
         });
     }
@@ -1210,7 +1210,7 @@ trait HasMeta
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
         $query->{$method}('allMeta', function (Builder $query) use ($key, $values) {
-            $query->groupByKeyTakeLatest($this->getMetaTimestamp())
+            $query->onlyCurrent($this->getMetaTimestamp())
                 ->where('meta.key', $key)->whereValueIn($values);
         });
     }
@@ -1273,7 +1273,7 @@ trait HasMeta
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
         $query->{$method}('allMeta', function (Builder $query) use ($keys) {
-            $query->groupByKeyTakeLatest($this->getMetaTimestamp())
+            $query->onlyCurrent($this->getMetaTimestamp())
                 ->whereIn('meta.key', $keys)
                 ->whereValueNotEmpty();
         }, '=', count($keys));

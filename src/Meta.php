@@ -30,7 +30,7 @@ class Meta extends Model
     ];
 
     /**
-     * Hide the aggregate columns from our custom join scope `scopeGroupByKeyTakeLatest()`.
+     * Hide the aggregate columns from our custom join scope `scopeJoinLatest()`.
      *
      * @var array<int, string>
      */
@@ -246,23 +246,59 @@ class Meta extends Model
      * Query published meta only.
      *
      * @param  Builder  $query
-     * @param  Carbon|null  $now
      * @return void
      */
-    public function scopePublished(Builder $query, ?Carbon $now = null): void
+    public function scopePublished(Builder $query): void
     {
-        $query->where('meta.published_at', '<=', $now ?? Carbon::now());
+        $query->publishedBefore();
+    }
+
+    /**
+     * Query meta published before given timestamp.
+     *
+     * @param  Builder  $query
+     * @param  string|DateTimeInterface|null  $time
+     * @return void
+     */
+    public function scopePublishedBefore(Builder $query, $time = null): void
+    {
+        $query->where('meta.published_at', '<=', $time ? Carbon::parse($time) : Carbon::now());
+    }
+
+    /**
+     * Query records not being the latest meta for any key.
+     *
+     * @param  Builder  $query
+     * @param  string|DateTimeInterface|null  $now
+     * @return void
+     */
+    public function scopeWithoutCurrent(Builder $query, $now = null): void
+    {
+        $query->joinLatest($now, '!=');
     }
 
     /**
      * Query only the latest meta for any key.
+     *
+     * @param  Builder  $query
+     * @param  string|DateTimeInterface|null  $now
+     * @return void
+     */
+    public function scopeOnlyCurrent(Builder $query, $now = null): void
+    {
+        $query->joinLatest($now);
+    }
+
+    /**
+     * Add a join to find only records matching or not matching the latest published record per key.
      * Will only query for meta records from the past by default.
      *
      * @param  Builder  $query
-     * @param  Carbon|null  $now
+     * @param  string|DateTimeInterface|null  $now
+     * @param  string  $operator
      * @return void
      */
-    public function scopeGroupByKeyTakeLatest(Builder $query, ?Carbon $now = null): void
+    public function scopeJoinLatest(Builder $query, $now = null, string $operator = '='): void
     {
         /**
          * Create a subquery based on the given query and find the most recent publishing
@@ -270,7 +306,7 @@ class Meta extends Model
          */
         $latestPublishAt = $query->clone()
             ->select('key', DB::raw('MAX(published_at) as published_at_aggregate'))
-            ->where('published_at', '<=', $now ?? Carbon::now())
+            ->publishedBefore($now)
             ->groupBy('key');
 
         /**
@@ -285,8 +321,8 @@ class Meta extends Model
          * Now that we have subqueries to join let’s build the complete query
          * and look for the record that matches the most recent entry for every `key`.
          */
-        $query->joinSub($maxId, 'max_id', function ($join) use ($latestPublishAt) {
-            $join->on('meta.id', '=', 'max_id.id_aggregate')
+        $query->joinSub($maxId, 'max_id', function ($join) use ($latestPublishAt, $operator) {
+            $join->on('meta.id', $operator, 'max_id.id_aggregate')
                 ->joinSub($latestPublishAt, 'max_published_at', function ($join) {
                     $join->on('max_id.published_at', '=', 'max_published_at.published_at_aggregate')
                         ->on('max_id.key_aggregate', '=', 'max_published_at.key');
