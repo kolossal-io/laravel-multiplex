@@ -28,7 +28,7 @@ use Kolossal\Multiplex\DataType\Registry;
  * @property-read ?string $raw_value
  * @property-read MorphTo $metable
  *
- * @method static Builder|Meta joinLatest($now = null, string $operator = '=')
+ * @method static Builder|Meta joinLatest($now = null)
  * @method static Builder|Meta newModelQuery()
  * @method static Builder|Meta newQuery()
  * @method static Builder|Meta onlyCurrent($now = null)
@@ -308,7 +308,7 @@ class Meta extends Model
      */
     public function scopeWithoutCurrent(Builder $query, $now = null): void
     {
-        $query->joinLatest($now, '!=');
+        $query->whereNotIn('id', $query->clone()->joinLatest($now)->select('meta.id'));
     }
 
     /**
@@ -329,10 +329,9 @@ class Meta extends Model
      *
      * @param  Builder<Meta>  $query
      * @param  string|\DateTimeInterface|null  $now
-     * @param  string  $operator
      * @return void
      */
-    public function scopeJoinLatest(Builder $query, $now = null, string $operator = '='): void
+    public function scopeJoinLatest(Builder $query, $now = null): void
     {
         /**
          * Create a subquery based on the given query and find the most recent publishing
@@ -355,8 +354,8 @@ class Meta extends Model
          * Now that we have subqueries to join let’s build the complete query
          * and look for the record that matches the most recent entry for every `key`.
          */
-        $query->joinSub($maxId, 'max_id', function ($join) use ($latestPublishAt, $operator) {
-            $join->on('meta.id', $operator, 'max_id.id_aggregate')
+        $query->joinSub($maxId, 'max_id', function ($join) use ($latestPublishAt) {
+            $join->on('meta.id', '=', 'max_id.id_aggregate')
                 ->joinSub($latestPublishAt, 'max_published_at', function ($join) {
                     $join->on('max_id.published_at', '=', 'max_published_at.published_at_aggregate')
                         ->on('max_id.key_aggregate', '=', 'max_published_at.key');
