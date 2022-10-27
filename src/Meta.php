@@ -334,7 +334,7 @@ class Meta extends Model
      */
     public function scopeWithoutCurrent(Builder $query, $now = null): void
     {
-        $query->whereNotIn('id', $query->clone()->joinLatest($now)->select('meta.id'));
+        $query->whereNotIn('id', static::query()->joinLatest($now)->select('meta.id'));
     }
 
     /**
@@ -346,11 +346,9 @@ class Meta extends Model
      */
     public function scopeWithoutHistory(Builder $query, $now = null): void
     {
-        $currentMetaIds = $query->clone()->joinLatest($now)->select('meta.id');
-
-        $query->where(function ($query) use ($currentMetaIds, $now) {
+        $query->where(function ($query) use ($now) {
             $query->publishedAfter($now)
-                ->orWhereIn('id', $currentMetaIds);
+                ->orWhereIn('id', static::query()->joinLatest($now)->select('meta.id'));
         });
     }
 
