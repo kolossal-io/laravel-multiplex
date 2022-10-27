@@ -282,6 +282,36 @@ $meta->is_current; // (bool)
 $meta->is_planned; // (bool)
 ```
 
+### Querying `Meta` Model
+
+There are also some query scopes on the `Meta` model itself that may be helpful.
+
+```php
+Meta::published()->get(); // Only current and historic meta.
+
+Meta::planned()->get(); // Only meta not yet published.
+
+Meta::publishedBefore('+1 week')->get(); // Only meta published by next week.
+
+Meta::publishedAfter('+1 week')->get(); // Only meta still unpublished in a week.
+
+Meta::onlyCurrent()->get(); // Only current meta without planned or historic data.
+
+Meta::withoutHistory()->get(); // Query without stale records.
+
+Meta::withoutCurrent()->get(); // Query without current records.
+```
+
+By default these functions will use `Carbon::now()` to determine what metadata is considered the most recent, but you can also pass a datetime to look from.
+
+```php
+// Get records that have been current a month ago.
+Meta::onlyCurrent('-1 month')->get();
+
+// Get records that will not be history by tommorow.
+Meta::withoutHistory(Carbon::now()->addDay())->get();
+```
+
 ## Query by Metadata
 
 ### Querying Metadata Existence

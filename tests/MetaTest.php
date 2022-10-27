@@ -176,12 +176,14 @@ class MetaTest extends TestCase
     {
         $model = Post::factory()->create();
 
+        Post::factory()->create()->saveMeta('foo', 'another');
+
         $model->saveMetaAt('bar', 'foo', '-2 days');
         $model->saveMetaAt('foo', 1, '-1 day');
         $model->saveMeta('foo', 2);
         $model->saveMetaAt('foo', 3, '+1 day');
 
-        $meta = Meta::published()->get()->pluck('value');
+        $meta = Meta::published()->whereMetableId($model->id)->get()->pluck('value');
 
         $this->assertCount(3, $meta);
         $this->assertContains('foo', $meta);
@@ -191,16 +193,37 @@ class MetaTest extends TestCase
     }
 
     /** @test */
+    public function it_can_query_unpublished_meta()
+    {
+        $model = Post::factory()->create();
+
+        Post::factory()->create()->saveMeta('foo', 'another');
+
+        $model->saveMetaAt('foo', 1, '-1 day');
+        $model->saveMeta('foo', 2);
+        $model->saveMetaAt('foo', 3, '+1 day');
+        $model->saveMetaAt('bar', 'foo', '+2 days');
+
+        $meta = Meta::planned()->whereMetableId($model->id)->get()->pluck('value');
+
+        $this->assertCount(2, $meta);
+        $this->assertContains(3, $meta);
+        $this->assertContains('foo', $meta);
+    }
+
+    /** @test */
     public function it_can_query_published_meta_by_date()
     {
         $model = Post::factory()->create();
+
+        Post::factory()->create()->saveMeta('foo', 'another');
 
         $model->saveMetaAt('bar', 'foo', '-2 days');
         $model->saveMetaAt('foo', 1, '-1 day');
         $model->saveMeta('foo', 2);
         $model->saveMetaAt('foo', 3, '+1 day');
 
-        $meta = Meta::publishedBefore('-1 minute')->get()->pluck('value');
+        $meta = Meta::publishedBefore('-1 minute')->whereMetableId($model->id)->get()->pluck('value');
 
         $this->assertCount(2, $meta);
         $this->assertContains('foo', $meta);
@@ -214,13 +237,15 @@ class MetaTest extends TestCase
     {
         $model = Post::factory()->create();
 
+        Post::factory()->create()->saveMeta('foo', 'another');
+
         $model->saveMetaAt('bar', 'old', '-3 days');
         $model->saveMetaAt('bar', 'foo', '-2 days');
         $model->saveMetaAt('foo', 1, '-1 day');
         $model->saveMeta('foo', 2);
         $model->saveMetaAt('foo', 3, '+1 day');
 
-        $meta = Meta::withoutCurrent()->get()->pluck('value');
+        $meta = Meta::withoutCurrent()->whereMetableId($model->id)->get()->pluck('value');
 
         $this->assertCount(3, $meta);
         $this->assertContains('old', $meta);
@@ -229,7 +254,8 @@ class MetaTest extends TestCase
         $this->assertNotContains(2, $meta);
         $this->assertContains(3, $meta);
 
-        $meta = Meta::withoutCurrent('-15 minutes')->get()->pluck('value');
+        $meta = Meta::withoutCurrent('-15 minutes')
+            ->whereMetableId($model->id)->get()->pluck('value');
 
         $this->assertCount(3, $meta);
         $this->assertContains('old', $meta);
@@ -238,7 +264,8 @@ class MetaTest extends TestCase
         $this->assertContains(2, $meta);
         $this->assertContains(3, $meta);
 
-        $meta = Meta::withoutCurrent('-50 hours')->get()->pluck('value');
+        $meta = Meta::withoutCurrent('-50 hours')
+            ->whereMetableId($model->id)->get()->pluck('value');
 
         $this->assertCount(4, $meta);
         $this->assertNotContains('old', $meta);
@@ -249,9 +276,52 @@ class MetaTest extends TestCase
     }
 
     /** @test */
+    public function it_can_exclude_history()
+    {
+        $model = Post::factory()->create();
+
+        Post::factory()->create()->saveMeta('foo', 'another');
+
+        $model->saveMetaAt('bar', 'old', '-3 days');
+        $model->saveMetaAt('bar', 'foo', '-2 days');
+        $model->saveMetaAt('foo', 1, '-1 day');
+        $model->saveMeta('foo', 2);
+        $model->saveMetaAt('foo', 3, '+1 day');
+
+        $meta = Meta::withoutHistory()
+            ->whereMetableId($model->id)->get()->pluck('value');
+
+        $this->assertCount(3, $meta);
+        $this->assertContains('foo', $meta);
+        $this->assertContains(2, $meta);
+        $this->assertContains(3, $meta);
+
+        $meta = Meta::withoutHistory('-15 minutes')
+            ->whereMetableId($model->id)->get()->pluck('value');
+
+        $this->assertCount(4, $meta);
+        $this->assertContains('foo', $meta);
+        $this->assertContains(1, $meta);
+        $this->assertContains(2, $meta);
+        $this->assertContains(3, $meta);
+
+        $meta = Meta::withoutHistory('-50 hours')
+            ->whereMetableId($model->id)->get()->pluck('value');
+
+        $this->assertCount(5, $meta);
+        $this->assertContains('old', $meta);
+        $this->assertContains('foo', $meta);
+        $this->assertContains(1, $meta);
+        $this->assertContains(2, $meta);
+        $this->assertContains(3, $meta);
+    }
+
+    /** @test */
     public function it_can_include_only_current()
     {
         $model = Post::factory()->create();
+
+        Post::factory()->create()->saveMeta('foo', 'another');
 
         $model->saveMetaAt('foo', 1, '-1 day');
         $model->saveMeta('foo', 2);

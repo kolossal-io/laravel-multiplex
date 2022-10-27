@@ -33,7 +33,9 @@ use Kolossal\Multiplex\DataType\Registry;
  * @method static Builder|Meta newQuery()
  * @method static Builder|Meta onlyCurrent($now = null)
  * @method static Builder|Meta published()
+ * @method static Builder|Meta planned()
  * @method static Builder|Meta publishedBefore($time = null)
+ * @method static Builder|Meta publishedAfter($time = null)
  * @method static Builder|Meta query()
  * @method static Builder|Meta whereCreatedAt($value)
  * @method static Builder|Meta whereId($value)
@@ -48,6 +50,7 @@ use Kolossal\Multiplex\DataType\Registry;
  * @method static Builder|Meta whereValueIn(array $values, ?string $type = null)
  * @method static Builder|Meta whereValueNotEmpty()
  * @method static Builder|Meta withoutCurrent($now = null)
+ * @method static Builder|Meta withoutHistory($now = null)
  * @mixin \Eloquent
  */
 class Meta extends Model
@@ -300,6 +303,29 @@ class Meta extends Model
     }
 
     /**
+     * Query planned meta only.
+     *
+     * @param  Builder<Meta>  $query
+     * @return void
+     */
+    public function scopePlanned(Builder $query): void
+    {
+        $query->publishedAfter();
+    }
+
+    /**
+     * Query meta published after given timestamp.
+     *
+     * @param  Builder<Meta>  $query
+     * @param  string|\DateTimeInterface|null  $time
+     * @return void
+     */
+    public function scopePublishedAfter(Builder $query, $time = null): void
+    {
+        $query->where('meta.published_at', '>', $time ? Carbon::parse($time) : Carbon::now());
+    }
+
+    /**
      * Query records not being the latest meta for any key.
      *
      * @param  Builder<Meta>  $query
@@ -309,6 +335,23 @@ class Meta extends Model
     public function scopeWithoutCurrent(Builder $query, $now = null): void
     {
         $query->whereNotIn('id', $query->clone()->joinLatest($now)->select('meta.id'));
+    }
+
+    /**
+     * Query records not being the latest meta for any key.
+     *
+     * @param  Builder<Meta>  $query
+     * @param  string|\DateTimeInterface|null  $now
+     * @return void
+     */
+    public function scopeWithoutHistory(Builder $query, $now = null): void
+    {
+        $currentMetaIds = $query->clone()->joinLatest($now)->select('meta.id');
+
+        $query->where(function ($query) use ($currentMetaIds, $now) {
+            $query->publishedAfter($now)
+                ->orWhereIn('id', $currentMetaIds);
+        });
     }
 
     /**
