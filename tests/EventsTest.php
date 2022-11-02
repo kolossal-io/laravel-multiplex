@@ -38,6 +38,23 @@ class EventsTest extends TestCase
     }
 
     /** @test */
+    public function it_will_fire_meta_added_event_when_creating()
+    {
+        Post::factory()->create([
+            'title' => 'Title',
+        ]);
+
+        Event::assertNotDispatched(MetaHasBeenAdded::class);
+
+        Post::factory()->create([
+            'title' => 'Title',
+            'foo' => 'bar',
+        ]);
+
+        Event::assertDispatched(MetaHasBeenAdded::class);
+    }
+
+    /** @test */
     public function it_will_fire_meta_added_event_when_assigning_fluently()
     {
         $model = Post::factory()->create();
