@@ -701,7 +701,9 @@ trait HasMeta
          * Fill the meta with the given attributes and save the changes in our collection.
          * This will not persist the given meta to the database.
          */
-        return $meta[$key] = (new Meta(['key' => $key]))
+        $modelClassName = $this->getMetaClassName();
+
+        return $meta[$key] = (new $modelClassName(['key' => $key]))
             ->forceType($this->getCastForMetaKey($key))
             ->forceFill($attributes);
     }
