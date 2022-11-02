@@ -59,6 +59,7 @@ $post->setMetaAt('likes', 6000, '+2 years');
 -   [Attaching Metadata](#attaching-metadata)
 -   [Retrieving Metadata](#retrieving-metadata)
 -   [Query by Metadata](#query-by-metadata)
+-   [Events](#events)
 -   [Time Traveling](#time-traveling)
 -   [Limit Meta Keys](#limit-meta-keys)
 -   [Extending Database Columns](#extending-database-columns)
@@ -398,6 +399,46 @@ Post::whereMetaEmpty('favorite_band')->get();
 
 // Get all posts having meta names `likes` and `comments` where *both* of them are not empty.
 Post::whereMetaNotEmpty(['likes', 'comments'])->get();
+```
+
+## Events
+
+You can listen for the following events that will be fired by Multiplex.
+
+### `MetaHasBeenAdded`
+
+This event will be fired once a new version of meta is saved to the model.
+
+```php
+use Kolossal\Multiplex\Events\MetaHasBeenAdded;
+
+class SomeListener
+{
+    public function handle(MetaHasBeenAdded $event)
+    {
+        $event->meta; // The Meta model that was added.
+        $event->model; // The parent model, same as $event->meta->metable.
+        $event->type; // The class name of the parent model.
+    }
+}
+```
+
+### `MetaHasBeenRemoved`
+
+This event will be fired once metadata is removed by using [`deleteMeta`](#deleting-metadata). The event will fire only once per key and the `$meta` property on the event will contain the latest meta only.
+
+```php
+use Kolossal\Multiplex\Events\MetaHasBeenRemoved;
+
+class SomeListener
+{
+    public function handle(MetaHasBeenRemoved $event)
+    {
+        $event->meta; // The Meta model that was removed.
+        $event->model; // The parent model, same as $event->meta->metable.
+        $event->type; // The class name of the parent model.
+    }
+}
 ```
 
 ## Time Traveling

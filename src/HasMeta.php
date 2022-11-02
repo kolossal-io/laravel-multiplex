@@ -12,6 +12,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Kolossal\Multiplex\Events\MetaHasBeenAdded;
+use Kolossal\Multiplex\Events\MetaHasBeenRemoved;
 use Kolossal\Multiplex\Exceptions\MetaException;
 
 trait HasMeta
@@ -754,7 +756,14 @@ trait HasMeta
                     throw MetaException::invalidKey($key);
                 }
             })
-            ->filter(fn ($key) => $this->allMeta()->where('key', $key)->delete());
+            ->filter(function ($key) {
+                $latest = $this->findMeta($key);
+
+                return tap(
+                    $this->allMeta()->where('key', $key)->delete(),
+                    fn ($deleted) => $deleted && $latest && event(new MetaHasBeenRemoved($latest))
+                );
+            });
 
         DB::commit();
 
@@ -852,7 +861,10 @@ trait HasMeta
             $meta->published_at ??= $this->metaTimestamp;
         }
 
-        return $this->allMeta()->save($meta);
+        return tap(
+            $this->allMeta()->save($meta),
+            fn ($model) => $model && event(new MetaHasBeenAdded($model))
+        );
     }
 
     /**

@@ -835,6 +835,11 @@ class HasMetaTest extends TestCase
 
         $this->travelTo('2022-10-02 12:00:00');
 
+        $model->saveMeta('foo', 'bar');
+        $model->saveMeta('bar', 123);
+
+        $this->assertDatabaseCount('meta', 2);
+
         $model->foo = 'bar';
         $model->bar = 123.0;
         $model->save();
