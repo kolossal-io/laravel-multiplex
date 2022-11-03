@@ -1097,7 +1097,7 @@ trait HasMeta
 
         $query->{$method}('allMeta', function (Builder $query) use ($key, $operator, $value) {
             $query->onlyCurrent($this->getMetaTimestamp())
-                ->when(
+                ->where(
                     $key instanceof Closure
                         ? $key
                         : fn ($q) => $q->where('meta.key', $key)->whereValue($value, $operator)
