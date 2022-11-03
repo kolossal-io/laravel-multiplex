@@ -8,11 +8,12 @@ use Illuminate\Support\Facades\DB;
 use Kolossal\Multiplex\Exceptions\MetaException;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\PostWithExistingColumn;
-use ReflectionClass;
+use Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties;
 
 class ExistingColumnOverrideTest extends TestCase
 {
     use RefreshDatabase;
+    use AccessesProtectedProperties;
 
     /** @test */
     public function it_will_throw_for_key_equal_to_existing_column_name()
@@ -400,14 +401,5 @@ class ExistingColumnOverrideTest extends TestCase
 
         $this->assertSame('Title', PostWithExistingColumn::first()->title);
         $this->assertSame('bar', PostWithExistingColumn::first()->foo);
-    }
-
-    protected function getProtectedProperty($model, string $property)
-    {
-        $reflectedClass = new ReflectionClass($model);
-        $reflection = $reflectedClass->getProperty($property);
-        $reflection->setAccessible(true);
-
-        return $reflection->getValue($model);
     }
 }

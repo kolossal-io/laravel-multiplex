@@ -135,7 +135,15 @@ class Meta extends Model
      */
     public function getValueAttribute()
     {
-        return $this->cachedValue ??= $this->getDataTypeRegistry()
+        if ($this->cachedValue) {
+            return $this->cachedValue;
+        }
+
+        if (!isset($this->attributes['type']) || !isset($this->attributes['value'])) {
+            return null;
+        }
+
+        return $this->cachedValue = $this->getDataTypeRegistry()
             ->getHandlerForType($this->attributes['type'])
             ->unserializeValue($this->attributes['value']);
     }

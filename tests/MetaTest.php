@@ -10,11 +10,13 @@ use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
+use Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties;
 use stdClass;
 
 class MetaTest extends TestCase
 {
     use RefreshDatabase;
+    use AccessesProtectedProperties;
 
     public function handlerProvider()
     {
@@ -389,5 +391,62 @@ class MetaTest extends TestCase
 
         $this->assertEquals($input, $result->value);
         $this->assertEquals($type, $result->type);
+    }
+
+    /**
+     * @test
+     */
+    public function it_will_return_null_for_undefined_value()
+    {
+        $meta = new Meta;
+
+        $this->assertNull($meta->value);
+        $this->assertNull($meta->type);
+    }
+
+    /**
+     * @test
+     */
+    public function it_can_return_value_and_type_once_defined()
+    {
+        $meta = new Meta;
+
+        $meta->value = 123.0;
+
+        $this->assertSame(123.0, $meta->value);
+        $this->assertSame('float', $meta->type);
+    }
+
+    /**
+     * @test
+     */
+    public function it_will_cache_value_when_accessing()
+    {
+        $meta = new Meta;
+        $meta->value = 123.0;
+
+        $this->assertNull($this->getProtectedProperty($meta, 'cachedValue'));
+
+        $this->assertSame(123.0, $meta->value);
+        $this->assertSame(123.0, $this->getProtectedProperty($meta, 'cachedValue'));
+    }
+
+    /**
+     * @test
+     */
+    public function it_will_reset_cache_when_setting_value()
+    {
+        $meta = new Meta;
+        $meta->value = 123.0;
+
+        $this->assertSame(123.0, $meta->value);
+        $this->assertSame(123.0, $this->getProtectedProperty($meta, 'cachedValue'));
+
+        $meta->value = 123;
+
+        $this->assertNull($this->getProtectedProperty($meta, 'cachedValue'));
+
+        $this->assertSame(123, $meta->value);
+        $this->assertSame(123, $this->getProtectedProperty($meta, 'cachedValue'));
     }
 }
