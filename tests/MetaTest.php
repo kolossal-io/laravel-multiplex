@@ -147,12 +147,10 @@ class MetaTest extends TestCase
 
         $this->assertCount(4, $model->allMeta);
 
-        $meta = Meta::orderBy('id')->get();
-
-        $this->assertFalse($meta->get(0)->is_current);
-        $this->assertFalse($meta->get(1)->is_current);
-        $this->assertTrue($meta->get(2)->is_current);
-        $this->assertFalse($meta->get(3)->is_current);
+        $this->assertFalse(Meta::whereValue(1)->first()->is_current);
+        $this->assertFalse(Meta::whereValue(2)->first()->is_current);
+        $this->assertTrue(Meta::whereValue(3)->first()->is_current);
+        $this->assertFalse(Meta::whereValue(4)->first()->is_current);
     }
 
     /** @test */
