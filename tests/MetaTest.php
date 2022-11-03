@@ -323,23 +323,31 @@ class MetaTest extends TestCase
 
         Post::factory()->create()->saveMeta('foo', 'another');
 
+        $model->saveMeta('bar', 'foo');
         $model->saveMetaAt('foo', 1, '-1 day');
         $model->saveMeta('foo', 2);
         $model->saveMetaAt('foo', 3, '+1 day');
 
         $meta = Meta::onlyCurrent()->get()->pluck('value');
+        $modelMeta = $model->allMeta()->onlyCurrent()->get()->pluck('value');
 
-        $this->assertCount(1, $meta);
-        $this->assertNotContains(1, $meta);
+        $this->assertCount(3, $meta);
+        $this->assertContains('another', $meta);
+        $this->assertContains('foo', $meta);
         $this->assertContains(2, $meta);
-        $this->assertNotContains(3, $meta);
+
+        $this->assertCount(2, $modelMeta);
+        $this->assertContains('foo', $meta);
+        $this->assertContains(2, $meta);
 
         $meta = Meta::onlyCurrent('-15 minutes')->get()->pluck('value');
+        $modelMeta = $model->allMeta()->onlyCurrent('-15 minutes')->get()->pluck('value');
 
         $this->assertCount(1, $meta);
         $this->assertContains(1, $meta);
-        $this->assertNotContains(2, $meta);
-        $this->assertNotContains(3, $meta);
+
+        $this->assertCount(1, $modelMeta);
+        $this->assertContains(1, $meta);
     }
 
     /**

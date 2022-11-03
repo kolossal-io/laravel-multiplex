@@ -25,6 +25,7 @@ class HasMetaScopeTest extends TestCase
     /** @test */
     public function it_scopes_where_has_meta()
     {
+        $this->seedRandomModels();
         $this->seedModels();
 
         $this->testScope(Post::whereHasMeta('one'), ['a']);
@@ -38,6 +39,7 @@ class HasMetaScopeTest extends TestCase
     /** @test */
     public function it_scopes_where_has_meta_from_array()
     {
+        $this->seedRandomModels();
         $this->seedModels();
 
         $this->testScope(Post::whereHasMeta(['one', 'two']), ['a', 'b']);
@@ -71,6 +73,8 @@ class HasMetaScopeTest extends TestCase
     /** @test */
     public function it_scopes_where_meta()
     {
+        $this->seedRandomModels();
+
         Post::factory()
             ->has(Meta::factory(3)->state(['key' => 'foo', 'value' => true]))
             ->has(Meta::factory(2)->state(['key' => 'foo', 'value' => false]))
@@ -96,6 +100,8 @@ class HasMetaScopeTest extends TestCase
      * */
     public function it_scopes_where_meta_with_datatype($type, $input, $another)
     {
+        $this->seedRandomModels();
+
         Post::factory()
             ->has(Meta::factory()->state(['key' => 'foo', 'value' => $another, 'published_at' => Carbon::now()->addDay()]))
             ->create(['title' => 'a']);
@@ -115,6 +121,8 @@ class HasMetaScopeTest extends TestCase
     /** @test */
     public function it_scopes_where_meta_with_operators()
     {
+        $this->seedRandomModels();
+
         Post::factory()
             ->has(Meta::factory(2)->state(['key' => 'foo', 'value' => 4]))
             ->create(['title' => 'a']);
@@ -149,6 +157,8 @@ class HasMetaScopeTest extends TestCase
     /** @test */
     public function it_scopes_where_raw_meta()
     {
+        $this->seedRandomModels();
+
         Post::factory()
             ->has(Meta::factory(2)->state(['key' => 'foo', 'value' => 4]))
             ->create(['title' => 'a']);
@@ -186,6 +196,8 @@ class HasMetaScopeTest extends TestCase
     /** @test */
     public function it_scopes_where_meta_of_type()
     {
+        $this->seedRandomModels();
+
         Post::factory()
             ->has(Meta::factory()->state(['key' => 'bar', 'value' => 0]))
             ->has(Meta::factory(2)->state(['key' => 'foo', 'value' => Carbon::parse('2022-01-01')]))
@@ -214,6 +226,8 @@ class HasMetaScopeTest extends TestCase
     /** @test */
     public function it_scopes_where_meta_in_array()
     {
+        $this->seedRandomModels();
+
         Post::factory()
             ->has(Meta::factory()->state(['key' => 'foo', 'value' => 'one']))
             ->has(Meta::factory()->state(['key' => 'foo', 'value' => 2]))
@@ -238,6 +252,8 @@ class HasMetaScopeTest extends TestCase
     /** @test */
     public function it_scopes_after_time_traveling()
     {
+        $this->seedRandomModels();
+
         $a = Post::factory()->create(['title' => 'a']);
         $b = Post::factory()->create(['title' => 'b']);
         $c = Post::factory()->create(['title' => 'c']);
@@ -302,6 +318,8 @@ class HasMetaScopeTest extends TestCase
     /** @test */
     public function it_scopes_where_meta_not_empty()
     {
+        $this->seedRandomModels();
+
         Post::factory()
             ->has(Meta::factory()->state(['key' => 'foo', 'value' => '']))
             ->has(Meta::factory()->state(['key' => 'foo', 'value' => 12]))
@@ -330,6 +348,11 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMeta('foo', false)->orWhereMetaNotEmpty('bar'), 'b,d,e');
         $this->testScope(Post::whereMetaNotEmpty(['foo', 'bar']), 'd');
         $this->testScope(Post::whereMetaNotEmpty(['foo', 'bar', 'another']));
+    }
+
+    protected function seedRandomModels()
+    {
+        Post::factory(10)->has(Meta::factory(3))->create();
     }
 
     protected function seedModels()
