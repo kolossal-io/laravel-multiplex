@@ -1044,6 +1044,18 @@ class HasMetaTest extends TestCase
             'bar' => 125,
         ], Post::first()->withMetaAt('2022-10-01 15:00:00')->only($keys));
 
+        $this->assertEquals([
+            'foo' => 'bar',
+            'another' => null,
+            'bar' => 125,
+        ], Post::with('meta')->first()->withMetaAt('2022-10-01 15:00:00')->only($keys));
+
+        $this->assertEquals([
+            'foo' => 'updated',
+            'another' => true,
+            'bar' => 125,
+        ], Post::with('meta')->first()->withMetaAt('2022-10-04 12:15:00')->only($keys));
+
         $post = Post::first()->withMetaAt('2022-10-02 15:00:00');
 
         $this->assertEquals([
