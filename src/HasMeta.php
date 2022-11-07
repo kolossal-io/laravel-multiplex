@@ -185,7 +185,15 @@ trait HasMeta
      */
     public function getFallbackValue(string $key)
     {
-        return $this->fallbackValues?->get($key) ?? null;
+        return with($this->fallbackValues?->get($key), function ($value) use ($key) {
+            if ($value && ($type = $this->getCastForMetaKey($key))) {
+                return $this->getMetaClassName()::getDataTypeRegistry()
+                    ->getHandlerForType($type)
+                    ->unserializeValue($value);
+            }
+
+            return $value;
+        });
     }
 
     /**

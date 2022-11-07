@@ -1461,6 +1461,9 @@ class HasMetaTest extends TestCase
             'title' => 'Title',
             'body' => null,
             'another' => 123,
+            'boolean_field' => null,
+            'float_field' => null,
+            'integer_field' => null,
         ], $b->pluckMeta()->toArray());
     }
 }

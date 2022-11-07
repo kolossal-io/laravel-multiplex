@@ -19,6 +19,13 @@ class PostWithExistingColumn extends Model
         'body',
     ];
 
+    protected $metaKeys = [
+        '*',
+        'integer_field' => 'integer',
+        'boolean_field' => 'boolean',
+        'float_field' => 'float',
+    ];
+
     protected $casts = [
         'title' => MetaAttribute::class,
         'body' => MetaAttribute::class,

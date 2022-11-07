@@ -402,4 +402,35 @@ class ExistingColumnOverrideTest extends TestCase
         $this->assertSame('Title', PostWithExistingColumn::first()->title);
         $this->assertSame('bar', PostWithExistingColumn::first()->foo);
     }
+
+    /** @test */
+    public function it_will_cast_fallback_fields_as_expected()
+    {
+        $this->assertDatabaseCount('meta', 0);
+
+        DB::table('sample_posts')->insert([
+            'title' => 'Title',
+            'boolean_field' => 1,
+            'float_field' => 120,
+            'integer_field' => '120',
+        ]);
+
+        $this->assertDatabaseCount('meta', 0);
+
+        $post = PostWithExistingColumn::first();
+
+        $this->assertSame(true, $post->boolean_field);
+        $this->assertSame(120.0, $post->float_field);
+        $this->assertSame(120, $post->integer_field);
+
+        $post->boolean_field = 0;
+        $post->float_field = '123';
+        $post->integer_field = 125.3;
+
+        $post->save();
+
+        $this->assertSame(false, $post->boolean_field);
+        $this->assertSame(123.0, $post->float_field);
+        $this->assertSame(125, $post->integer_field);
+    }
 }
