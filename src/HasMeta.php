@@ -610,7 +610,7 @@ trait HasMeta
      */
     public function setMetaAt($key, $value = null, $publishAt = null)
     {
-        if (count(func_get_args()) === 2 && is_array($key)) {
+        if (func_num_args() === 2 && is_array($key)) {
             return $this->setMetaFromArray($key, Carbon::parse($value));
         }
 
@@ -890,7 +890,7 @@ trait HasMeta
         /**
          * If we have exactly two arguments set and save the value for the given key.
          */
-        if (count(func_get_args()) === 2) {
+        if (func_num_args() === 2) {
             $this->setMeta($key, $value);
 
             return $this->saveMeta($key);
@@ -904,7 +904,7 @@ trait HasMeta
         /**
          * If no arguments were passed, all changes should be persisted.
          */
-        if (empty(func_get_args())) {
+        if (func_num_args() === 0) {
             return tap($changes->every(function (Meta $meta, $key) use ($changes) {
                 return tap($this->storeMeta($meta), fn ($saved) => $saved && $changes->forget($key));
             }), fn () => $this->refreshMetaRelations());
