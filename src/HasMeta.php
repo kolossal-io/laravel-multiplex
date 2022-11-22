@@ -879,13 +879,16 @@ trait HasMeta
 
     /**
      * Store the meta data from the Meta Collection.
-     * Returns `true` if all meta was saved successfully.
+     * Returns `true` if all meta was saved successfully
+     * or the `Meta` model if only one key value pair was submitted.
      *
      * @param  string|array|null  $key
      * @param  mixed|null  $value
-     * @return bool
+     * @return bool|Meta
+     *
+     * @throws MetaException if invalid key is used.
      */
-    public function saveMeta($key = null, $value = null): bool
+    public function saveMeta($key = null, $value = null)
     {
         /**
          * If we have exactly two arguments set and save the value for the given key.
@@ -929,8 +932,8 @@ trait HasMeta
         /** @var Meta $meta */
         $meta = $changes->pull($key);
 
-        return tap((bool) $this->storeMeta($meta), function ($saved) {
-            if ($saved) {
+        return tap($this->storeMeta($meta), function ($result) {
+            if (!!$result) {
                 $this->refreshMetaRelations();
             }
         });
@@ -942,6 +945,7 @@ trait HasMeta
      * @param  string|array  $key
      * @param  mixed  $value
      * @param  string|DateTimeInterface|null  $publishAt
+     * @return bool|Meta
      *
      * @throws MetaException if invalid key is used.
      */
