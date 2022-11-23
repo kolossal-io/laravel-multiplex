@@ -1383,10 +1383,10 @@ class HasMetaTest extends TestCase
     {
         $model = Post::factory()->create();
 
-        $this->assertTrue($model->saveMeta('foo', 'bar'));
+        $this->assertInstanceOf(Meta::class, $model->saveMeta('foo', 'bar'));
         $this->assertFalse($model->saveMeta('foo', 'bar'));
         $this->assertFalse($model->saveMeta('foo', 'bar'));
-        $this->assertTrue($model->saveMeta('foo', 'changed'));
+        $this->assertInstanceOf(Meta::class, $model->saveMeta('foo', 'changed'));
 
         $this->assertDatabaseCount('meta', 2);
     }

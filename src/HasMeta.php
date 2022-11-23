@@ -933,7 +933,7 @@ trait HasMeta
         $meta = $changes->pull($key);
 
         return tap($this->storeMeta($meta), function ($result) {
-            if (!!$result) {
+            if ((bool) $result) {
                 $this->refreshMetaRelations();
             }
         });
