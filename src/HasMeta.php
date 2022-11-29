@@ -373,12 +373,10 @@ trait HasMeta
     public function getMetaTimestamp(): Carbon
     {
         if ($this->metaTimestamp) {
-            return Carbon::parse($this->metaTimestamp);
+            return $this->metaTimestamp;
         }
 
-        return static::$staticMetaTimestamp
-            ? Carbon::parse(static::$staticMetaTimestamp)
-            : Carbon::now();
+        return static::$staticMetaTimestamp ?? Carbon::now();
     }
 
     /**
@@ -824,8 +822,8 @@ trait HasMeta
         /**
          * If `$metaTimestamp` is set we probably are storing meta for the future or past.
          */
-        if ($this->metaTimestamp) {
-            $meta->published_at ??= $this->metaTimestamp;
+        if ($currentTime = $this->getMetaTimestamp()) {
+            $meta->published_at ??= $currentTime;
         }
 
         return tap(
@@ -913,7 +911,10 @@ trait HasMeta
         $previousTimestamp = $this->metaTimestamp;
         $this->metaTimestamp = Carbon::parse(array_pop($args));
 
-        return tap($this->saveMeta(...$args), fn () => $this->metaTimestamp = $previousTimestamp);
+        return tap(
+            $this->saveMeta(...$args),
+            fn () => $this->metaTimestamp = $previousTimestamp
+        );
     }
 
     /**
@@ -940,7 +941,10 @@ trait HasMeta
     {
         $time = $time ? Carbon::parse($time) : null;
 
-        if (gettype($this->metaTimestamp) !== gettype($time) || !$this->metaTimestamp?->equalTo($time)) {
+        if (
+            gettype($this->metaTimestamp) !== gettype($time)
+            || !$this->metaTimestamp?->equalTo($time)
+        ) {
             $this->refreshMetaRelations();
         }
 
