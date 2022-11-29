@@ -85,7 +85,7 @@ class Meta extends Model
 
     protected $table = 'meta';
 
-    protected $cachedValue;
+    protected mixed $cachedValue = null;
 
     protected ?string $forceType = null;
 

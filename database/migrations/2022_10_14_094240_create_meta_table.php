@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
         if (!Schema::hasTable('meta')) {
             Schema::create('meta', function (Blueprint $table) {
@@ -26,7 +26,7 @@ return new class extends Migration
         }
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('meta');
     }

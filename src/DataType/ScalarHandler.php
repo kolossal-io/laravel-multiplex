@@ -39,9 +39,7 @@ abstract class ScalarHandler implements HandlerInterface
      */
     public function serializeValue($value): string
     {
-        settype($value, 'string');
-
-        return $value;
+        return strval($value);
     }
 
     /**

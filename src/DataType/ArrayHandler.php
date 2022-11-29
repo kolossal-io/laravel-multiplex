@@ -32,7 +32,7 @@ class ArrayHandler implements HandlerInterface
      */
     public function serializeValue($value): string
     {
-        return json_encode($value);
+        return json_encode($value) ?: '';
     }
 
     /**
