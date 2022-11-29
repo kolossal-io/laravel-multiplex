@@ -167,25 +167,6 @@ $model->saveMeta([
 ]);
 ```
 
-Multiplex will take care of serializing and unserializing datatypes for you. The underlying polymorphic `meta` table may look something like this:
-
-| metable_type      | metable_id | key     |  value | type      | …   |
-| ----------------- | ---------: | ------- | -----: | --------- | --- |
-| `App\Models\Post` |        `1` | `color` | `#000` | `string`  | …   |
-| `App\Models\Post` |        `1` | `likes` |   `24` | `integer` | …   |
-| `App\Models\Post` |        `2` | `color` | `#fff` | `string`  | …   |
-| `App\Models\Post` |        `2` | `hide`  | `true` | `boolean` | …   |
-
-The corresponding meta values would look like this:
-
-```php
-Post::find(1)->color; // string(4) "#000"
-Post::find(1)->likes; // int(24)
-
-Post::find(2)->color; // string(4) "#fff"
-Post::find(2)->hide; // bool(true)
-```
-
 ### Schedule Metadata
 
 You can save metadata for a specific publishing date.
@@ -223,6 +204,29 @@ $user->saveMetaAt([
     'favorite_color' => 'blue',
     'favorite_band' => 'Jane’s Addiction',
 ], '+1 week');
+```
+
+### How Metadata is stored
+
+Multiplex will store metadata in a polymorphic table and take care of serializing and unserializing datatypes for you. The underlying polymorphic `meta` table may look something like this:
+
+| metable_type    | metable_id | key   | value | type    | published_at        |
+| --------------- | ---------: | ----- | ----: | ------- | ------------------- |
+| App\Models\Post |        `1` | color |  #000 | string  | 2022-11-29 13:13:45 |
+| App\Models\Post |        `1` | likes |    24 | integer | 2020-01-01 00:00:00 |
+| App\Models\Post |        `1` | hide  |  true | boolean | 2022-11-27 16:32:08 |
+| App\Models\Post |        `1` | color |  #fff | string  | 2030-01-01 00:00:00 |
+
+The corresponding meta values would look like this:
+
+```php
+$post = Post::find(1);
+
+$post->color; // string(4) "#000"
+$post->likes; // int(24)
+$post->hide; // bool(true)
+
+// In the year 2030 `$post->color` will be `#fff`.
 ```
 
 ## Retrieving Metadata
