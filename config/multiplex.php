@@ -14,15 +14,6 @@ return [
     'migrations' => true,
 
     /**
-     * When storing models having the `HasMeta` trait you may define that all meta
-     * should be saved with a specific publication date. To do that pass a date castable
-     * value to an attribute named as configured here (`meta_publish_at` by default).
-     *
-     * Set this to a falsy value to disable this feature.
-     */
-    'publish_date_key' => 'meta_publish_at',
-
-    /**
      * List of handlers for recognized data types.
      *
      * Handlers will be evaluated in order, so a value will be handled

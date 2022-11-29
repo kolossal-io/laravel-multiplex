@@ -121,18 +121,6 @@ trait HasMeta
     }
 
     /**
-     * Initialize the HasMeta trait.
-     *
-     * @return void
-     */
-    public function initializeHasMeta()
-    {
-        if (($key = $this->getPublishDateKey())) {
-            $this->mergeFillable([$key]);
-        }
-    }
-
-    /**
      * Disable all meta key restrictions.
      *
      * @param  bool  $state
@@ -354,31 +342,6 @@ trait HasMeta
         }
 
         return $this->isMetaWildcardSet();
-    }
-
-    /**
-     * Get the publish date magic key from config.
-     * See config `multiplex.publish_date_key` for more information.
-     *
-     * @return string|null
-     */
-    protected function getPublishDateKey(): ?string
-    {
-        $config = config('multiplex.publish_date_key');
-
-        return $config && is_string($config) ? $config : null;
-    }
-
-    /**
-     * Determine wether the given key matches the magic key defined in config.
-     * See config `multiplex.publish_date_key` for more information.
-     *
-     * @param  string  $key
-     * @return bool
-     */
-    protected function isPublishDateKey(string $key): bool
-    {
-        return $this->getPublishDateKey() === $key;
     }
 
     /**
@@ -821,12 +784,6 @@ trait HasMeta
      */
     public function setAttribute($key, $value)
     {
-        if ($this->isPublishDateKey($key)) {
-            $this->metaTimestamp = Carbon::parse($value);
-
-            return;
-        }
-
         if (!$this->isValidMetaKey($key)) {
             return parent::setAttribute($key, $value);
         }
