@@ -30,19 +30,21 @@ class ModelCollectionHandler implements HandlerInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Convert the value to a string, so that it can be stored in the database.
+     *
+     * @param  Collection  $value
+     * @return string
      */
     public function serializeValue($value): string
     {
-        $items = [];
-        foreach ($value as $key => $model) {
-            $items[$key] = [
+        $items = $value->mapWithKeys(
+            fn ($model, $key) => [$key => [
                 'class' => get_class($model),
                 'key' => $model->exists ? $model->getKey() : null,
-            ];
-        }
+            ]]
+        );
 
-        return json_encode(['class' => get_class($value), 'items' => $items]);
+        return json_encode(['class' => get_class($value), 'items' => $items]) ?: '';
     }
 
     /**
@@ -56,15 +58,20 @@ class ModelCollectionHandler implements HandlerInterface
 
         $data = json_decode($value, true);
 
+        if (!is_array($data)) {
+            return $value;
+        }
+
+        /** @var Collection */
         $collection = new $data['class']();
         $models = $this->loadModels($data['items']);
 
         // Repopulate collection keys with loaded models.
         foreach ($data['items'] as $key => $item) {
             if (is_null($item['key'])) {
-                $collection[$key] = new $item['class']();
+                $collection->put($key, new $item['class']());
             } elseif (isset($models[$item['class']][$item['key']])) {
-                $collection[$key] = $models[$item['class']][$item['key']];
+                $collection->put($key, $models[$item['class']][$item['key']]);
             }
         }
 
@@ -91,8 +98,13 @@ class ModelCollectionHandler implements HandlerInterface
 
         // Iterate list of classes and load all records matching a key.
         foreach ($classes as $class => $keys) {
+            /** @var \Illuminate\Database\Eloquent\Model */
             $model = new $class();
-            $results[$class] = $model->whereIn($model->getKeyName(), $keys)->get()->keyBy($model->getKeyName());
+
+            $results[$class] = $model
+                ->whereIn($model->getKeyName(), $keys)
+                ->get()
+                ->keyBy($model->getKeyName());
         }
 
         return $results;

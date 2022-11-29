@@ -28,7 +28,7 @@
 
 ---
 
-## What it Does
+## What it does
 
 Multiplex allows you to attach time-sliced metadata to Eloquent models in a convenient way.
 
@@ -52,6 +52,14 @@ $post->setMetaAt('likes', 6000, '+2 years');
 -   Polymorphic relationship allows adding metadata to any Eloquent model without worrying about the database schema.
 -   Easy to try: Extend existing database columns of your model with versionable metadata without touching or deleting your original columns.
 -   Type conversion system heavily based on [Laravel-Metable](https://github.com/plank/laravel-metable) allows data of numerous different scalar and object types to be stored and retrieved.
+
+## Why another Metadata Package?
+
+The main difference is that the metadata in Multiplex has a timestamp that defines validity. This allows changes to be tracked and planned. You can inspect all metadata on your model at a specific point in time and Multiplex will by default only give you the most current.
+
+Since Multiplex is storing the metadata in a [polymorphic](https://laravel.com/docs/9.x/eloquent-relationships#polymorphic-relationships) table, it can easily be plugged into existing projects to expand properties of your models. This even works without removing the relevant table columns of your model: They are used as a fallback.
+
+And it’s low profile: If you don't like it, just [remove the `HasMeta` Trait](#installation) and everything is back to normal.
 
 ## Table of Contents
 
@@ -200,6 +208,21 @@ $user->saveMetaAt('favorite_band', 'Tool', '-1 year');
 
 // This will return `Tool` – which is true since this is indeed a good band.
 $user->favorite_band;
+```
+
+You may also save multiple metadata records at once.
+
+```php
+$user->setMeta('favorite_color', 'blue');
+$user->setMeta('favorite_band', 'Jane’s Addiction');
+$user->saveMetaAt('+1 week');
+
+// or
+
+$user->saveMetaAt([
+    'favorite_color' => 'blue',
+    'favorite_band' => 'Jane’s Addiction',
+], '+1 week');
 ```
 
 ## Retrieving Metadata

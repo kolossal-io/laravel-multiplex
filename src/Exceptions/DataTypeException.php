@@ -18,7 +18,7 @@ final class DataTypeException extends Exception
         return new static("Meta handler not found for type identifier '{$type}'");
     }
 
-    public static function handlerNotFoundForValue($value): self
+    public static function handlerNotFoundForValue(mixed $value): self
     {
         $type = is_object($value) ? get_class($value) : gettype($value);
 

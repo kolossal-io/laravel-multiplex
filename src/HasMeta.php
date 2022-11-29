@@ -121,18 +121,6 @@ trait HasMeta
     }
 
     /**
-     * Initialize the HasMeta trait.
-     *
-     * @return void
-     */
-    public function initializeHasMeta()
-    {
-        if (($key = $this->getPublishDateKey())) {
-            $this->mergeFillable([$key]);
-        }
-    }
-
-    /**
      * Disable all meta key restrictions.
      *
      * @param  bool  $state
@@ -357,31 +345,6 @@ trait HasMeta
     }
 
     /**
-     * Get the publish date magic key from config.
-     * See config `multiplex.publish_date_key` for more information.
-     *
-     * @return string|null
-     */
-    protected function getPublishDateKey(): ?string
-    {
-        $config = config('multiplex.publish_date_key');
-
-        return $config && is_string($config) ? $config : null;
-    }
-
-    /**
-     * Determine wether the given key matches the magic key defined in config.
-     * See config `multiplex.publish_date_key` for more information.
-     *
-     * @param  string  $key
-     * @return bool
-     */
-    protected function isPublishDateKey(string $key): bool
-    {
-        return $this->getPublishDateKey() === $key;
-    }
-
-    /**
      * Determine if model table has a given column.
      *
      * @param  [string]  $column
@@ -410,12 +373,10 @@ trait HasMeta
     public function getMetaTimestamp(): Carbon
     {
         if ($this->metaTimestamp) {
-            return Carbon::parse($this->metaTimestamp);
+            return $this->metaTimestamp;
         }
 
-        return static::$staticMetaTimestamp
-            ? Carbon::parse(static::$staticMetaTimestamp)
-            : Carbon::now();
+        return static::$staticMetaTimestamp ?? Carbon::now();
     }
 
     /**
@@ -821,12 +782,6 @@ trait HasMeta
      */
     public function setAttribute($key, $value)
     {
-        if ($this->isPublishDateKey($key)) {
-            $this->metaTimestamp = Carbon::parse($value);
-
-            return;
-        }
-
         if (!$this->isValidMetaKey($key)) {
             return parent::setAttribute($key, $value);
         }
@@ -867,8 +822,8 @@ trait HasMeta
         /**
          * If `$metaTimestamp` is set we probably are storing meta for the future or past.
          */
-        if ($this->metaTimestamp) {
-            $meta->published_at ??= $this->metaTimestamp;
+        if ($currentTime = $this->getMetaTimestamp()) {
+            $meta->published_at ??= $currentTime;
         }
 
         return tap(
@@ -956,7 +911,10 @@ trait HasMeta
         $previousTimestamp = $this->metaTimestamp;
         $this->metaTimestamp = Carbon::parse(array_pop($args));
 
-        return tap($this->saveMeta(...$args), fn () => $this->metaTimestamp = $previousTimestamp);
+        return tap(
+            $this->saveMeta(...$args),
+            fn () => $this->metaTimestamp = $previousTimestamp
+        );
     }
 
     /**
@@ -983,7 +941,10 @@ trait HasMeta
     {
         $time = $time ? Carbon::parse($time) : null;
 
-        if (gettype($this->metaTimestamp) !== gettype($time) || !$this->metaTimestamp?->equalTo($time)) {
+        if (
+            gettype($this->metaTimestamp) !== gettype($time)
+            || !$this->metaTimestamp?->equalTo($time)
+        ) {
             $this->refreshMetaRelations();
         }
 

@@ -30,7 +30,10 @@ class ModelHandler implements HandlerInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Convert the value to a string, so that it can be stored in the database.
+     *
+     * @param  Model  $value
+     * @return string
      */
     public function serializeValue($value): string
     {
@@ -38,7 +41,7 @@ class ModelHandler implements HandlerInterface
             return get_class($value) . '#' . $value->getKey();
         }
 
-        return get_class($value);
+        return get_class($value) ?: '';
     }
 
     /**
@@ -58,6 +61,6 @@ class ModelHandler implements HandlerInterface
         // Fetch specific instances.
         [$class, $id] = explode('#', $value);
 
-        return (new $class())->findOrFail($id);
+        return $class::findOrFail($id);
     }
 }

@@ -448,6 +448,27 @@ class HasMetaTest extends TestCase
     }
 
     /** @test */
+    public function it_can_save_multiple_meta_for_the_future()
+    {
+        $model = Post::factory()->create();
+
+        $model->setMeta('foo', 'bar');
+        $model->setMeta('bar', 123);
+
+        $model->saveMetaAt('+1 hour');
+        $model->refresh();
+
+        $this->assertNull($model->foo);
+        $this->assertNull($model->bar);
+
+        $this->travelTo('+1 hour');
+        $model->refresh();
+
+        $this->assertSame('bar', $model->foo);
+        $this->assertSame(123, $model->bar);
+    }
+
+    /** @test */
     public function it_can_set_meta_for_future_from_array()
     {
         $model = Post::factory()->create();
@@ -1188,104 +1209,6 @@ class HasMetaTest extends TestCase
         $this->assertDatabaseCount('meta', 2);
         $this->assertTrue(PostWithoutSoftDelete::first()->delete());
         $this->assertDatabaseCount('meta', 0);
-    }
-
-    /** @test */
-    public function it_can_set_meta_publishing_date_by_magic_attribute()
-    {
-        $post = Post::factory()->create();
-
-        $post->setMeta('foo', true);
-        $post->setMeta('bar', 'also true');
-
-        $post->meta_publish_at = '2023-12-01 12:00:00';
-
-        $post->save();
-
-        $this->assertDatabaseCount('meta', 2);
-        $this->assertCount(0, Post::first()->meta);
-
-        $this->travelTo('2023-11-30 23:00:00');
-        $this->assertCount(0, Post::first()->meta);
-
-        $this->travelTo('2023-12-01 12:00:00');
-        $this->assertCount(2, Post::first()->meta);
-    }
-
-    /** @test */
-    public function it_can_fill_meta_publishing_date_by_magic_attribute()
-    {
-        $post = Post::factory()->create();
-
-        $post->mergeFillable(['title', 'foo', 'bar']);
-
-        $post->fill([
-            'title' => 'New title',
-            'foo' => true,
-            'bar' => 'also true',
-            'meta_publish_at' => '2023-12-01 12:00:00',
-        ]);
-
-        $post->save();
-
-        $this->assertDatabaseCount('meta', 2);
-        $this->assertCount(0, Post::first()->meta);
-
-        $this->travelTo('2023-11-30 23:00:00');
-        $this->assertCount(0, Post::first()->meta);
-
-        $this->travelTo('2023-12-01 12:00:00');
-        $this->assertCount(2, Post::first()->meta);
-    }
-
-    /** @test */
-    public function it_can_rename_meta_publishing_date_magic_attribute()
-    {
-        config(['multiplex.publish_date_key' => 'foo']);
-
-        $post = Post::factory()->create();
-
-        $post->mergeFillable(['title', 'bar']);
-
-        $post->fill([
-            'title' => 'New title',
-            'foo' => '2023-12-01 12:00:00',
-            'bar' => 'also true',
-        ]);
-
-        $post->save();
-
-        $this->assertDatabaseCount('meta', 1);
-        $this->assertCount(0, Post::first()->meta);
-
-        $this->travelTo('2023-11-30 23:00:00');
-        $this->assertCount(0, Post::first()->meta);
-
-        $this->travelTo('2023-12-01 12:00:00');
-        $this->assertCount(1, Post::first()->meta);
-    }
-
-    /** @test */
-    public function it_can_disable_magic_attribute()
-    {
-        config(['multiplex.publish_date_key' => null]);
-
-        $post = Post::factory()->create();
-
-        $post->unguard();
-
-        $post->fill([
-            'title' => 'New title',
-            'foo' => 'bar',
-            'bar' => 'also true',
-            'meta_publish_at' => '2023-12-01 12:00:00',
-        ]);
-
-        $post->save();
-
-        $this->assertDatabaseCount('meta', 3);
-        $this->assertCount(3, Post::first()->meta);
-        $this->assertSame('2023-12-01 12:00:00', Post::first()->getMeta('meta_publish_at'));
     }
 
     /** @test */
