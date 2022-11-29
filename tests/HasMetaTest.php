@@ -448,6 +448,27 @@ class HasMetaTest extends TestCase
     }
 
     /** @test */
+    public function it_can_save_multiple_meta_for_the_future()
+    {
+        $model = Post::factory()->create();
+
+        $model->setMeta('foo', 'bar');
+        $model->setMeta('bar', 123);
+
+        $model->saveMetaAt('+1 hour');
+        $model->refresh();
+
+        $this->assertNull($model->foo);
+        $this->assertNull($model->bar);
+
+        $this->travelTo('+1 hour');
+        $model->refresh();
+
+        $this->assertSame('bar', $model->foo);
+        $this->assertSame(123, $model->bar);
+    }
+
+    /** @test */
     public function it_can_set_meta_for_future_from_array()
     {
         $model = Post::factory()->create();
