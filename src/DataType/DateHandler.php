@@ -65,6 +65,10 @@ class DateHandler implements HandlerInterface
             return null;
         }
 
-        return Carbon::createFromFormat($this->format, $value)->startOfDay();
+        return tap(Carbon::createFromFormat($this->format, $value), function ($date) {
+            if ($date instanceof Carbon) {
+                $date->startOfDay();
+            }
+        });
     }
 }
