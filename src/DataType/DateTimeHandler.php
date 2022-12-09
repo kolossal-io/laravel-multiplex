@@ -61,6 +61,10 @@ class DateTimeHandler implements HandlerInterface
             return null;
         }
 
-        return Carbon::createFromFormat($this->format, $value);
+        try {
+            return Carbon::createFromFormat($this->format, $value);
+        } catch (\Exception $e) {
+            return Carbon::parse($value);
+        }
     }
 }
