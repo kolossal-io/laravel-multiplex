@@ -21,6 +21,7 @@ class HasMetaCastTest extends TestCase
             'str' => 123.0,
             'bool' => '0',
             'date' => '2020-01-01',
+            'datetime' => '2020-01-01',
             'dbl' => 123,
         ])->save();
 
@@ -28,7 +29,8 @@ class HasMetaCastTest extends TestCase
         $this->assertDatabaseHas('meta', ['key' => 'int', 'type' => 'integer']);
         $this->assertDatabaseHas('meta', ['key' => 'str', 'type' => 'string']);
         $this->assertDatabaseHas('meta', ['key' => 'bool', 'type' => 'boolean']);
-        $this->assertDatabaseHas('meta', ['key' => 'date', 'type' => 'datetime']);
+        $this->assertDatabaseHas('meta', ['key' => 'date', 'type' => 'date']);
+        $this->assertDatabaseHas('meta', ['key' => 'datetime', 'type' => 'datetime']);
         $this->assertDatabaseHas('meta', ['key' => 'dbl', 'type' => 'float']);
 
         $model->refresh();
@@ -37,7 +39,8 @@ class HasMetaCastTest extends TestCase
         $this->assertSame(123, $model->int);
         $this->assertSame('123', $model->str);
         $this->assertSame(false, $model->bool);
-        $this->assertTrue($model->date->equalTo(Carbon::create(2020, 1, 1)));
+        $this->assertTrue($model->date->isSameDay(Carbon::create(2020, 1, 1)));
+        $this->assertTrue($model->datetime->equalTo(Carbon::create(2020, 1, 1)));
         $this->assertSame(123.000, $model->dbl);
     }
 
@@ -52,6 +55,7 @@ class HasMetaCastTest extends TestCase
             'str' => null,
             'bool' => null,
             'date' => null,
+            'datetime' => null,
             'dbl' => null,
         ])->save();
 
@@ -59,7 +63,8 @@ class HasMetaCastTest extends TestCase
         $this->assertDatabaseHas('meta', ['key' => 'int', 'type' => 'integer', 'value' => null]);
         $this->assertDatabaseHas('meta', ['key' => 'str', 'type' => 'string', 'value' => null]);
         $this->assertDatabaseHas('meta', ['key' => 'bool', 'type' => 'boolean', 'value' => null]);
-        $this->assertDatabaseHas('meta', ['key' => 'date', 'type' => 'datetime', 'value' => null]);
+        $this->assertDatabaseHas('meta', ['key' => 'date', 'type' => 'date', 'value' => null]);
+        $this->assertDatabaseHas('meta', ['key' => 'datetime', 'type' => 'datetime', 'value' => null]);
         $this->assertDatabaseHas('meta', ['key' => 'dbl', 'type' => 'float', 'value' => null]);
 
         $model->refresh();
@@ -69,6 +74,7 @@ class HasMetaCastTest extends TestCase
         $this->assertNull($model->str);
         $this->assertNull($model->bool);
         $this->assertNull($model->date);
+        $this->assertNull($model->datetime);
         $this->assertNull($model->dbl);
     }
 
@@ -83,6 +89,7 @@ class HasMetaCastTest extends TestCase
             'str' => 0,
             'bool' => 0,
             'date' => 0,
+            'datetime' => 0,
             'dbl' => 0,
         ])->save();
 
@@ -92,7 +99,8 @@ class HasMetaCastTest extends TestCase
         $this->assertSame(0, $model->int);
         $this->assertSame('0', $model->str);
         $this->assertSame(false, $model->bool);
-        $this->assertSame('1970-01-01 00:00:00', $model->date->format('Y-m-d H:i:s'));
+        $this->assertSame('1970-01-01', $model->date->format('Y-m-d'));
+        $this->assertSame('1970-01-01 00:00:00', $model->datetime->format('Y-m-d H:i:s'));
         $this->assertSame(0.0, $model->dbl);
     }
 
@@ -107,6 +115,7 @@ class HasMetaCastTest extends TestCase
             'str' => '',
             'bool' => '',
             'date' => '',
+            'datetime' => '',
             'dbl' => '',
         ])->save();
 
@@ -116,7 +125,8 @@ class HasMetaCastTest extends TestCase
         $this->assertSame(0, $model->int);
         $this->assertSame('', $model->str);
         $this->assertSame(false, $model->bool);
-        $this->assertNull($model->date?->format('Y-m-d H:i:s'));
+        $this->assertNull($model->date?->format('Y-m-d'));
+        $this->assertNull($model->datetime?->format('Y-m-d H:i:s'));
         $this->assertSame(0.0, $model->dbl);
     }
 
@@ -129,7 +139,8 @@ class HasMetaCastTest extends TestCase
             'int' => 'integer',
             'str' => 'string',
             'bool' => 'boolean',
-            'date' => 'datetime',
+            'date' => 'date',
+            'datetime' => 'datetime',
             'dbl' => 'float',
         ]);
 

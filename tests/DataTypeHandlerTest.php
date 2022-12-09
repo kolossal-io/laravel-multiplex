@@ -41,6 +41,13 @@ class DataTypeHandlerTest extends TestCase
                 true,
                 [1, 0, '', [], null],
             ],
+            'date' => [
+                new DataType\DateHandler,
+                'date',
+                '2017-01-01',
+                [2017, Carbon::parse('2017-01-01')],
+                fn (Carbon $value) => $value->isSameDay('2017-01-01'),
+            ],
             'datetime' => [
                 new DataType\DateTimeHandler,
                 'datetime',
@@ -124,12 +131,16 @@ class DataTypeHandlerTest extends TestCase
      * @test
      * @dataProvider handlerProvider
      */
-    public function it_can_serialize_and_unserialize_values(HandlerInterface $handler, $type, $value)
+    public function it_can_serialize_and_unserialize_values(HandlerInterface $handler, $type, $value, $incompatible, ?callable $closure = null)
     {
         $serialized = $handler->serializeValue($value);
         $unserialized = $handler->unserializeValue($serialized);
 
-        $this->assertEquals($value, $unserialized);
+        if ($closure) {
+            $this->assertTrue(call_user_func($closure, $unserialized));
+        } else {
+            $this->assertEquals($value, $unserialized);
+        }
     }
 
     /**

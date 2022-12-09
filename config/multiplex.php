@@ -30,6 +30,7 @@ return [
         Kolossal\Multiplex\DataType\FloatHandler::class,
         Kolossal\Multiplex\DataType\StringHandler::class,
         Kolossal\Multiplex\DataType\DateTimeHandler::class,
+        Kolossal\Multiplex\DataType\DateHandler::class,
         Kolossal\Multiplex\DataType\ArrayHandler::class,
         Kolossal\Multiplex\DataType\ModelHandler::class,
         Kolossal\Multiplex\DataType\ModelCollectionHandler::class,
