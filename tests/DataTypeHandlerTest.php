@@ -107,6 +107,7 @@ class DataTypeHandlerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider handlerProvider
      */
     public function it_specifies_a_datatype_identifier(HandlerInterface $handler, $type)
@@ -116,6 +117,7 @@ class DataTypeHandlerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider handlerProvider
      */
     public function it_can_verify_compatibility(HandlerInterface $handler, $type, $value, $incompatible)
@@ -129,6 +131,7 @@ class DataTypeHandlerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider handlerProvider
      */
     public function it_can_serialize_and_unserialize_values(HandlerInterface $handler, $type, $value, $incompatible, ?callable $closure = null)
@@ -145,6 +148,7 @@ class DataTypeHandlerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider handlerProvider
      */
     public function it_can_handle_null_values(HandlerInterface $handler)

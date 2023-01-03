@@ -51,6 +51,7 @@ use Kolossal\Multiplex\DataType\Registry;
  * @method static Builder|Meta whereValueNotEmpty()
  * @method static Builder|Meta withoutCurrent($now = null)
  * @method static Builder|Meta withoutHistory($now = null)
+ *
  * @mixin \Eloquent
  */
 class Meta extends Model
