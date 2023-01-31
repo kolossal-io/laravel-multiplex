@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('sample_posts', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('user_id')->nullable();
             $table->string('title')->nullable();
             $table->text('body')->nullable();
             $table->integer('integer_field')->nullable();

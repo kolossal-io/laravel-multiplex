@@ -1389,4 +1389,25 @@ class HasMetaTest extends TestCase
             'integer_field' => null,
         ], $b->pluckMeta()->toArray());
     }
+
+    /** @test */
+    public function it_not_loads_meta_on_relation_null()
+    {
+        $post = Post::factory()->create();
+
+        $this->assertNull($post->user);
+        $this->assertFalse($post->relationLoaded('meta'));
+    }
+
+    /** @test */
+    public function it_uses_get_mutator()
+    {
+        $post = Post::factory()->create();
+
+        $this->assertNull($post->custom_mutator);
+        $this->assertNull($post->custom_get_attribute);
+        $this->assertNull($post->custom_attribute);
+
+        $this->assertFalse($post->relationLoaded('meta'));
+    }
 }

@@ -280,8 +280,12 @@ trait HasMeta
     public function isModelAttribute(string $key): bool
     {
         return
+            $this->isRelation($key) ||
             $this->hasSetMutator($key) ||
             $this->hasAttributeSetMutator($key) ||
+            $this->hasGetMutator($key) ||
+            $this->hasAttributeGetMutator($key) ||
+            $this->hasAttributeMutator($key) ||
             $this->isEnumCastable($key) ||
             $this->isClassCastable($key) ||
             str_contains($key, '->') ||
