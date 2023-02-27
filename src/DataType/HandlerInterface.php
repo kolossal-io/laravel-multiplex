@@ -13,8 +13,6 @@ interface HandlerInterface
 {
     /**
      * Return the identifier for the data type being handled.
-     *
-     * @return string
      */
     public function getDataType(): string;
 
@@ -22,7 +20,6 @@ interface HandlerInterface
      * Determine if the value is of the correct type for this handler.
      *
      * @param  mixed  $value
-     * @return bool
      */
     public function canHandleValue($value): bool;
 
@@ -30,7 +27,6 @@ interface HandlerInterface
      * Convert the value to a string, so that it can be stored in the database.
      *
      * @param  mixed  $value
-     * @return string
      */
     public function serializeValue($value): string;
 

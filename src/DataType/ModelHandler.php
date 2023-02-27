@@ -33,7 +33,6 @@ class ModelHandler implements HandlerInterface
      * Convert the value to a string, so that it can be stored in the database.
      *
      * @param  Model  $value
-     * @return string
      */
     public function serializeValue($value): string
     {
