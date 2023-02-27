@@ -34,43 +34,31 @@ trait HasMeta
 
     /**
      * Collection of the changed meta data for this model.
-     *
-     * @var Collection|null
      */
     protected ?Collection $metaChanges = null;
 
     /**
      * Collection database columns overridden by meta.
-     *
-     * @var Collection|null
      */
     protected ?Collection $fallbackValues = null;
 
     /**
      * Cache storage for table column names.
-     *
-     * @var array
      */
     protected static array $metaSchemaColumnsCache = [];
 
     /**
      * Auto-save meta data when model is saved.
-     *
-     * @var bool
      */
     protected bool $autosaveMeta = true;
 
     /**
      * Static timestamp used to determine which meta is published yet.
-     *
-     * @var Carbon|null
      */
     protected static ?Carbon $staticMetaTimestamp = null;
 
     /**
      * The timestamp used to determine which meta is published yet for this model.
-     *
-     * @var Carbon|null
      */
     protected ?Carbon $metaTimestamp = null;
 
@@ -83,8 +71,6 @@ trait HasMeta
 
     /**
      * Boot the model trait.
-     *
-     * @return void
      */
     public static function bootHasMeta(): void
     {
@@ -122,9 +108,6 @@ trait HasMeta
 
     /**
      * Disable all meta key restrictions.
-     *
-     * @param  bool  $state
-     * @return void
      */
     public static function unguardMeta(bool $state = true): void
     {
@@ -133,8 +116,6 @@ trait HasMeta
 
     /**
      * Re-enable the meta key restrictions.
-     *
-     * @return void
      */
     public static function reguardMeta(): void
     {
@@ -143,8 +124,6 @@ trait HasMeta
 
     /**
      * Determine if meta keys are unguarded
-     *
-     * @return bool
      */
     public static function isMetaUnguarded(): bool
     {
@@ -154,7 +133,6 @@ trait HasMeta
     /**
      * Add value to the list of columns overridden by meta.
      *
-     * @param  string  $key
      * @param  mixed  $value
      * @return self
      */
@@ -168,7 +146,6 @@ trait HasMeta
     /**
      * Get the fallback value for the given key.
      *
-     * @param  string  $key
      * @return mixed|null
      */
     public function getFallbackValue(string $key)
@@ -186,8 +163,6 @@ trait HasMeta
 
     /**
      * Enable or disable auto-saving of meta data.
-     *
-     * @return self
      */
     public function autosaveMeta(bool $enable = true): self
     {
@@ -198,8 +173,6 @@ trait HasMeta
 
     /**
      * Get the value from the $metaKeys property if set or a fallback.
-     *
-     * @return array
      */
     protected function getMetaKeysProperty(): array
     {
@@ -263,8 +236,6 @@ trait HasMeta
 
     /**
      * Determine if the meta key wildcard (*) is set.
-     *
-     * @return bool
      */
     public function isMetaWildcardSet(): bool
     {
@@ -273,9 +244,6 @@ trait HasMeta
 
     /**
      * Determine if the given key is an allowed meta key.
-     *
-     * @param  string  $key
-     * @return bool
      */
     public function isModelAttribute(string $key): bool
     {
@@ -292,8 +260,6 @@ trait HasMeta
     /**
      * Get the meta keys explicitly allowed by using `$metaKeys`
      * or by typecasting to `MetaAttribute::class`.
-     *
-     * @return array
      */
     public function getExplicitlyAllowedMetaKeys(bool $fromCache = true): array
     {
@@ -312,9 +278,6 @@ trait HasMeta
 
     /**
      * Determine if the given key was explicitly allowed.
-     *
-     * @param  string  $key
-     * @return bool
      */
     public function isExplicitlyAllowedMetaKey(string $key): bool
     {
@@ -323,9 +286,6 @@ trait HasMeta
 
     /**
      * Determine if the given key is an allowed meta key.
-     *
-     * @param  string  $key
-     * @return bool
      */
     public function isValidMetaKey(string $key): bool
     {
@@ -348,7 +308,6 @@ trait HasMeta
      * Determine if model table has a given column.
      *
      * @param  [string]  $column
-     * @return bool
      */
     public function hasColumn($column): bool
     {
@@ -367,8 +326,6 @@ trait HasMeta
 
     /**
      * Get the timestamp to take as `now` when looking up meta data.
-     *
-     * @return Carbon
      */
     public function getMetaTimestamp(): Carbon
     {
@@ -381,8 +338,6 @@ trait HasMeta
 
     /**
      * Relationship to all `Meta` models associated with this model.
-     *
-     * @return MorphMany
      */
     public function allMeta(): MorphMany
     {
@@ -391,8 +346,6 @@ trait HasMeta
 
     /**
      * Relationship to only published `Meta` models associated with this model.
-     *
-     * @return MorphMany
      */
     public function publishedMeta(): MorphMany
     {
@@ -402,8 +355,6 @@ trait HasMeta
     /**
      * Relationship to the `Meta` model.
      * Groups by `key` and only shows the latest item that is published yet.
-     *
-     * @return MorphMany
      */
     public function meta(): MorphMany
     {
@@ -412,8 +363,6 @@ trait HasMeta
 
     /**
      * Get Meta model class name.
-     *
-     * @return string
      */
     protected function getMetaClassName(): string
     {
@@ -423,7 +372,6 @@ trait HasMeta
     /**
      * Get meta value for key.
      *
-     * @param  string  $key
      * @param  mixed  $default
      * @return  mixed
      */
@@ -434,8 +382,6 @@ trait HasMeta
 
     /**
      * Get all meta values as a key => value collection.
-     *
-     * @return  Collection
      */
     public function pluckMeta(): Collection
     {
@@ -495,9 +441,6 @@ trait HasMeta
 
     /**
      * Determine wether the given meta exists.
-     *
-     * @param  string  $key
-     * @return bool
      */
     public function hasMeta(string $key): bool
     {
@@ -521,8 +464,6 @@ trait HasMeta
 
     /**
      * Get the dirty meta collection.
-     *
-     * @return Collection
      */
     public function getDirtyMeta(): Collection
     {
@@ -531,9 +472,6 @@ trait HasMeta
 
     /**
      * Determine if meta is dirty.
-     *
-     * @param  string|null  $key
-     * @return bool
      */
     public function isMetaDirty(?string $key = null): bool
     {
@@ -581,9 +519,7 @@ trait HasMeta
     /**
      * Set meta values from array of $key => $value pairs.
      *
-     * @param  array  $metas
      * @param  ?Carbon  $publishAt
-     * @return Collection
      *
      * @throws MetaException if invalid keys are used.
      */
@@ -696,8 +632,6 @@ trait HasMeta
 
     /**
      * Reset the meta changes for the given key.
-     *
-     * @param  string  $key
      */
     public function resetMeta(string $key): Collection
     {
@@ -753,8 +687,6 @@ trait HasMeta
 
     /**
      * Delete all meta for the given model.
-     *
-     * @return self
      */
     public function purgeMeta(): self
     {
@@ -765,8 +697,6 @@ trait HasMeta
 
     /**
      * Get the locally collected meta data.
-     *
-     * @return Collection
      */
     public function getMetaChanges(): Collection
     {
@@ -791,8 +721,6 @@ trait HasMeta
 
     /**
      * Refresh the meta relations.
-     *
-     * @return self
      */
     public function refreshMetaRelations(): self
     {
@@ -814,7 +742,6 @@ trait HasMeta
     /**
      * Store a single Meta model.
      *
-     * @param  Meta  $meta
      * @return Meta|false
      */
     protected function storeMeta(Meta $meta)
@@ -919,8 +846,6 @@ trait HasMeta
 
     /**
      * Store the model without saving attached meta data.
-     *
-     * @return bool
      */
     public function saveWithoutMeta(): bool
     {
@@ -935,7 +860,6 @@ trait HasMeta
      * Travel to the specified point in time for storing or retrieving meta.
      *
      * @param  string|DateTimeInterface|null  $time
-     * @return self
      */
     public function withMetaAt($time = null): self
     {
@@ -955,8 +879,6 @@ trait HasMeta
 
     /**
      * Travel to the current time for storing or retrieving meta.
-     *
-     * @return self
      */
     public function withCurrentMeta(): self
     {
@@ -967,7 +889,6 @@ trait HasMeta
      * Travel to the specified point in time for storing or retrieving meta.
      *
      * @param  string|DateTimeInterface|null  $time
-     * @return void
      */
     public function scopeTravelTo(Builder $query, $time = null): void
     {
@@ -976,8 +897,6 @@ trait HasMeta
 
     /**
      * Travel to the current time for storing or retrieving meta.
-     *
-     * @return void
      */
     public function scopeTravelBack(Builder $query): void
     {
@@ -988,10 +907,7 @@ trait HasMeta
      * Query records having meta data for the given key.
      * Pass an array to find records having meta for at least one of the given keys.
      *
-     * @param  Builder  $query
      * @param  string|array  $key
-     * @param  string  $boolean
-     * @return void
      */
     public function scopeWhereHasMeta(Builder $query, $key, string $boolean = 'and'): void
     {
@@ -1007,9 +923,7 @@ trait HasMeta
      * Query records having meta data for the given key with "or" where clause.
      * Pass an array to find records having meta for at least one of the given keys.
      *
-     * @param  Builder  $query
      * @param  string|array  $key
-     * @return void
      */
     public function scopeOrWhereHasMeta(Builder $query, $key): void
     {
@@ -1020,10 +934,7 @@ trait HasMeta
      * Query records not having meta data for the given key.
      * Pass an array to find records not having meta for any of the given keys.
      *
-     * @param  Builder  $query
      * @param  string|array  $key
-     * @param  string  $boolean
-     * @return void
      */
     public function scopeWhereDoesntHaveMeta(Builder $query, $key, string $boolean = 'and'): void
     {
@@ -1039,9 +950,7 @@ trait HasMeta
      * Query records not having meta data for the given key  with "or" where clause..
      * Pass an array to find records not having meta for any of the given keys.
      *
-     * @param  Builder  $query
      * @param  string|array  $key
-     * @return void
      */
     public function scopeOrWhereDoesntHaveMeta(Builder $query, $key): void
     {
@@ -1052,12 +961,10 @@ trait HasMeta
      * Query records having meta with a specific key and value.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
      *
-     * @param  Builder  $query
      * @param  string|\Closure  $key
      * @param  mixed  $operator
      * @param  mixed  $value
      * @param  string  $boolean
-     * @return void
      */
     public function scopeWhereMeta(Builder $query, $key, $operator = null, $value = null, $boolean = 'and'): void
     {
@@ -1082,11 +989,9 @@ trait HasMeta
      * Query records having meta with a specific key and value with "or" clause.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
      *
-     * @param  Builder  $query
      * @param  string|\Closure  $key
      * @param  mixed  $operator
      * @param  mixed  $value
-     * @return void
      */
     public function scopeOrWhereMeta(Builder $query, $key, $operator = null, $value = null): void
     {
@@ -1098,12 +1003,9 @@ trait HasMeta
      * Make sure that the supplied $value is a string or string castable.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
      *
-     * @param  Builder  $query
-     * @param  string  $key
      * @param  mixed  $operator
      * @param  mixed  $value
      * @param  string  $boolean
-     * @return void
      */
     public function scopeWhereRawMeta(Builder $query, string $key, $operator, $value = null, $boolean = 'and'): void
     {
@@ -1125,11 +1027,8 @@ trait HasMeta
      * Make sure that the supplied $value is a string or string castable.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
      *
-     * @param  Builder  $query
-     * @param  string  $key
      * @param  mixed  $operator
      * @param  mixed  $value
-     * @return void
      */
     public function scopeOrWhereRawMeta(Builder $query, string $key, $operator, $value = null): void
     {
@@ -1142,13 +1041,9 @@ trait HasMeta
      *
      * Available types can be found in `config('multiplex.datatypes')`.
      *
-     * @param  Builder  $query
-     * @param  string  $type
-     * @param  string  $key
      * @param  mixed  $operator
      * @param  mixed  $value
      * @param  string  $boolean
-     * @return void
      */
     public function scopeWhereMetaOfType(Builder $query, string $type, string $key, $operator, $value = null, $boolean = 'and'): void
     {
@@ -1171,12 +1066,8 @@ trait HasMeta
      *
      * Available types can be found in `config('multiplex.datatypes')`.
      *
-     * @param  Builder  $query
-     * @param  string  $type
-     * @param  string  $key
      * @param  mixed  $operator
      * @param  mixed  $value
-     * @return void
      */
     public function scopeOrWhereMetaOfType(Builder $query, string $type, string $key, $operator, $value = null): void
     {
@@ -1186,11 +1077,7 @@ trait HasMeta
     /**
      * Query records having one of the given values for the given key.
      *
-     * @param  Builder  $query
-     * @param  string  $key
-     * @param  array  $values
      * @param  string  $boolean
-     * @return void
      */
     public function scopeWhereMetaIn(Builder $query, string $key, array $values, $boolean = 'and'): void
     {
@@ -1204,11 +1091,6 @@ trait HasMeta
 
     /**
      * Query records having one of the given values for the given key with "or" clause.
-     *
-     * @param  Builder  $query
-     * @param  string  $key
-     * @param  array  $values
-     * @return void
      */
     public function scopeOrWhereMetaIn(Builder $query, string $key, array $values): void
     {
@@ -1218,10 +1100,7 @@ trait HasMeta
     /**
      * Query records where meta does not exist or is empty.
      *
-     * @param  Builder  $query
      * @param  string|array  $key
-     * @param  string  $boolean
-     * @return void
      */
     public function scopeWhereMetaEmpty(Builder $query, $key, string $boolean = 'and'): void
     {
@@ -1237,9 +1116,7 @@ trait HasMeta
     /**
      * Query records where meta does not exist or is empty with "or" clause.
      *
-     * @param  Builder  $query
      * @param  string|array  $key
-     * @return void
      */
     public function scopeOrWhereMetaEmpty(Builder $query, $key): void
     {
@@ -1249,10 +1126,7 @@ trait HasMeta
     /**
      * Query records where meta exists and is not empty.
      *
-     * @param  Builder  $query
      * @param  string|array  $key
-     * @param  string  $boolean
-     * @return void
      */
     public function scopeWhereMetaNotEmpty(Builder $query, $key, string $boolean = 'and'): void
     {
@@ -1269,9 +1143,7 @@ trait HasMeta
     /**
      * Query records where meta exists and is not empty with "or" clause.
      *
-     * @param  Builder  $query
      * @param  string|array  $key
-     * @return void
      */
     public function scopeOrWhereMetaNotEmpty(Builder $query, $key): void
     {

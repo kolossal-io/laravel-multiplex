@@ -102,8 +102,6 @@ class Meta extends Model
 
     /**
      * Metable Relation.
-     *
-     * @return MorphTo
      */
     public function metable(): MorphTo
     {
@@ -114,7 +112,6 @@ class Meta extends Model
      * Set forced type to be used.
      *
      * @param  ?string  $value
-     * @return self
      */
     public function forceType(?string $value): self
     {
@@ -173,8 +170,6 @@ class Meta extends Model
 
     /**
      * Determine if this is the most recent meta for this key.
-     *
-     * @return bool
      */
     public function getIsCurrentAttribute(): bool
     {
@@ -186,8 +181,6 @@ class Meta extends Model
 
     /**
      * Determine if this is a planned record not yet published.
-     *
-     * @return bool
      */
     public function getIsPlannedAttribute(): bool
     {
@@ -206,8 +199,6 @@ class Meta extends Model
 
     /**
      * Load the datatype Registry from the container.
-     *
-     * @return Registry
      */
     public static function getDataTypeRegistry(): Registry
     {
@@ -216,9 +207,6 @@ class Meta extends Model
 
     /**
      * Query records where value is considered empty.
-     *
-     * @param  Builder  $query
-     * @return void
      */
     public function scopeWhereValueEmpty(Builder $query): void
     {
@@ -227,9 +215,6 @@ class Meta extends Model
 
     /**
      * Query records where value is considered not empty.
-     *
-     * @param  Builder  $query
-     * @return void
      */
     public function scopeWhereValueNotEmpty(Builder $query): void
     {
@@ -240,11 +225,9 @@ class Meta extends Model
      * Query records where value equals the serialized version of the given value.
      * If `$type` is omited the type will be taken from the data type registry.
      *
-     * @param  Builder  $query
      * @param  mixed  $operator
      * @param  mixed  $value
      * @param  ?string  $type
-     * @return void
      */
     public function scopeWhereValue(Builder $query, $value, $operator = '=', ?string $type = null): void
     {
@@ -264,9 +247,7 @@ class Meta extends Model
      * If `$type` is omited the type will be taken from the data type registry.
      *
      * @param  Builder<Meta>  $query
-     * @param  array  $values
      * @param  ?string  $type
-     * @return void
      */
     public function scopeWhereValueIn(Builder $query, array $values, ?string $type = null): void
     {
@@ -292,7 +273,6 @@ class Meta extends Model
      * Query published meta only.
      *
      * @param  Builder<Meta>  $query
-     * @return void
      */
     public function scopePublished(Builder $query): void
     {
@@ -304,7 +284,6 @@ class Meta extends Model
      *
      * @param  Builder<Meta>  $query
      * @param  string|\DateTimeInterface|null  $time
-     * @return void
      */
     public function scopePublishedBefore(Builder $query, $time = null): void
     {
@@ -315,7 +294,6 @@ class Meta extends Model
      * Query planned meta only.
      *
      * @param  Builder<Meta>  $query
-     * @return void
      */
     public function scopePlanned(Builder $query): void
     {
@@ -327,7 +305,6 @@ class Meta extends Model
      *
      * @param  Builder<Meta>  $query
      * @param  string|\DateTimeInterface|null  $time
-     * @return void
      */
     public function scopePublishedAfter(Builder $query, $time = null): void
     {
@@ -339,7 +316,6 @@ class Meta extends Model
      *
      * @param  Builder<Meta>  $query
      * @param  string|\DateTimeInterface|null  $now
-     * @return void
      */
     public function scopeWithoutCurrent(Builder $query, $now = null): void
     {
@@ -351,7 +327,6 @@ class Meta extends Model
      *
      * @param  Builder<Meta>  $query
      * @param  string|\DateTimeInterface|null  $now
-     * @return void
      */
     public function scopeWithoutHistory(Builder $query, $now = null): void
     {
@@ -366,7 +341,6 @@ class Meta extends Model
      *
      * @param  Builder<Meta>  $query
      * @param  string|\DateTimeInterface|null  $now
-     * @return void
      */
     public function scopeOnlyCurrent(Builder $query, $now = null): void
     {
@@ -379,7 +353,6 @@ class Meta extends Model
      *
      * @param  Builder<Meta>  $query
      * @param  string|\DateTimeInterface|null  $now
-     * @return void
      */
     public function scopeJoinLatest(Builder $query, $now = null): void
     {

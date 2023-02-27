@@ -78,7 +78,6 @@ class RegistryTest extends TestCase
     }
 
     /**
-     * @param $type
      * @return \PHPUnit\Framework\MockObject\MockObject|HandlerInterface
      */
     protected function mockHandlerWithType($type): HandlerInterface

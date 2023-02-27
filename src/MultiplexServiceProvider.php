@@ -33,8 +33,6 @@ class MultiplexServiceProvider extends ServiceProvider
      * @copyright Plank Multimedia Inc.
      *
      * @link https://github.com/plank/laravel-metable
-     *
-     * @return void
      */
     protected function registerDataTypeRegistry(): void
     {
