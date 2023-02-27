@@ -45,7 +45,6 @@ class DateHandler implements HandlerInterface
      * {@inheritDoc}
      *
      * @param  DateTimeInterface|string|null  $value
-     * @return string
      */
     public function serializeValue($value): string
     {

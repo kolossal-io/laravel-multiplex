@@ -33,7 +33,6 @@ class ModelCollectionHandler implements HandlerInterface
      * Convert the value to a string, so that it can be stored in the database.
      *
      * @param  Collection  $value
-     * @return string
      */
     public function serializeValue($value): string
     {
@@ -81,7 +80,6 @@ class ModelCollectionHandler implements HandlerInterface
     /**
      * Load each model instance, grouped by class.
      *
-     * @param  array  $items
      * @return array
      */
     private function loadModels(array $items)
