@@ -448,6 +448,22 @@ class HasMetaTest extends TestCase
     }
 
     /** @test */
+    public function it_can_save_meta_with_same_value_for_different_timestamps()
+    {
+        $this->travelTo('2020-02-01 00:00:00');
+
+        $model = Post::factory()->create();
+
+        $this->assertEquals(0, $model->allMeta()->count());
+
+        $model->saveMetaAt('foo', 123.29, '2020-01-01 00:00:00');
+        $model->saveMetaAt('foo', 123.29, '2019-01-01 00:00:00');
+        $model->saveMetaAt('foo', 123.29, '2021-01-01 00:00:00');
+
+        $this->assertEquals(3, $model->allMeta()->count());
+    }
+
+    /** @test */
     public function it_can_save_multiple_meta_for_the_future()
     {
         $model = Post::factory()->create();
