@@ -372,7 +372,7 @@ class ExistingColumnOverrideTest extends TestCase
             $num = $i + 1;
             $this->assertSame("Title {$num}", $model->toArray()['title']);
 
-            $model->title = "Meta Title ${num}";
+            $model->title = "Meta Title {$num}";
             $model->save();
         });
 
