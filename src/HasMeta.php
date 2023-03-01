@@ -326,9 +326,6 @@ trait HasMeta
 
     /**
      * Set the timestamp to take as `now` when looking up and storing meta data.
-     *
-     * @param Carbon|null $timestamp
-     * @return self
      */
     public function setMetaTimestamp(?Carbon $timestamp = null): self
     {
