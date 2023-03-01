@@ -329,7 +329,21 @@ trait HasMeta
     }
 
     /**
-     * Get the timestamp to take as `now` when looking up meta data.
+     * Set the timestamp to take as `now` when looking up and storing meta data.
+     *
+     * @param Carbon|null $timestamp
+     * @return self
+     */
+    public function setMetaTimestamp(?Carbon $timestamp = null): self
+    {
+        $this->metaTimestamp = $timestamp;
+        $this->refreshMetaRelations();
+
+        return $this;
+    }
+
+    /**
+     * Get the timestamp to take as `now` when looking up and storing meta data.
      */
     public function getMetaTimestamp(): Carbon
     {
@@ -588,6 +602,8 @@ trait HasMeta
          */
         if ($publishAt) {
             $attributes['published_at'] = $publishAt;
+        } elseif ($this->metaTimestamp) {
+            $attributes['published_at'] = $this->metaTimestamp;
         }
 
         if (($model = $this->findMeta($key))) {
@@ -840,11 +856,11 @@ trait HasMeta
         $args = func_get_args();
 
         $previousTimestamp = $this->metaTimestamp;
-        $this->metaTimestamp = Carbon::parse(array_pop($args));
+        $this->setMetaTimestamp(Carbon::parse(array_pop($args)));
 
         return tap(
             $this->saveMeta(...$args),
-            fn () => $this->metaTimestamp = $previousTimestamp
+            fn () => $this->setMetaTimestamp($previousTimestamp)
         );
     }
 
@@ -876,7 +892,7 @@ trait HasMeta
             $this->refreshMetaRelations();
         }
 
-        $this->metaTimestamp = $time;
+        $this->setMetaTimestamp($time);
 
         return $this;
     }
