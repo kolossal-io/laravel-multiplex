@@ -376,7 +376,7 @@ class Meta extends Model
          */
         $maxId = static::query()
             ->select(
-                DB::raw('`key` AS key_aggregate'),
+                'key AS key_aggregate',
                 DB::raw('MAX(id) as id_aggregate'),
                 'metable_id',
                 'metable_type',
