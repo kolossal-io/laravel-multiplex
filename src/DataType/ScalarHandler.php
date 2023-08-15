@@ -2,6 +2,8 @@
 
 namespace Kolossal\Multiplex\DataType;
 
+use Exception;
+
 /**
  * Handle serialization of scalar values.
  *
@@ -39,6 +41,10 @@ abstract class ScalarHandler implements HandlerInterface
      */
     public function serializeValue($value): string
     {
+        if (!is_null($value) && !is_bool($value) && !is_float($value) && !is_int($value) && !is_resource($value) && !is_string($value)) {
+            throw new Exception('Invalid value passed as scalar value. Use a boolean, float, int, resource, string value or null.');
+        }
+
         return strval($value);
     }
 

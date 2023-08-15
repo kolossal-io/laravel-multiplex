@@ -28,12 +28,12 @@
         "nunomaduro/collision": "^6.1|^7.0",
         "nunomaduro/larastan": "^2.0.1",
         "orchestra/testbench": "^7.0|^8.0",
-        "pestphp/pest": "^2.14",
-        "pestphp/pest-plugin-laravel": "^2.2",
+        "pestphp/pest": "^1.21|^2.0",
+        "pestphp/pest-plugin-laravel": "^1.1|^2.0",
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan-deprecation-rules": "^1.0",
         "phpstan/phpstan-phpunit": "^1.0",
-        "phpunit/phpunit": "^10.3"
+        "phpunit/phpunit": "^9.5|^10.3"
     },
     "autoload": {
         "psr-4": {
