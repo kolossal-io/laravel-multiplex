@@ -394,10 +394,10 @@ trait HasMeta
     /**
      * Get all meta values as a key => value collection.
      */
-    public function pluckMeta(): Collection
+    public function pluckMeta(bool $withFallbackValues = false): Collection
     {
         return collect($this->getExplicitlyAllowedMetaKeys())
-            ->mapWithKeys(fn ($key) => [$key => null])
+            ->mapWithKeys(fn ($key) => [$key => $withFallbackValues ? $this->getFallbackValue($key) : null])
             ->merge($this->meta->pluck('value', 'key'));
     }
 
