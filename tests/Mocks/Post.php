@@ -20,6 +20,11 @@ class Post extends Model
         'appendable_foo' => MetaAttribute::class,
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function setTestHasMutatorMeta($value)
     {
         return "Test {$value}.";

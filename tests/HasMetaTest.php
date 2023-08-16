@@ -13,6 +13,7 @@ use Kolossal\Multiplex\Tests\Mocks\Dummy;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\PostWithExistingColumn;
 use Kolossal\Multiplex\Tests\Mocks\PostWithoutSoftDelete;
+use Kolossal\Multiplex\Tests\Mocks\User;
 use PDOException;
 
 class HasMetaTest extends TestCase
@@ -1270,24 +1271,22 @@ class HasMetaTest extends TestCase
     }
 
     /** @test */
-    public function it_will_prefer_relations_over_meta()
+    public function it_will_throw_an_error_for_relation_attributes()
     {
         $post = Post::factory()->create();
 
-        $post->saveMeta('meta', 'Meta Value');
         $post->saveMeta('other', 'Other Value');
 
-        $this->assertDatabaseCount('meta', 2);
-
-        $this->assertSame('Meta Value', $post->getMeta('meta'));
-        $this->assertNotEquals('Meta Value', $post->meta);
-        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $post->meta);
-        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $post->getAttribute('meta'));
+        $this->assertDatabaseCount('meta', 1);
 
         $this->assertSame('Other Value', $post->getMeta('other'));
         $this->assertSame('Other Value', $post->other);
         $this->assertIsString($post->other);
         $this->assertIsString($post->getAttribute('other'));
+
+        $this->expectException(MetaException::class);
+
+        $post->saveMeta('meta', 'Meta Value');
     }
 
     /** @test */
@@ -1404,5 +1403,23 @@ class HasMetaTest extends TestCase
             'float_field' => null,
             'integer_field' => null,
         ], $b->pluckMeta()->toArray());
+    }
+
+    /** @test */
+    public function it_does_not_load_meta_if_relation_is_null()
+    {
+        $post = Post::factory()->create();
+
+        $this->assertNull($post->user);
+        $this->assertFalse($post->relationLoaded('meta'));
+    }
+
+    /** @test */
+    public function it_does_not_load_meta_if_relation_is_not_null()
+    {
+        $post = Post::factory()->for(User::factory())->create();
+
+        $this->assertInstanceOf(User::class, $post->user);
+        $this->assertFalse($post->relationLoaded('meta'));
     }
 }

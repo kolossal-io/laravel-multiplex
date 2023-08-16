@@ -248,6 +248,7 @@ trait HasMeta
     public function isModelAttribute(string $key): bool
     {
         return
+            $this->isRelation($key) ||
             $this->hasSetMutator($key) ||
             $this->hasAttributeSetMutator($key) ||
             $this->isEnumCastable($key) ||
