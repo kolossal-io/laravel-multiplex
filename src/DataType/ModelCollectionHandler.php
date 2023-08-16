@@ -3,6 +3,7 @@
 namespace Kolossal\Multiplex\DataType;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Handle serialization of Eloquent collections.
@@ -67,8 +68,8 @@ class ModelCollectionHandler implements HandlerInterface
 
         // Repopulate collection keys with loaded models.
         foreach ($data['items'] as $key => $item) {
-            if (is_null($item['key'])) {
-                $collection->put($key, new $item['class']());
+            if (is_null($item['key']) && ($model = new $item['class']()) instanceof Model) {
+                $collection->put($key, $model);
             } elseif (isset($models[$item['class']][$item['key']])) {
                 $collection->put($key, $models[$item['class']][$item['key']]);
             }

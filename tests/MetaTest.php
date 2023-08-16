@@ -18,7 +18,7 @@ class MetaTest extends TestCase
     use RefreshDatabase;
     use AccessesProtectedProperties;
 
-    public function handlerProvider()
+    public static function handlerProvider()
     {
         $timestamp = '2017-01-01 00:00:00.000000+0000';
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s.uO', $timestamp);
