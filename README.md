@@ -549,6 +549,8 @@ class Post extends Model
 
 Trying to assign a value to a meta key that is not allowed will throw a `Kolossal\Multiplex\Exceptions\MetaException`.
 
+If you have [Eloquent Strictness](https://laravel.com/docs/10.x/eloquent#configuring-eloquent-strictness) enabled it is recommended to [explicitely cast the meta attributes to `MetaAttribute`](https://github.com/kolossal-io/laravel-multiplex/issues/19#issuecomment-1584150675).
+
 ## Typecast Meta Keys
 
 Sometimes you may wish to force typecasting of meta attributes. You can bypass guessing the correct type and define which type should be used for specific meta keys.
