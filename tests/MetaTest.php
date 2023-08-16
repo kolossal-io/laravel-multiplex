@@ -160,6 +160,8 @@ class MetaTest extends TestCase
     {
         $model = Post::factory()->create();
 
+        $model->setMetaTimestamp(now());
+
         $model->saveMetaAt('foo', 1, '-1 day');
         $model->saveMeta('foo', 2);
         $model->saveMetaAt('foo', 3, '+1 day');
@@ -175,6 +177,8 @@ class MetaTest extends TestCase
     public function it_can_query_published_meta()
     {
         $model = Post::factory()->create();
+
+        $model->setMetaTimestamp(now());
 
         Post::factory()->create()->saveMeta('foo', 'another');
 
@@ -196,6 +200,8 @@ class MetaTest extends TestCase
     public function it_can_query_unpublished_meta()
     {
         $model = Post::factory()->create();
+
+        $model->setMetaTimestamp(now());
 
         Post::factory()->create()->saveMeta('foo', 'another');
 
@@ -282,6 +288,8 @@ class MetaTest extends TestCase
     {
         $model = Post::factory()->create();
 
+        $model->setMetaTimestamp(now());
+
         Post::factory()->create()->saveMeta('foo', 'another');
 
         $model->saveMetaAt('bar', 'old', '-3 days');
@@ -322,6 +330,8 @@ class MetaTest extends TestCase
     public function it_can_include_only_current()
     {
         $model = Post::factory()->create();
+
+        $model->setMetaTimestamp(now());
 
         Post::factory()->create()->saveMeta('foo', 'another');
 
