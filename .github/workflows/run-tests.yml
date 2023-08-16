@@ -49,7 +49,7 @@ jobs:
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
       - name: List Installed Dependencies
-        run: composer show -D
+        run: composer show
 
       - name: Execute tests
         env:
