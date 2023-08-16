@@ -6,9 +6,13 @@ on:
       - main
 
 jobs:
+  tests:
+    name: Run Tests
+    uses: ./.github/workflows/snippet-tests.yml
+
   release:
     runs-on: ubuntu-latest
-
+    needs: tests
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3

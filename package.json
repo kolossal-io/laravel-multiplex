@@ -1,5 +1,6 @@
 {
     "name": "laravel-multiplex",
+    "private": true,
     "version": "1.0.0",
     "description": "A Laravel package to attach versioned meta data to Eloquent models.",
     "scripts": {
