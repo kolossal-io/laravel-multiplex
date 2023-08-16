@@ -54,6 +54,9 @@ jobs:
         id: coverage
         run: echo "ENABLED={ matrix.php == '8.2' && matrix.stability == 'prefer-stable' && matrix.laravel == '10.*' }" >> "$GITHUB_OUTPUT"
 
+      - name: Output if Code Coverage is needed
+        run: echo "${{ steps.coverage.ENABLED }}"
+
       - name: Execute tests
         if: ${{ steps.coverage.ENABLED == false }}
         run: vendor/bin/pest
