@@ -1,0 +1,29 @@
+{
+    "name": "laravel-multiplex",
+    "version": "1.0.0",
+    "description": "A Laravel package to attach versioned meta data to Eloquent models.",
+    "scripts": {
+        "release": "semantic-release"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kolossal-io/laravel-multiplex.git"
+    },
+    "author": "kolossal.io",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/kolossal-io/laravel-multiplex/issues"
+    },
+    "homepage": "https://github.com/kolossal-io/laravel-multiplex#readme",
+    "devDependencies": {
+        "semantic-release": "^21.0.7"
+    },
+    "release": {
+        "branches": [
+            "main"
+        ]
+    },
+    "publishConfig": {
+        "access": "restricted"
+    }
+}
