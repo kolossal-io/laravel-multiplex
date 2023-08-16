@@ -2,7 +2,6 @@
 
 namespace Kolossal\Multiplex\Tests\Mocks;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -34,20 +33,5 @@ class Post extends Model
     public function getTestHasAccessorMeta($value)
     {
         return $value ? "Test {$value}." : 'Empty';
-    }
-
-    public function getCustomMutatorAttribute()
-    {
-        return null;
-    }
-
-    public function customGetAttribute(): Attribute
-    {
-        return Attribute::get(fn () => null);
-    }
-
-    public function customAttribute(): Attribute
-    {
-        return Attribute::make(fn () => null);
     }
 }
