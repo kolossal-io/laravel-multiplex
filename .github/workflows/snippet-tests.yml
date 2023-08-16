@@ -46,15 +46,15 @@ jobs:
         run: echo "directory={$(composer config cache-dir)}" >> $GITHUB_OUTPUT
 
       - name: Cache composer dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-composer-modules
         with:
           path: ${{ steps.composer-cache.outputs.directory }}
           key: php-${{ matrix.php }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys:
-            - php-${{ matrix.php }}-composer-${{ hashFiles('composer.lock') }}
-            - php-${{ matrix.php }}-composer-
+          restore-keys: |
+            php-${{ matrix.php }}-composer-${{ hashFiles('composer.lock') }}
+            php-${{ matrix.php }}-composer-
 
       - name: Install dependencies
         run: |
