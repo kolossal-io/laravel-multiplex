@@ -25,8 +25,6 @@ jobs:
             stability: prefer-lowest
 
     name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
-    env:
-      with_coverage: ${{ matrix.php == '8.2' && matrix.stability == 'prefer-stable' && matrix.laravel == '10.*' }}
 
     steps:
       - name: Checkout code
@@ -52,20 +50,22 @@ jobs:
       - name: List Installed Dependencies
         run: composer show
 
+      - name: Determine if Code Coverage is needed
+        id: coverage
+        run: echo "ENABLED={ matrix.php == '8.2' && matrix.stability == 'prefer-stable' && matrix.laravel == '10.*' }" >> "$GITHUB_OUTPUT"
+
       - name: Execute tests
-        if: ${{ env.with_coverage == false }}
-        env:
-          XDEBUG_MODE: coverage
-        run: vendor/bin/pest --coverage --coverage-clover ./coverage.xml
+        if: ${{ !steps.coverage.ENABLED }}
+        run: vendor/bin/pest
 
       - name: Execute tests with coverage
-        if: ${{ env.with_coverage == true }}
+        if: ${{ steps.coverage.ENABLED }}
         env:
           XDEBUG_MODE: coverage
         run: vendor/bin/pest --coverage --coverage-clover ./coverage.xml
 
       - name: Upload coverage to CodeCov
-        if: ${{ env.with_coverage == true }}
+        if: ${{ steps.coverage.ENABLED }}
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
