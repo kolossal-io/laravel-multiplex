@@ -51,9 +51,8 @@ jobs:
           cache-name: cache-composer-modules
         with:
           path: ${{ steps.composer-cache.outputs.directory }}
-          key: php-${{ matrix.php }}-composer-${{ hashFiles('composer.lock') }}
+          key: php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
           restore-keys: |
-            php-${{ matrix.php }}-composer-${{ hashFiles('composer.lock') }}
             php-${{ matrix.php }}-composer-
 
       - name: Install dependencies
