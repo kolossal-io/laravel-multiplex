@@ -37,6 +37,10 @@ class ModelCollectionHandler implements HandlerInterface
      */
     public function serializeValue($value): string
     {
+        if (!($value instanceof Collection)) {
+            return '';
+        }
+
         $items = $value->mapWithKeys(
             fn ($model, $key) => [$key => [
                 'class' => get_class($model),
@@ -52,14 +56,14 @@ class ModelCollectionHandler implements HandlerInterface
      */
     public function unserializeValue(?string $value)
     {
-        if (is_null($value)) {
-            return $value;
+        if (!is_string($value) || empty($value)) {
+            return null;
         }
 
         $data = json_decode($value, true);
 
-        if (!is_array($data)) {
-            return $value;
+        if (is_null($data) || !is_array($data) || !isset($data['class'])) {
+            return null;
         }
 
         /** @var Collection */

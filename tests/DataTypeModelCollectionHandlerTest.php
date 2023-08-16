@@ -53,4 +53,33 @@ class DataTypeModelCollectionHandlerTest extends TestCase
             $unserialized->pluck('title')->sort()->toArray()
         );
     }
+
+    /**
+     * @test
+     */
+    public function it_will_serialize_empty_value_if_no_collection_is_passed()
+    {
+        $model = Post::factory()->create();
+
+        $handler = new DataType\ModelCollectionHandler;
+
+        $serialized = $handler->serializeValue($model);
+
+        $this->assertSame('', $serialized);
+        $this->assertNull($handler->unserializeValue($serialized));
+    }
+
+    /**
+     * @test
+     */
+    public function it_will_unserialize_to_null_for_invalid_values()
+    {
+        $model = Post::factory()->create();
+
+        $handler = new DataType\ModelCollectionHandler;
+
+        $this->assertNull($handler->unserializeValue('123'));
+        $this->assertNull($handler->unserializeValue($model));
+        $this->assertNull($handler->unserializeValue(123));
+    }
 }
