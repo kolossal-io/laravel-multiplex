@@ -55,17 +55,17 @@ jobs:
         run: echo "ENABLED={ matrix.php == '8.2' && matrix.stability == 'prefer-stable' && matrix.laravel == '10.*' }" >> "$GITHUB_OUTPUT"
 
       - name: Execute tests
-        if: ${{ !steps.coverage.ENABLED }}
+        if: ${{ steps.coverage.ENABLED == false }}
         run: vendor/bin/pest
 
       - name: Execute tests with coverage
-        if: ${{ steps.coverage.ENABLED }}
+        if: ${{ steps.coverage.ENABLED == true }}
         env:
           XDEBUG_MODE: coverage
         run: vendor/bin/pest --coverage --coverage-clover ./coverage.xml
 
       - name: Upload coverage to CodeCov
-        if: ${{ steps.coverage.ENABLED }}
+        if: ${{ steps.coverage.ENABLED == true }}
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
