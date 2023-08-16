@@ -239,6 +239,8 @@ class MetaTest extends TestCase
 
         Post::factory()->create()->saveMeta('foo', 'another');
 
+        $model->setMetaTimestamp(now());
+
         $model->saveMetaAt('bar', 'old', '-3 days');
         $model->saveMetaAt('bar', 'foo', '-2 days');
         $model->saveMetaAt('foo', 1, '-1 day');
