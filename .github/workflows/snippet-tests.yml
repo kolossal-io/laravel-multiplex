@@ -52,7 +52,9 @@ jobs:
         with:
           path: ${{ steps.composer-cache.outputs.directory }}
           key: php-${{ matrix.php }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: php-${{ matrix.php }}-composer-
+          restore-keys:
+            - php-${{ matrix.php }}-composer-${{ hashFiles('composer.lock') }}
+            - php-${{ matrix.php }}-composer-
 
       - name: Install dependencies
         run: |
