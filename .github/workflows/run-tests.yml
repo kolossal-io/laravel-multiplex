@@ -13,12 +13,19 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest]
-        php: [8.0, 8.2]
-        laravel: [9.*]
+        php: [8.0, 8.1, 8.2]
+        laravel: [9.*, 10.*]
         stability: [prefer-lowest, prefer-stable]
         include:
+          - laravel: 10.*
+            testbench: 8.*
           - laravel: 9.*
             testbench: 7.*
+        exclude:
+          - laravel: 10.*
+            php: 8.0
+          - laravel: 9.*
+            stability: prefer-lowest
 
     name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
@@ -44,7 +51,7 @@ jobs:
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
       - name: List Installed Dependencies
-        run: composer show -D
+        run: composer show
 
       - name: Execute tests
         env:
