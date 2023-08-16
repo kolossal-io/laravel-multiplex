@@ -47,13 +47,11 @@ jobs:
 
       - name: Cache composer dependencies
         uses: actions/cache@v3
-        env:
-          cache-name: cache-composer-modules
         with:
           path: ${{ steps.composer-cache.outputs.directory }}
-          key: php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
+          key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
           restore-keys: |
-            php-${{ matrix.php }}-composer-
+            ${{ runner.os }}-php-${{ matrix.php }}-composer-
 
       - name: Install dependencies
         run: |
