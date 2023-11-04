@@ -15,8 +15,8 @@ use stdClass;
 
 class MetaTest extends TestCase
 {
-    use RefreshDatabase;
     use AccessesProtectedProperties;
+    use RefreshDatabase;
 
     public static function handlerProvider()
     {

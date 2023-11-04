@@ -12,8 +12,8 @@ use Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties;
 
 class ExistingColumnOverrideTest extends TestCase
 {
-    use RefreshDatabase;
     use AccessesProtectedProperties;
+    use RefreshDatabase;
 
     /** @test */
     public function it_will_throw_for_key_equal_to_existing_column_name()

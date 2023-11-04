@@ -10,8 +10,8 @@ use Kolossal\Multiplex\MetaAttribute;
 
 class Post extends Model
 {
-    use HasMeta;
     use HasFactory;
+    use HasMeta;
     use SoftDeletes;
 
     protected $table = 'sample_posts';

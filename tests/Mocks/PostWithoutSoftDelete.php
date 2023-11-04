@@ -8,8 +8,8 @@ use Kolossal\Multiplex\HasMeta;
 
 class PostWithoutSoftDelete extends Model
 {
-    use HasMeta;
     use HasFactory;
+    use HasMeta;
 
     protected $table = 'sample_posts';
 

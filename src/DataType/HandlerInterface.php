@@ -33,7 +33,6 @@ interface HandlerInterface
     /**
      * Convert a serialized string back to its original value.
      *
-     * @param  string  $serializedValue
      * @return mixed
      */
     public function unserializeValue(?string $serializedValue);
