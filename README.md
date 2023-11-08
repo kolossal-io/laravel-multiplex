@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-    <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/badge/Laravel-^9.0-green.svg?style=flat-square" alt="Laravel"></a>
+    <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/badge/Laravel-^9.0|^10.0-green.svg?style=flat-square" alt="Laravel"></a>
     <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/packagist/v/kolossal-io/laravel-multiplex.svg?style=flat-square" alt="Latest Version on Packagist"></a>
     <a href="https://codecov.io/gh/kolossal-io/laravel-multiplex" > 
     <img src="https://codecov.io/gh/kolossal-io/laravel-multiplex/branch/main/graph/badge.svg?token=330354GI30"/> 
