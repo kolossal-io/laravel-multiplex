@@ -74,6 +74,7 @@ And it’s low profile: If you don't like it, just [remove the `HasMeta` Trait](
 -   [Deleting Metadata](#deleting-metadata)
 -   [Performance](#performance)
 -   [Configuration](#configuration)
+-   [Using UUID or ULID](#using-uuid-or-ulid)
 
 ## Installation
 
@@ -636,6 +637,60 @@ There is no need to configure anything but if you like, you can publish the conf
 
 ```bash
 php artisan vendor:publish --tag="multiplex-config"
+```
+
+## Using Uuid or Ulid
+
+If you are using UUID or ULID key for your models, you need to change the morph type of the Meta table. 
+Create a local migration file to drop the current morph and create a new one with the good type.
+
+!!! To do as soon as you install this package otherwise you will lose your data
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class () extends Migration {
+    public function up(): void
+    {
+        if (Schema::hasTable('meta')) {
+            Schema::table('meta', function (Blueprint $table): void {
+                $table->dropIndex(['metable_id', 'metable_type', 'published_at']);
+                $table->dropIndex(['metable_id', 'metable_type', 'key', 'published_at']);
+                $table->dropMorphs('metable');
+            });
+
+            Schema::table('meta', function (Blueprint $table): void {
+                $table->ulidMorphs('metable'); // or uuidMorphs
+                $table->index(['metable_id', 'metable_type', 'published_at']);
+                $table->index(['metable_id', 'metable_type', 'key', 'published_at']);
+            });
+        }
+
+    }
+
+    public function down(): void
+    {
+        if (Schema::hasTable('meta')) {
+            Schema::table('meta', function (Blueprint $table): void {
+                $table->dropIndex(['metable_id', 'metable_type', 'published_at']);
+                $table->dropIndex(['metable_id', 'metable_type', 'key', 'published_at']);
+                $table->dropMorphs('metable');
+            });
+
+            Schema::table('meta', function (Blueprint $table): void {
+                $table->morphs('metable');
+                $table->index(['metable_id', 'metable_type', 'published_at']);
+                $table->index(['metable_id', 'metable_type', 'key', 'published_at']);
+            });
+        }
+    }
+};
 ```
 
 ## Credits
