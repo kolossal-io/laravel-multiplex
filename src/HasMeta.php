@@ -217,7 +217,7 @@ trait HasMeta
      * @param  array<string>|null  $fillable
      * @return $this
      */
-    public function metaKeys(array $metaKeys = null): array
+    public function metaKeys(?array $metaKeys = null): array
     {
         if (!$metaKeys) {
             return $this->getMetaKeysProperty();
@@ -328,7 +328,7 @@ trait HasMeta
     /**
      * Set the timestamp to take as `now` when looking up and storing meta data.
      */
-    public function setMetaTimestamp(Carbon $timestamp = null): self
+    public function setMetaTimestamp(?Carbon $timestamp = null): self
     {
         $this->metaTimestamp = $timestamp;
         $this->refreshMetaRelations();
@@ -385,7 +385,7 @@ trait HasMeta
      * Get meta value for key.
      *
      * @param  mixed  $default
-     * @return  mixed
+     * @return mixed
      */
     public function getMeta(string $key, $default = null)
     {
@@ -463,7 +463,7 @@ trait HasMeta
      * Find current Meta model for the given key.
      *
      * @param  string  $key
-     * @return  ?Meta
+     * @return ?Meta
      */
     public function findMeta($key): ?Meta
     {
@@ -485,7 +485,7 @@ trait HasMeta
     /**
      * Determine if meta is dirty.
      */
-    public function isMetaDirty(string $key = null): bool
+    public function isMetaDirty(?string $key = null): bool
     {
         return (bool) with(
             $this->getMetaChanges(),
@@ -535,7 +535,7 @@ trait HasMeta
      *
      * @throws MetaException if invalid keys are used.
      */
-    protected function setMetaFromArray(array $metas, Carbon $publishAt = null): Collection
+    protected function setMetaFromArray(array $metas, ?Carbon $publishAt = null): Collection
     {
         return collect($metas)->map(function ($value, $key) use ($publishAt) {
             return $this->setMetaFromString($key, $value, $publishAt);
@@ -551,7 +551,7 @@ trait HasMeta
      *
      * @throws MetaException if invalid key is used.
      */
-    protected function setMetaFromString($key, $value, Carbon $publishAt = null): Meta
+    protected function setMetaFromString($key, $value, ?Carbon $publishAt = null): Meta
     {
         $key = strtolower($key);
 
@@ -633,7 +633,7 @@ trait HasMeta
      *
      * @param  ?string  $key
      */
-    public function resetMetaChanges(string $key = null): Collection
+    public function resetMetaChanges(?string $key = null): Collection
     {
         if ($key && $this->metaChanges) {
             $this->metaChanges->forget($key);

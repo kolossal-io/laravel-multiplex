@@ -46,7 +46,7 @@ jobs:
         run: echo "directory=$(composer config cache-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache composer dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.directory }}
           key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
@@ -63,7 +63,7 @@ jobs:
 
       - name: Determine if Code Coverage is needed
         id: coverage
-        run: echo "ENABLED={ matrix.php == '8.2' && matrix.stability == 'prefer-stable' && matrix.laravel == '10.*' }" >> "$GITHUB_OUTPUT"
+        run: echo "ENABLED={ matrix.php == '8.3' && matrix.stability == 'prefer-stable' && matrix.laravel == '10.*' }" >> "$GITHUB_OUTPUT"
 
       - name: Output if Code Coverage is needed
         run: echo "${{ steps.coverage.ENABLED }}"

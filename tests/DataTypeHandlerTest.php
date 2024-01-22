@@ -134,7 +134,7 @@ class DataTypeHandlerTest extends TestCase
      *
      * @dataProvider handlerProvider
      */
-    public function it_can_serialize_and_unserialize_values(HandlerInterface $handler, $type, $value, $incompatible, callable $closure = null)
+    public function it_can_serialize_and_unserialize_values(HandlerInterface $handler, $type, $value, $incompatible, ?callable $closure = null)
     {
         $serialized = $handler->serializeValue($value);
         $unserialized = $handler->unserializeValue($serialized);
