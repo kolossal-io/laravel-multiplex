@@ -64,10 +64,17 @@ class DateHandler implements HandlerInterface
             return null;
         }
 
-        return tap(Carbon::createFromFormat($this->format, $value), function ($date) {
-            if ($date instanceof Carbon) {
-                $date->startOfDay();
-            }
-        });
+        try {
+            return tap(Carbon::createFromFormat($this->format, $value), fn ($date) => $this->setTime($date));
+        } catch (\Exception $e) {
+            return tap(Carbon::parse($value), fn ($date) => $this->setTime($date));
+        }
+    }
+
+    protected function setTime(mixed &$date): void
+    {
+        if ($date instanceof Carbon) {
+            $date->startOfDay();
+        }
     }
 }

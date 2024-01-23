@@ -16,6 +16,7 @@ return new class extends Migration
             $table->integer('integer_field')->nullable();
             $table->float('float_field')->nullable();
             $table->boolean('boolean_field')->nullable();
+            $table->dateTime('datetime_field')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

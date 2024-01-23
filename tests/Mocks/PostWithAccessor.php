@@ -6,6 +6,7 @@ class PostWithAccessor extends Post
 {
     protected $metaKeys = [
         'title',
+        'datetime_field' => 'date',
     ];
 
     public function getTitleMeta($value)
