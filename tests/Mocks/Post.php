@@ -32,6 +32,6 @@ class Post extends Model
 
     public function getTestHasAccessorMeta($value)
     {
-        return $value ? "Test {$value}." : 'Empty';
+        return $value ? "Testing {$value} passed." : $value;
     }
 }

@@ -11,6 +11,7 @@ use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\MetaAttribute;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
 use Kolossal\Multiplex\Tests\Mocks\Post;
+use Kolossal\Multiplex\Tests\Mocks\PostWithAccessor;
 use Kolossal\Multiplex\Tests\Mocks\PostWithExistingColumn;
 use Kolossal\Multiplex\Tests\Mocks\PostWithoutSoftDelete;
 use Kolossal\Multiplex\Tests\Mocks\User;
@@ -542,13 +543,34 @@ class HasMetaTest extends TestCase
     /** @test */
     public function it_will_respect_get_meta_accessors()
     {
-        $model = Post::factory()->create();
+        $model = PostWithAccessor::factory()->create(['title' => null]);
 
-        $this->assertSame('Empty', $model->test_has_accessor);
+        $this->assertNull($model->title);
 
-        $model->saveMeta('test_has_accessor', 'passed');
+        $model->allMeta()->delete();
 
-        $this->assertSame('Test passed.', $model->test_has_accessor);
+        $this->assertNull($model->title);
+
+        $model->saveMeta('title', 'Accessor');
+
+        $this->assertSame('Testing Accessor passed.', $model->title);
+    }
+
+    /** @test */
+    public function it_will_use_meta_accessors_for_fallback_values()
+    {
+        $model = PostWithAccessor::factory()->create(['title' => null]);
+
+        DB::table('meta')->truncate();
+
+        $this->assertNull($model->title);
+
+        DB::table('sample_posts')->where('id', $model->id)
+            ->update(['title' => 'Fallback Accessor']);
+
+        $model = PostWithAccessor::first();
+
+        $this->assertSame('Testing Fallback Accessor passed.', $model->refresh()->title);
     }
 
     /** @test */
