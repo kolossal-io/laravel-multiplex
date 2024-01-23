@@ -2,6 +2,18 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v1.1.0 - 2024-01-23
+
+### [1.1.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.0.2...v1.1.0) (2024-01-23)
+
+##### Bug Fixes
+
+* try to parse `date` field as fallback ([cfc4f83](https://github.com/kolossal-io/laravel-multiplex/commit/cfc4f838cec385ec1d41ff707edaabebc886d987))
+
+##### Features
+
+* use meta accessor for fallback values ([52f5ed4](https://github.com/kolossal-io/laravel-multiplex/commit/52f5ed414ea129e48edcc88b8108e84c58ca97a7))
+
 ## v1.0.2 - 2024-01-22
 
 ### [1.0.2](https://github.com/kolossal-io/laravel-multiplex/compare/v1.0.1...v1.0.2) (2024-01-22)
