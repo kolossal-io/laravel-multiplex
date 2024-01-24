@@ -28,7 +28,10 @@ class PrimaryKeyTypesTest extends TestCase
     {
         $this->refreshDatabaseWithType($type);
 
-        $this->assertSame($column_type, Schema::getColumnType('meta', 'id'));
+        if (version_compare(app()->version(), '10.0.0', '>')) {
+            $this->assertSame($column_type, Schema::getColumnType('meta', 'id'));
+        }
+
         $this->assertSame($type, config('multiplex.morph_type'));
 
         $meta = Post::factory()->create()->saveMeta('foo', 'bar');

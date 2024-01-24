@@ -12,9 +12,22 @@ trait HasConfigurableMorphType
      */
     public function initializeHasConfigurableMorphType(): void
     {
-        if ($this->usesUniqueIdsInMorphType()) {
-            $this->usesUniqueIds = true;
+        if (!$this->usesUniqueIdsInMorphType()) {
+            return;
         }
+
+        if (property_exists($this, 'usesUniqueIds')) {
+            $this->usesUniqueIds = true;
+            return;
+        }
+
+        static::creating(function (self $model) {
+            foreach ($model->uniqueIds() as $column) {
+                if (empty($model->{$column})) {
+                    $model->{$column} = $model->newUniqueId();
+                }
+            }
+        });
     }
 
     /**
