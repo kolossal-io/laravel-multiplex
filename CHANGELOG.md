@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v1.2.0 - 2024-01-24
+
+### [1.2.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.1.1...v1.2.0) (2024-01-24)
+
+##### Features
+
+* support UUIDs and ULIDs ([#31](https://github.com/kolossal-io/laravel-multiplex/issues/31)) ([fdaf720](https://github.com/kolossal-io/laravel-multiplex/commit/fdaf720bc38fcb3f2bcff915f57b357951fcfb1a)), closes [#26](https://github.com/kolossal-io/laravel-multiplex/issues/26)
+
 ## v1.1.1 - 2024-01-24
 
 ### [1.1.1](https://github.com/kolossal-io/laravel-multiplex/compare/v1.1.0...v1.1.1) (2024-01-24)
