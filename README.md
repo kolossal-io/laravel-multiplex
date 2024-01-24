@@ -641,9 +641,9 @@ php artisan vendor:publish --tag="multiplex-config"
 
 ## UUID and ULID Support
 
-If your application uses UUIDs or ULIDs for the model(s) using metadata, you may set the `multiplex.morph_type` setting to `uuid` or `ulid` **before** running the migrations. You might as well set the `MULTIPLEX_MORPH_TYPE` environment variable to `uuid` or `ulid`.
+If your application uses UUIDs or ULIDs for the model(s) using metadata, you may set the `multiplex.morph_type` setting to `uuid` or `ulid` **before** running the migrations. You might as well set the `MULTIPLEX_MORPH_TYPE` environment variable instead, if you don’t want to publish the configuration file.
 
-This will ensure `Meta` models will also use UUID/ULID and that proper foreign keys are used.
+This will ensure `Meta` models will use UUID/ULID and that proper keys and foreign keys are used when running the migrations.
 
 ## Credits
 
