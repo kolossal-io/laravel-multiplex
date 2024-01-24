@@ -2,6 +2,15 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v1.1.1 - 2024-01-24
+
+### [1.1.1](https://github.com/kolossal-io/laravel-multiplex/compare/v1.1.0...v1.1.1) (2024-01-24)
+
+#### Bug Fixes
+
+* add missing type hints ([84483b3](https://github.com/kolossal-io/laravel-multiplex/commit/84483b3a103b7271d4f333c8e44772fbc9106976))
+* support nunomaduro/collision `^8.0` ([100c08c](https://github.com/kolossal-io/laravel-multiplex/commit/100c08c98e5758ce9584b9deeca8989b960781be))
+
 ## v1.1.0 - 2024-01-23
 
 ### [1.1.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.0.2...v1.1.0) (2024-01-23)
