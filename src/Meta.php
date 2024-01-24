@@ -56,6 +56,7 @@ use Kolossal\Multiplex\DataType\Registry;
  */
 class Meta extends Model
 {
+    use HasConfigurableMorphType;
     use HasFactory;
     use HasTimestamps;
 
