@@ -74,6 +74,7 @@ And it’s low profile: If you don't like it, just [remove the `HasMeta` Trait](
 -   [Deleting Metadata](#deleting-metadata)
 -   [Performance](#performance)
 -   [Configuration](#configuration)
+-   [UUID and ULID Support](#uuid-and-ulid-support)
 
 ## Installation
 
@@ -637,6 +638,12 @@ There is no need to configure anything but if you like, you can publish the conf
 ```bash
 php artisan vendor:publish --tag="multiplex-config"
 ```
+
+## UUID and ULID Support
+
+If your application uses UUIDs or ULIDs for the model(s) using metadata, you may set the `multiplex.morph_type` setting to `uuid` or `ulid` **before** running the migrations. You might as well set the `MULTIPLEX_MORPH_TYPE` environment variable to `uuid` or `ulid`.
+
+This will ensure `Meta` models will also use UUID/ULID and that proper foreign keys are used.
 
 ## Credits
 

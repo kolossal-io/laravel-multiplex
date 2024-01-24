@@ -10,8 +10,9 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest]
-        php: [8.0, 8.1, 8.2, 8.3]
+        php: [8.1, 8.2, 8.3]
         laravel: [9.*, 10.*]
+        morphtype: [integer, uuid, ulid]
         stability: [prefer-lowest, prefer-stable]
         include:
           - laravel: 10.*
@@ -19,14 +20,16 @@ jobs:
           - laravel: 9.*
             testbench: 7.*
         exclude:
-          - laravel: 10.*
-            php: 8.0
           - laravel: 9.*
             stability: prefer-lowest
           - laravel: 9.*
             php: 8.3
+          - php: 8.2
+            morphtype: uuid
+          - php: 8.2
+            morphtype: ulid
 
-    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
+    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.morphtype }}
 
     steps:
       - name: Checkout code
@@ -72,3 +75,5 @@ jobs:
 
       - name: Execute tests
         run: vendor/bin/pest
+        env:
+          MULTIPLEX_MORPH_TYPE: "${{ matrix.morphtype }}"

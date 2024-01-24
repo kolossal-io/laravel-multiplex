@@ -14,6 +14,13 @@ return [
     'migrations' => true,
 
     /**
+     * The type of primary key your models using the `HasMeta` trait are using.
+     * Must be one of `integer`, `uuid` or `ulid`.
+     * ATTENTION: This must be changed before running the database migrations.
+     */
+    'morph_type' => env('MULTIPLEX_MORPH_TYPE', 'integer'),
+
+    /**
      * List of handlers for recognized data types.
      *
      * Handlers will be evaluated in order, so a value will be handled
