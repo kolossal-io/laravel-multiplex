@@ -60,6 +60,10 @@ trait HasConfigurableMorphType
      */
     protected function isValidUniqueMorphId(mixed $value): bool
     {
+        if (!is_string($value)) {
+            return false;
+        }
+
         if ($this->morphType() === 'ulid') {
             return Str::isUlid($value);
         }
