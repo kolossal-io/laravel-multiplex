@@ -12,7 +12,6 @@ jobs:
         os: [ubuntu-latest]
         php: [8.1, 8.2, 8.3]
         laravel: [9.*, 10.*]
-        morphtype: [integer]
         stability: [prefer-lowest, prefer-stable]
         include:
           - laravel: 10.*
@@ -84,4 +83,4 @@ jobs:
       - name: Execute tests
         run: vendor/bin/pest
         env:
-          MULTIPLEX_MORPH_TYPE: "${{ matrix.morphtype }}"
+          MULTIPLEX_MORPH_TYPE: "${{ matrix.morphtype || 'integer' }}"
