@@ -22,17 +22,14 @@ class Registry
 
     /**
      * Append a Handler to use for a given type identifier.
-     *
-     * @return void
      */
-    public function addHandler(HandlerInterface $handler)
+    public function addHandler(HandlerInterface $handler): void
     {
         $this->handlers[$handler->getDataType()] = $handler;
     }
 
     /**
      * Retrieve the handler assigned to a given type identifier.
-     *
      *
      * @throws DataTypeException if no handler is found.
      */
@@ -55,10 +52,8 @@ class Registry
 
     /**
      * Removes the handler with a given type identifier.
-     *
-     * @return void
      */
-    public function removeHandlerForType(string $type)
+    public function removeHandlerForType(string $type): void
     {
         unset($this->handlers[$type]);
     }
@@ -66,11 +61,9 @@ class Registry
     /**
      * Find a data type Handler that is able to operate on the value, return the type identifier associated with it.
      *
-     * @param  mixed  $value
-     *
      * @throws DataTypeException if no handler can handle the value.
      */
-    public function getTypeForValue($value): string
+    public function getTypeForValue(mixed $value): string
     {
         foreach ($this->handlers as $type => $handler) {
             if ($handler->canHandleValue($value)) {

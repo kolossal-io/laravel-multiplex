@@ -32,8 +32,6 @@ interface HandlerInterface
 
     /**
      * Convert a serialized string back to its original value.
-     *
-     * @return mixed
      */
-    public function unserializeValue(?string $serializedValue);
+    public function unserializeValue(?string $serializedValue): mixed;
 }

@@ -54,7 +54,7 @@ class ModelCollectionHandler implements HandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function unserializeValue(?string $value)
+    public function unserializeValue(?string $value): mixed
     {
         if (!is_string($value) || empty($value)) {
             return null;
@@ -84,10 +84,8 @@ class ModelCollectionHandler implements HandlerInterface
 
     /**
      * Load each model instance, grouped by class.
-     *
-     * @return array
      */
-    private function loadModels(array $items)
+    private function loadModels(array $items): array
     {
         $classes = [];
         $results = [];

@@ -134,9 +134,8 @@ trait HasMeta
      * Add value to the list of columns overridden by meta.
      *
      * @param  mixed  $value
-     * @return self
      */
-    public function setFallbackValue(string $key, $value = null)
+    public function setFallbackValue(string $key, $value = null): self
     {
         ($this->fallbackValues ??= new Collection)->put($key, $value);
 

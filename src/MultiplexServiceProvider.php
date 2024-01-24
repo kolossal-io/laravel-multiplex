@@ -36,7 +36,7 @@ class MultiplexServiceProvider extends ServiceProvider
      */
     protected function registerDataTypeRegistry(): void
     {
-        $this->app->singleton(Registry::class, function () {
+        $this->app->singleton(Registry::class, function (): Registry {
             $registry = new Registry();
             $datatypes = (array) config('multiplex.datatypes', []);
 

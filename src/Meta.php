@@ -26,7 +26,7 @@ use Kolossal\Multiplex\DataType\Registry;
  * @property-read bool $is_current
  * @property-read bool $is_planned
  * @property-read ?string $raw_value
- * @property-read MorphTo $metable
+ * @property-read MorphTo<\Illuminate\Database\Eloquent\Model,\Kolossal\Multiplex\Meta> $metable
  *
  * @method static Builder|Meta joinLatest($now = null)
  * @method static Builder|Meta newModelQuery()
@@ -90,11 +90,11 @@ class Meta extends Model
 
     protected ?string $forceType = null;
 
-    public static function boot()
+    public static function boot(): void
     {
         parent::boot();
 
-        static::saving(function ($model) {
+        static::saving(function ($model): void {
             /** @var Meta $model */
             $model->attributes['published_at'] ??= Carbon::now();
         });
@@ -127,11 +127,10 @@ class Meta extends Model
      *
      * Successive access will be loaded from cache.
      *
-     * @return mixed
      *
      * @throws Exceptions\DataTypeException
      */
-    public function getValueAttribute()
+    public function getValueAttribute(): mixed
     {
         if ($this->cachedValue) {
             return $this->cachedValue;
@@ -173,7 +172,11 @@ class Meta extends Model
      */
     public function getIsCurrentAttribute(): bool
     {
-        /** @phpstan-ignore-next-line  */
+        /**
+         * @phpstan-ignore-next-line
+         *
+         * @disregard P1014
+         * */
         return $this->metable->meta
             ?->first(fn (Meta $meta) => $meta->key === $this->key)
             ?->is($this) ?? false;
@@ -262,7 +265,7 @@ class Meta extends Model
             ];
         });
 
-        $query->where(function ($query) use ($serializedValues) {
+        $query->where(function ($query) use ($serializedValues): void {
             $serializedValues->groupBy('type')->each(function ($values, $type) use ($query) {
                 $query->orWhere(fn ($q) => $q->where('type', $type)->whereIn('value', $values->pluck('value')));
             });
@@ -388,7 +391,7 @@ class Meta extends Model
          * Now that we have subqueries to join let’s build the complete query
          * and look for the record that matches the most recent entry for every `key`.
          */
-        $query->joinSub($maxId, 'max_id', function ($join) use ($latestPublishAt) {
+        $query->joinSub($maxId, 'max_id', function ($join) use ($latestPublishAt): void {
             $join->on('meta.id', '=', 'max_id.id_aggregate')
                 ->on('meta.metable_type', '=', 'max_id.metable_type')
                 ->on('meta.metable_id', '=', 'max_id.metable_id')

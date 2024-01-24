@@ -13,9 +13,8 @@ class MetaAttribute implements CastsAttributes
      * @param  string  $key
      * @param  mixed  $value
      * @param  array  $attributes
-     * @return mixed
      */
-    public function get($model, $key, $value, $attributes)
+    public function get($model, $key, $value, $attributes): mixed
     {
         if (method_exists($model, 'getMeta') && method_exists($model, 'getFallbackValue')) {
             return $model->getMeta($key, $value ?? $model->getFallbackValue($key));
@@ -32,9 +31,8 @@ class MetaAttribute implements CastsAttributes
      * @param  string  $key
      * @param  mixed  $value
      * @param  array  $attributes
-     * @return mixed
      */
-    public function set($model, $key, $value, $attributes)
+    public function set($model, $key, $value, $attributes): mixed
     {
         return $value;
     }
