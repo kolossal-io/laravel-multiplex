@@ -18,6 +18,7 @@ trait HasConfigurableMorphType
 
         if (property_exists($this, 'usesUniqueIds')) {
             $this->usesUniqueIds = true;
+
             return;
         }
 
