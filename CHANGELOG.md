@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v1.2.1 - 2024-01-30
+
+### [1.2.1](https://github.com/kolossal-io/laravel-multiplex/compare/v1.2.0...v1.2.1) (2024-01-30)
+
+#### Bug Fixes
+
+* make `metable` nullable ([9041532](https://github.com/kolossal-io/laravel-multiplex/commit/9041532522c9cdb8376e1f3f9cafa617635e71c2))
+
 ## v1.2.0 - 2024-01-24
 
 ### [1.2.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.1.1...v1.2.0) (2024-01-24)
