@@ -178,7 +178,7 @@ class Meta extends Model
          *
          * @disregard P1014
          * */
-        return $this->metable->meta
+        return $this->metable?->meta
             ?->first(fn (Meta $meta) => $meta->key === $this->key)
             ?->is($this) ?? false;
     }
