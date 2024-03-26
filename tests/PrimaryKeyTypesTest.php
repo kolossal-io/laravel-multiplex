@@ -23,6 +23,7 @@ final class PrimaryKeyTypesTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider morphTypes
      **/
     public function it_uses_the_configured_column_type(string $type, string $column_type): void
@@ -51,6 +52,7 @@ final class PrimaryKeyTypesTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider stringMorphTypes
      */
     public function it_throws_error_for_invalid_unique_ids(string $type): void
@@ -66,6 +68,7 @@ final class PrimaryKeyTypesTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider stringMorphTypes
      */
     public function it_throws_error_for_invalid_unique_ids_with_implicit_key_name(string $type): void
@@ -92,6 +95,7 @@ final class PrimaryKeyTypesTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider stringMorphTypes
      */
     public function it_resolves_integer_id_models_by_key(string $type): void
