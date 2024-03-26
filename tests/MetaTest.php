@@ -370,8 +370,10 @@ final class MetaTest extends TestCase
         $this->assertContains(1, $meta);
     }
 
-    /** @test */
-    /** @dataProvider handlerProvider */
+    /**
+     * @test
+     * @dataProvider handlerProvider
+     */
     public function it_can_store_and_retrieve_datatypes($type, $input): void
     {
         $meta = Meta::factory()->make([
@@ -390,8 +392,10 @@ final class MetaTest extends TestCase
         $this->assertTrue(is_string($meta->raw_value) || is_null($meta->raw_value));
     }
 
-    /** @test */
-    /** @dataProvider handlerProvider */
+    /**
+     * @test
+     * @dataProvider handlerProvider
+     */
     public function it_can_query_by_value($type, $input): void
     {
         $meta = Meta::factory()->make([

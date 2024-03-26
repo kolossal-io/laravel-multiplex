@@ -21,8 +21,10 @@ final class PrimaryKeyTypesTest extends TestCase
         $this->defineDatabaseMigrations();
     }
 
-    /** @test */
-    /** @dataProvider morphTypes */
+    /**
+     * @test
+     * @dataProvider morphTypes
+     **/
     public function it_uses_the_configured_column_type(string $type, string $column_type): void
     {
         $this->refreshDatabaseWithType($type);
@@ -47,8 +49,10 @@ final class PrimaryKeyTypesTest extends TestCase
         }
     }
 
-    /** @test */
-    /** @dataProvider stringMorphTypes */
+    /**
+     * @test
+     * @dataProvider stringMorphTypes
+     */
     public function it_throws_error_for_invalid_unique_ids(string $type): void
     {
         $this->refreshDatabaseWithType($type);
@@ -60,8 +64,10 @@ final class PrimaryKeyTypesTest extends TestCase
         $meta->resolveRouteBinding('abc-123', 'id');
     }
 
-    /** @test */
-    /** @dataProvider stringMorphTypes */
+    /**
+     * @test
+     * @dataProvider stringMorphTypes
+     */
     public function it_throws_error_for_invalid_unique_ids_with_implicit_key_name(string $type): void
     {
         $this->refreshDatabaseWithType($type);
@@ -84,8 +90,10 @@ final class PrimaryKeyTypesTest extends TestCase
         $this->assertTrue($meta->is($meta->resolveRouteBinding($meta->id, 'id')));
     }
 
-    /** @test */
-    /** @dataProvider stringMorphTypes */
+    /**
+     * @test
+     * @dataProvider stringMorphTypes
+     */
     public function it_resolves_integer_id_models_by_key(string $type): void
     {
         $this->refreshDatabaseWithType($type);

@@ -107,15 +107,19 @@ final class DataTypeHandlerTest extends TestCase
         ];
     }
 
-    /** @test */
-    /** @dataProvider handlerProvider */
+    /**
+     * @test
+     * @dataProvider handlerProvider
+     */
     public function it_specifies_a_datatype_identifier(HandlerInterface $handler, $type): void
     {
         $this->assertEquals($type, $handler->getDataType());
     }
 
-    /** @test */
-    /** @dataProvider handlerProvider */
+    /**
+     * @test
+     * @dataProvider handlerProvider
+     */
     public function it_can_verify_compatibility(HandlerInterface $handler, $type, $value, $incompatible): void
     {
         $this->assertTrue($handler->canHandleValue($value));
@@ -125,8 +129,10 @@ final class DataTypeHandlerTest extends TestCase
         }
     }
 
-    /** @test */
-    /** @dataProvider handlerProvider */
+    /**
+     * @test
+     * @dataProvider handlerProvider
+     */
     public function it_can_serialize_and_unserialize_values(HandlerInterface $handler, $type, $value, $incompatible, ?callable $closure = null): void
     {
         $serialized = $handler->serializeValue($value);
@@ -139,8 +145,10 @@ final class DataTypeHandlerTest extends TestCase
         }
     }
 
-    /** @test */
-    /** @dataProvider handlerProvider */
+    /**
+     * @test
+     * @dataProvider handlerProvider
+     */
     public function it_can_handle_null_values(HandlerInterface $handler): void
     {
         $unserialized = $handler->unserializeValue(null);

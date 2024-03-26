@@ -668,9 +668,11 @@ trait HasMeta
      */
     public function deleteMeta($key): bool
     {
+        // @codeCoverageIgnoreStart
         if (!app()->environment('testing')) {
             DB::beginTransaction();
         }
+        // @codeCoverageIgnoreEnd
 
         $keys = collect(is_array($key) ? $key : [$key]);
 
@@ -693,9 +695,11 @@ trait HasMeta
                 );
             });
 
+        // @codeCoverageIgnoreStart
         if (!app()->environment('testing')) {
             DB::commit();
         }
+        // @codeCoverageIgnoreEnd
 
         /**
          * Remove the deleted meta models from the collection of changes

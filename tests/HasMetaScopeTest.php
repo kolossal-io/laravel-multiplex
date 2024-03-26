@@ -96,8 +96,10 @@ final class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMeta('foo', true)->orWhereMeta('bar', 12), 'b,c');
     }
 
-    /** @test */
-    /** @dataProvider datatypeProvider */
+    /**
+     * @test
+     * @dataProvider datatypeProvider
+     */
     public function it_scopes_where_meta_with_datatype($type, $input, $another): void
     {
         $this->seedRandomModels();

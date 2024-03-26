@@ -16,13 +16,13 @@ trait HasConfigurableMorphType
             return;
         }
 
+        // @codeCoverageIgnoreStart
         if (property_exists($this, 'usesUniqueIds')) {
             $this->usesUniqueIds = true;
 
             return;
         }
 
-        // @codeCoverageIgnoreStart
         static::creating(function (self $model) {
             foreach ($model->uniqueIds() as $column) {
                 if (empty($model->{$column})) {
