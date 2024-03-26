@@ -2,6 +2,7 @@
 
 namespace Kolossal\Multiplex\Tests;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -155,10 +156,10 @@ final class ExistingColumnOverrideTest extends TestCase
 
         $this->assertSame('Initial title', $model->title);
 
-        $model->saveMetaAt('title', 'Changed title', '+1 hour');
+        $model->saveMetaAt('title', 'Changed title', Carbon::now()->addHour());
         $this->assertSame('Initial title', $model->refresh()->title);
 
-        $this->travelTo('+1 hour');
+        $this->travelTo(Carbon::now()->addHour());
         $this->assertSame('Changed title', $model->refresh()->title);
     }
 
@@ -172,10 +173,10 @@ final class ExistingColumnOverrideTest extends TestCase
 
         $this->assertNull($model->title);
 
-        $model->saveMetaAt('title', 'Changed title', '+1 hour');
+        $model->saveMetaAt('title', 'Changed title', Carbon::now()->addHour());
         $this->assertNull($model->title);
 
-        $this->travelTo('+1 hour');
+        $this->travelTo(Carbon::now()->addHour());
         $this->assertSame('Changed title', $model->refresh()->title);
     }
 

@@ -333,14 +333,14 @@ final class MetaTest extends TestCase
     {
         $model = Post::factory()->create();
 
-        $model->setMetaTimestamp(now());
+        $model->setMetaTimestamp(Carbon::now());
 
         Post::factory()->create()->saveMeta('foo', 'another');
 
         $model->saveMeta('bar', 'foo');
-        $model->saveMetaAt('foo', 1, '-1 day');
+        $model->saveMetaAt('foo', 1, Carbon::now()->subDay());
         $model->saveMeta('foo', 2);
-        $model->saveMetaAt('foo', 3, '+1 day');
+        $model->saveMetaAt('foo', 3, Carbon::now()->addDay());
 
         $meta = Meta::onlyCurrent()->get()->pluck('value');
         $modelMeta = $model->allMeta()->onlyCurrent()->get()->pluck('value');

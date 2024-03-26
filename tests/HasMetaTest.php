@@ -409,7 +409,7 @@ final class HasMetaTest extends TestCase
 
         $this->assertNull(Post::first()->foo);
 
-        $this->travelTo('+1 hour');
+        $this->travelTo(Carbon::now()->addHour());
 
         $this->assertSame('change', Post::first()->foo);
     }
@@ -429,7 +429,7 @@ final class HasMetaTest extends TestCase
         $this->assertNull(Post::first()->foo);
         $this->assertNull(Post::first()->bar);
 
-        $this->travelTo('+1 hour');
+        $this->travelTo(Carbon::now()->addHour());
 
         $this->assertSame('bar', Post::first()->foo);
         $this->assertSame(true, Post::first()->bar);
@@ -445,7 +445,7 @@ final class HasMetaTest extends TestCase
 
         $this->assertSame('bar', $model->refresh()->foo);
 
-        $this->travelTo('+1 hour');
+        $this->travelTo(Carbon::now()->addHour());
 
         $this->assertSame('change', $model->refresh()->foo);
     }
@@ -480,7 +480,7 @@ final class HasMetaTest extends TestCase
         $this->assertNull($model->foo);
         $this->assertNull($model->bar);
 
-        $this->travelTo('+1 hour');
+        $this->travelTo(Carbon::now()->addHour());
         $model->refresh();
 
         $this->assertSame('bar', $model->foo);
@@ -505,7 +505,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame('bar', $model->refresh()->foo);
         $this->assertSame(123, $model->refresh()->bar);
 
-        $this->travelTo('+1 hour');
+        $this->travelTo(Carbon::now()->addHour());
 
         $this->assertSame('change', $model->refresh()->foo);
         $this->assertSame(false, $model->refresh()->bar);
@@ -522,7 +522,7 @@ final class HasMetaTest extends TestCase
 
         $this->assertFalse($model->refresh()->hasMeta('foo'));
 
-        $this->travelTo('+1 hour');
+        $this->travelTo(Carbon::now()->addHour());
 
         $this->assertTrue($model->refresh()->hasMeta('foo'));
     }
@@ -1033,11 +1033,11 @@ final class HasMetaTest extends TestCase
 
         $model->saveMetaAt('appendable_foo', 8000.99, Carbon::now()->addDay());
 
-        $this->travelTo('+23 hours 50 minutes');
+        $this->travelTo(Carbon::now()->addHours(23)->addMinutes(50));
 
         $this->assertSame('Fallback', Post::first()->appendable_foo);
 
-        $this->travelTo('+10 minutes');
+        $this->travelTo(Carbon::now()->addMinutes(10));
 
         $this->assertSame(8000.99, Post::first()->appendable_foo);
     }
@@ -1065,7 +1065,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame('old value', Post::first()->foo);
         $this->assertSame(false, Post::first()->bar);
 
-        $this->travelTo('+1 day');
+        $this->travelTo(Carbon::now()->addDay());
 
         $this->assertSame('bar', Post::first()->foo);
         $this->assertSame(125, Post::first()->bar);
@@ -1084,13 +1084,13 @@ final class HasMetaTest extends TestCase
             'bar' => 125,
         ]);
 
-        $this->travelTo('+1 day');
+        $this->travelTo(Carbon::now()->addDay());
         $model->saveMeta('foo', 'updated');
 
-        $this->travelTo('+2 days');
+        $this->travelTo(Carbon::now()->addDays(2));
         $model->saveMeta('another', true);
 
-        $this->travelTo('+1 day');
+        $this->travelTo(Carbon::now()->addDay());
         $model->saveMeta('bar', 999.125);
 
         $this->assertEquals([

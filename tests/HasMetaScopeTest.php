@@ -113,7 +113,7 @@ final class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMeta('foo', $input), 'b');
         $this->testScope(Post::whereMeta('foo', $another));
 
-        $this->travelTo('+1 day');
+        $this->travelTo(Carbon::now()->addDay());
 
         $this->testScope(Post::whereMeta('foo', $another), 'a');
     }
@@ -272,18 +272,18 @@ final class HasMetaScopeTest extends TestCase
         $c->saveMetaAt('bar', 123, '+2 days');
 
         $this->testScope(Post::whereMetaIn('foo', [false, 'bar']), 'a,c');
-        $this->testScope(Post::travelTo('-23 hours')->whereMetaIn('foo', [false, 'bar']));
-        $this->testScope(Post::travelTo('-23 hours')->whereMetaIn('foo', [true, 'history']), 'a,c');
-        $this->testScope(Post::whereMetaIn('foo', [true, 'history'])->travelTo('-23 hours'), 'a,c');
-        $this->testScope(Post::travelTo('-25 hours')->whereMetaIn('foo', [true, 'history']), 'c');
-        $this->testScope(Post::travelTo('+1 day')->whereMetaIn('foo', [false, 'history']), 'c');
-        $this->testScope(Post::travelTo('+2 days')->whereMetaIn('foo', [false, 'future']), 'a,c');
+        $this->testScope(Post::travelTo(Carbon::now()->subHours(23))->whereMetaIn('foo', [false, 'bar']));
+        $this->testScope(Post::travelTo(Carbon::now()->subHours(23))->whereMetaIn('foo', [true, 'history']), 'a,c');
+        $this->testScope(Post::whereMetaIn('foo', [true, 'history'])->travelTo(Carbon::now()->subHours(23)), 'a,c');
+        $this->testScope(Post::travelTo(Carbon::now()->subHours(25))->whereMetaIn('foo', [true, 'history']), 'c');
+        $this->testScope(Post::travelTo(Carbon::now()->addDay())->whereMetaIn('foo', [false, 'history']), 'c');
+        $this->testScope(Post::travelTo(Carbon::now()->addDays(2))->whereMetaIn('foo', [false, 'future']), 'a,c');
 
-        $this->testScope(Post::travelTo('-2 days')->whereMeta('bar', 'foo'));
+        $this->testScope(Post::travelTo(Carbon::now()->subDays(2))->whereMeta('bar', 'foo'));
         $this->testScope(Post::travelBack()->whereMeta('bar', 'foo'), 'b');
 
-        $this->testScope(Post::travelTo('-50 hours')->whereMeta('bar', '>=', 123));
-        $this->testScope(Post::travelTo('+3 days')->whereMeta('bar', '>=', 123), 'c');
+        $this->testScope(Post::travelTo(Carbon::now()->subHours(50))->whereMeta('bar', '>=', 123));
+        $this->testScope(Post::travelTo(Carbon::now()->addDays(3))->whereMeta('bar', '>=', 123), 'c');
     }
 
     #[Test]
