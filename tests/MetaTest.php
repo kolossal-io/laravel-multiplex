@@ -331,6 +331,8 @@ final class MetaTest extends TestCase
     /** @test */
     public function it_can_include_only_current(): void
     {
+        $this->travelBack();
+
         $model = Post::factory()->create();
 
         $model->setMetaTimestamp(Carbon::now());
@@ -341,6 +343,8 @@ final class MetaTest extends TestCase
         $model->saveMetaAt('foo', 1, Carbon::now()->subDay());
         $model->saveMeta('foo', 2);
         $model->saveMetaAt('foo', 3, Carbon::now()->addDay());
+
+        $this->travelTo(Carbon::now()->addSeconds(10));
 
         $meta = Meta::onlyCurrent()->get()->pluck('value');
         $modelMeta = $model->allMeta()->onlyCurrent()->get()->pluck('value');
@@ -354,8 +358,8 @@ final class MetaTest extends TestCase
         $this->assertContains('foo', $meta);
         $this->assertContains(2, $meta);
 
-        $meta = Meta::onlyCurrent('-15 minutes')->get()->pluck('value');
-        $modelMeta = $model->allMeta()->onlyCurrent('-15 minutes')->get()->pluck('value');
+        $meta = Meta::onlyCurrent(Carbon::now()->subMinutes(15))->get()->pluck('value');
+        $modelMeta = $model->allMeta()->onlyCurrent(Carbon::now()->subMinutes(15))->get()->pluck('value');
 
         $this->assertCount(1, $meta);
         $this->assertContains(1, $meta);
