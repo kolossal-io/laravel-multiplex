@@ -3,8 +3,9 @@
 namespace Kolossal\Multiplex\Tests;
 
 use Kolossal\Multiplex\MultiplexServiceProvider;
+use PHPUnit\Framework\Attributes\Test;
 
-class MultiplexServiceProviderTest extends TestCase
+final class MultiplexServiceProviderTest extends TestCase
 {
     protected function getPackageProviders($app)
     {
@@ -12,7 +13,7 @@ class MultiplexServiceProviderTest extends TestCase
     }
 
     /** @test */
-    public function it_skips_migrations()
+    public function it_skips_migrations(): void
     {
         config(['multiplex.migrations' => false]);
 
@@ -23,7 +24,7 @@ class MultiplexServiceProviderTest extends TestCase
     }
 
     /** @test */
-    public function it_applies_migrations()
+    public function it_applies_migrations(): void
     {
         config()->set('multiplex.migrations', true);
 

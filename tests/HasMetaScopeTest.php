@@ -9,9 +9,11 @@ use Illuminate\Support\Carbon;
 use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 
-class HasMetaScopeTest extends TestCase
+final class HasMetaScopeTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -23,7 +25,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     /** @test */
-    public function it_scopes_where_has_meta()
+    public function it_scopes_where_has_meta(): void
     {
         $this->seedRandomModels();
         $this->seedModels();
@@ -37,7 +39,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     /** @test */
-    public function it_scopes_where_has_meta_from_array()
+    public function it_scopes_where_has_meta_from_array(): void
     {
         $this->seedRandomModels();
         $this->seedModels();
@@ -48,7 +50,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     /** @test */
-    public function it_scopes_where_doesnt_have_meta()
+    public function it_scopes_where_doesnt_have_meta(): void
     {
         $this->seedModels();
 
@@ -62,7 +64,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     /** @test */
-    public function it_scopes_where_doesnt_have_meta_from_array()
+    public function it_scopes_where_doesnt_have_meta_from_array(): void
     {
         $this->seedModels();
 
@@ -71,7 +73,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     /** @test */
-    public function it_scopes_where_meta()
+    public function it_scopes_where_meta(): void
     {
         $this->seedRandomModels();
 
@@ -94,12 +96,9 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMeta('foo', true)->orWhereMeta('bar', 12), 'b,c');
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider datatypeProvider
-     * */
-    public function it_scopes_where_meta_with_datatype($type, $input, $another)
+    /** @test */
+    /** @dataProvider datatypeProvider */
+    public function it_scopes_where_meta_with_datatype($type, $input, $another): void
     {
         $this->seedRandomModels();
 
@@ -114,13 +113,13 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMeta('foo', $input), 'b');
         $this->testScope(Post::whereMeta('foo', $another));
 
-        $this->travelTo('+1 day');
+        $this->travelTo(Carbon::now()->addDay());
 
         $this->testScope(Post::whereMeta('foo', $another), 'a');
     }
 
     /** @test */
-    public function it_scopes_where_meta_with_operators()
+    public function it_scopes_where_meta_with_operators(): void
     {
         $this->seedRandomModels();
 
@@ -156,7 +155,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     /** @test */
-    public function it_scopes_where_raw_meta()
+    public function it_scopes_where_raw_meta(): void
     {
         $this->seedRandomModels();
 
@@ -195,7 +194,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     /** @test */
-    public function it_scopes_where_meta_of_type()
+    public function it_scopes_where_meta_of_type(): void
     {
         $this->seedRandomModels();
 
@@ -225,7 +224,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     /** @test */
-    public function it_scopes_where_meta_in_array()
+    public function it_scopes_where_meta_in_array(): void
     {
         $this->seedRandomModels();
 
@@ -251,7 +250,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     /** @test */
-    public function it_scopes_after_time_traveling()
+    public function it_scopes_after_time_traveling(): void
     {
         $this->seedRandomModels();
 
@@ -273,22 +272,22 @@ class HasMetaScopeTest extends TestCase
         $c->saveMetaAt('bar', 123, '+2 days');
 
         $this->testScope(Post::whereMetaIn('foo', [false, 'bar']), 'a,c');
-        $this->testScope(Post::travelTo('-23 hours')->whereMetaIn('foo', [false, 'bar']));
-        $this->testScope(Post::travelTo('-23 hours')->whereMetaIn('foo', [true, 'history']), 'a,c');
-        $this->testScope(Post::whereMetaIn('foo', [true, 'history'])->travelTo('-23 hours'), 'a,c');
-        $this->testScope(Post::travelTo('-25 hours')->whereMetaIn('foo', [true, 'history']), 'c');
-        $this->testScope(Post::travelTo('+1 day')->whereMetaIn('foo', [false, 'history']), 'c');
-        $this->testScope(Post::travelTo('+2 days')->whereMetaIn('foo', [false, 'future']), 'a,c');
+        $this->testScope(Post::travelTo(Carbon::now()->subHours(23))->whereMetaIn('foo', [false, 'bar']));
+        $this->testScope(Post::travelTo(Carbon::now()->subHours(23))->whereMetaIn('foo', [true, 'history']), 'a,c');
+        $this->testScope(Post::whereMetaIn('foo', [true, 'history'])->travelTo(Carbon::now()->subHours(23)), 'a,c');
+        $this->testScope(Post::travelTo(Carbon::now()->subHours(25))->whereMetaIn('foo', [true, 'history']), 'c');
+        $this->testScope(Post::travelTo(Carbon::now()->addDay())->whereMetaIn('foo', [false, 'history']), 'c');
+        $this->testScope(Post::travelTo(Carbon::now()->addDays(2))->whereMetaIn('foo', [false, 'future']), 'a,c');
 
-        $this->testScope(Post::travelTo('-2 days')->whereMeta('bar', 'foo'));
+        $this->testScope(Post::travelTo(Carbon::now()->subDays(2))->whereMeta('bar', 'foo'));
         $this->testScope(Post::travelBack()->whereMeta('bar', 'foo'), 'b');
 
-        $this->testScope(Post::travelTo('-50 hours')->whereMeta('bar', '>=', 123));
-        $this->testScope(Post::travelTo('+3 days')->whereMeta('bar', '>=', 123), 'c');
+        $this->testScope(Post::travelTo(Carbon::now()->subHours(50))->whereMeta('bar', '>=', 123));
+        $this->testScope(Post::travelTo(Carbon::now()->addDays(3))->whereMeta('bar', '>=', 123), 'c');
     }
 
     /** @test */
-    public function it_scopes_where_meta_empty()
+    public function it_scopes_where_meta_empty(): void
     {
         Post::factory()
             ->has(Meta::factory()->state(['key' => 'foo', 'value' => '']))
@@ -317,7 +316,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     /** @test */
-    public function it_scopes_where_meta_not_empty()
+    public function it_scopes_where_meta_not_empty(): void
     {
         $this->seedRandomModels();
 
@@ -390,7 +389,7 @@ class HasMetaScopeTest extends TestCase
         return $result;
     }
 
-    public static function datatypeProvider()
+    public static function datatypeProvider(): array
     {
         $timestamp = '2017-01-01 00:00:00.000000+0000';
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s.uO', $timestamp);

@@ -4,14 +4,13 @@ namespace Kolossal\Multiplex\Tests;
 
 use Kolossal\Multiplex\DataType;
 use Kolossal\Multiplex\Tests\Mocks\Post;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 
-class DataTypeModelHandlerTest extends TestCase
+final class DataTypeModelHandlerTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_can_handle_non_existing_models()
+    /** @test */
+    public function it_can_handle_non_existing_models(): void
     {
         $model = Post::factory()->make();
         $handler = new DataType\ModelHandler;
@@ -26,10 +25,8 @@ class DataTypeModelHandlerTest extends TestCase
         $this->assertInstanceOf(Post::class, $unserialized);
     }
 
-    /**
-     * @test
-     */
-    public function it_can_handle_existing_models()
+    /** @test */
+    public function it_can_handle_existing_models(): void
     {
         $model = Post::factory()->create();
         $handler = new DataType\ModelHandler;

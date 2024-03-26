@@ -488,15 +488,15 @@ Post::first()->withMetaAt('2022-10-01 15:00:00')->meta->pluck('value', 'key');
 You can also query by meta for a specific point in time.
 
 ```php
-Post::travelTo('-14 days')->whereMetaIn('foo', [false, 0])->get();
+Post::travelTo(Carbon::now()->subWeeks(2))->whereMetaIn('foo', [false, 0])->get();
 
-Post::travelTo('+2 years')->where('category', 'tech')->get();
+Post::travelTo(Carbon::now()->addYears(2))->where('category', 'tech')->get();
 ```
 
 Remember to travel back if you want to perform further actions.
 
 ```php
-Post::travelTo('-1 year')->where('category', 'tech')->get();
+Post::travelTo(Carbon::now()->subYear())->where('category', 'tech')->get();
 Post::where('category', 'tech')->get(); // Will still look for meta published last year.
 
 Post::travelBack();

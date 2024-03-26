@@ -17,7 +17,7 @@
     },
     "homepage": "https://github.com/kolossal-io/laravel-multiplex#readme",
     "devDependencies": {
-        "semantic-release": "^21.0.7"
+        "semantic-release": "^23.0.6"
     },
     "release": {
         "branches": [

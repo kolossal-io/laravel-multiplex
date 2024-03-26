@@ -15,8 +15,6 @@ class TestCase extends Orchestra
         Factory::guessFactoryNamesUsing(
             fn (string $modelName) => 'Kolossal\\Multiplex\\Tests\\Factories\\' . class_basename($modelName) . 'Factory'
         );
-
-        $this->useDatabase();
     }
 
     protected function getPackageProviders($app)
@@ -26,13 +24,7 @@ class TestCase extends Orchestra
         ];
     }
 
-    public function getEnvironmentSetUp($app)
-    {
-        config()->set('database.default', 'sqlite');
-        config()->set('database.connections.sqlite.database', ':memory:');
-    }
-
-    protected function useDatabase()
+    protected function defineDatabaseMigrations()
     {
         $this->loadMigrationsFrom(__DIR__ . '/migrations');
     }

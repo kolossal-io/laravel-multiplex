@@ -11,14 +11,16 @@ use Kolossal\Multiplex\Tests\Mocks\Dummy;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
 use Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 
-class MetaTest extends TestCase
+final class MetaTest extends TestCase
 {
     use AccessesProtectedProperties;
     use RefreshDatabase;
 
-    public static function handlerProvider()
+    public static function handlerProvider(): array
     {
         $timestamp = '2017-01-01 00:00:00.000000+0000';
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s.uO', $timestamp);
@@ -76,7 +78,7 @@ class MetaTest extends TestCase
     }
 
     /** @test */
-    public function it_can_get_and_set_value()
+    public function it_can_get_and_set_value(): void
     {
         $meta = Meta::factory()->make();
 
@@ -87,7 +89,7 @@ class MetaTest extends TestCase
     }
 
     /** @test */
-    public function it_exposes_its_serialized_value()
+    public function it_exposes_its_serialized_value(): void
     {
         $meta = Meta::factory()->make();
         $meta->value = 123;
@@ -97,7 +99,7 @@ class MetaTest extends TestCase
     }
 
     /** @test */
-    public function it_caches_unserialized_value()
+    public function it_caches_unserialized_value(): void
     {
         $meta = Meta::factory()->make();
         $meta->value = 'foo';
@@ -112,7 +114,7 @@ class MetaTest extends TestCase
     }
 
     /** @test */
-    public function it_clears_cache_on_set()
+    public function it_clears_cache_on_set(): void
     {
         $meta = Meta::factory()->make();
 
@@ -126,7 +128,7 @@ class MetaTest extends TestCase
     }
 
     /** @test */
-    public function it_can_get_its_model_relation()
+    public function it_can_get_its_model_relation(): void
     {
         $meta = Meta::factory()->make();
 
@@ -138,7 +140,7 @@ class MetaTest extends TestCase
     }
 
     /** @test */
-    public function it_can_determine_if_it_is_current()
+    public function it_can_determine_if_it_is_current(): void
     {
         $model = Post::factory()->create();
 
@@ -156,7 +158,7 @@ class MetaTest extends TestCase
     }
 
     /** @test */
-    public function it_can_determine_if_it_is_planned()
+    public function it_can_determine_if_it_is_planned(): void
     {
         $model = Post::factory()->create();
 
@@ -174,7 +176,7 @@ class MetaTest extends TestCase
     }
 
     /** @test */
-    public function it_can_query_published_meta()
+    public function it_can_query_published_meta(): void
     {
         $model = Post::factory()->create();
 
@@ -197,7 +199,7 @@ class MetaTest extends TestCase
     }
 
     /** @test */
-    public function it_can_query_unpublished_meta()
+    public function it_can_query_unpublished_meta(): void
     {
         $model = Post::factory()->create();
 
@@ -218,7 +220,7 @@ class MetaTest extends TestCase
     }
 
     /** @test */
-    public function it_can_query_published_meta_by_date()
+    public function it_can_query_published_meta_by_date(): void
     {
         $model = Post::factory()->create();
 
@@ -239,7 +241,7 @@ class MetaTest extends TestCase
     }
 
     /** @test */
-    public function it_can_exclude_current()
+    public function it_can_exclude_current(): void
     {
         $model = Post::factory()->create();
 
@@ -284,7 +286,7 @@ class MetaTest extends TestCase
     }
 
     /** @test */
-    public function it_can_exclude_history()
+    public function it_can_exclude_history(): void
     {
         $model = Post::factory()->create();
 
@@ -327,18 +329,18 @@ class MetaTest extends TestCase
     }
 
     /** @test */
-    public function it_can_include_only_current()
+    public function it_can_include_only_current(): void
     {
         $model = Post::factory()->create();
 
-        $model->setMetaTimestamp(now());
+        $model->setMetaTimestamp(Carbon::now());
 
         Post::factory()->create()->saveMeta('foo', 'another');
 
         $model->saveMeta('bar', 'foo');
-        $model->saveMetaAt('foo', 1, '-1 day');
+        $model->saveMetaAt('foo', 1, Carbon::now()->subDay());
         $model->saveMeta('foo', 2);
-        $model->saveMetaAt('foo', 3, '+1 day');
+        $model->saveMetaAt('foo', 3, Carbon::now()->addDay());
 
         $meta = Meta::onlyCurrent()->get()->pluck('value');
         $modelMeta = $model->allMeta()->onlyCurrent()->get()->pluck('value');
@@ -362,12 +364,9 @@ class MetaTest extends TestCase
         $this->assertContains(1, $meta);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
-    public function it_can_store_and_retrieve_datatypes($type, $input)
+    /** @test */
+    /** @dataProvider handlerProvider */
+    public function it_can_store_and_retrieve_datatypes($type, $input): void
     {
         $meta = Meta::factory()->make([
             'metable_type' => 'Foo\Bar\Model',
@@ -385,12 +384,9 @@ class MetaTest extends TestCase
         $this->assertTrue(is_string($meta->raw_value) || is_null($meta->raw_value));
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
-    public function it_can_query_by_value($type, $input)
+    /** @test */
+    /** @dataProvider handlerProvider */
+    public function it_can_query_by_value($type, $input): void
     {
         $meta = Meta::factory()->make([
             'metable_type' => 'Foo\Bar\Model',
@@ -407,10 +403,8 @@ class MetaTest extends TestCase
         $this->assertEquals($type, $result->type);
     }
 
-    /**
-     * @test
-     */
-    public function it_will_return_null_for_undefined_value()
+    /** @test */
+    public function it_will_return_null_for_undefined_value(): void
     {
         $meta = new Meta;
 
@@ -418,10 +412,8 @@ class MetaTest extends TestCase
         $this->assertNull($meta->type);
     }
 
-    /**
-     * @test
-     */
-    public function it_can_return_value_and_type_once_defined()
+    /** @test */
+    public function it_can_return_value_and_type_once_defined(): void
     {
         $meta = new Meta;
 
@@ -431,10 +423,8 @@ class MetaTest extends TestCase
         $this->assertSame('float', $meta->type);
     }
 
-    /**
-     * @test
-     */
-    public function it_will_cache_value_when_accessing()
+    /** @test */
+    public function it_will_cache_value_when_accessing(): void
     {
         $meta = new Meta;
         $meta->value = 123.0;
@@ -445,10 +435,8 @@ class MetaTest extends TestCase
         $this->assertSame(123.0, $this->getProtectedProperty($meta, 'cachedValue'));
     }
 
-    /**
-     * @test
-     */
-    public function it_will_reset_cache_when_setting_value()
+    /** @test */
+    public function it_will_reset_cache_when_setting_value(): void
     {
         $meta = new Meta;
         $meta->value = 123.0;
