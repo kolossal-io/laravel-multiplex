@@ -38,7 +38,7 @@ trait HasConfigurableMorphType
      */
     protected function morphType(): string
     {
-        if (in_array(config('multiplex.morph_type'), ['uuid', 'ulid'])) {
+        if (is_string(config('multiplex.morph_type')) && in_array(config('multiplex.morph_type'), ['uuid', 'ulid'])) {
             return config('multiplex.morph_type');
         }
 
