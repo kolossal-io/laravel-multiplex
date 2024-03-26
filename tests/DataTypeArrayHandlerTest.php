@@ -3,7 +3,6 @@
 namespace Kolossal\Multiplex\Tests;
 
 use Kolossal\Multiplex\DataType\ArrayHandler;
-use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
 use PHPUnit\Framework\Attributes\Test;
 
 final class DataTypeArrayHandlerTest extends TestCase
