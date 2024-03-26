@@ -15,7 +15,7 @@ use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
 use Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties;
 use stdClass;
 
-class MetaTest extends TestCase
+final class MetaTest extends TestCase
 {
     use AccessesProtectedProperties;
     use RefreshDatabase;

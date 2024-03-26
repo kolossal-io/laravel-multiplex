@@ -5,7 +5,7 @@ namespace Kolossal\Multiplex\Tests;
 use PHPUnit\Framework\Attributes\Test;
 use Kolossal\Multiplex\MultiplexServiceProvider;
 
-class MultiplexServiceProviderTest extends TestCase
+final class MultiplexServiceProviderTest extends TestCase
 {
     protected function getPackageProviders($app)
     {

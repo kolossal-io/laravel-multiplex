@@ -18,7 +18,7 @@ use Kolossal\Multiplex\Tests\Mocks\PostWithoutSoftDelete;
 use Kolossal\Multiplex\Tests\Mocks\User;
 use PDOException;
 
-class HasMetaTest extends TestCase
+final class HasMetaTest extends TestCase
 {
     use RefreshDatabase;
 

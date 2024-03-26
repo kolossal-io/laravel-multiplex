@@ -7,7 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 
-class HasMetaCastTest extends TestCase
+final class HasMetaCastTest extends TestCase
 {
     use RefreshDatabase;
 

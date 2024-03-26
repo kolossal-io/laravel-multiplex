@@ -7,7 +7,7 @@ use Kolossal\Multiplex\DataType;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use stdClass;
 
-class DataTypeModelHandlerTest extends TestCase
+final class DataTypeModelHandlerTest extends TestCase
 {
     #[Test]
     public function it_can_handle_non_existing_models(): void

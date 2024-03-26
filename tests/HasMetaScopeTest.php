@@ -13,7 +13,7 @@ use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
 use stdClass;
 
-class HasMetaScopeTest extends TestCase
+final class HasMetaScopeTest extends TestCase
 {
     use RefreshDatabase;
 

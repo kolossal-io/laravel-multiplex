@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Kolossal\Multiplex\MultiplexServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
-class TestCase extends Orchestra
+final class TestCase extends Orchestra
 {
     protected function setUp(): void
     {

@@ -9,7 +9,7 @@ use Kolossal\Multiplex\Events\MetaHasBeenAdded;
 use Kolossal\Multiplex\Events\MetaHasBeenRemoved;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 
-class EventsTest extends TestCase
+final class EventsTest extends TestCase
 {
     use RefreshDatabase;
 

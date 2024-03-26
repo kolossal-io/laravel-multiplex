@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Kolossal\Multiplex\DataType;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 
-class DataTypeModelCollectionHandlerTest extends TestCase
+final class DataTypeModelCollectionHandlerTest extends TestCase
 {
     #[Test]
     public function it_can_handle_non_existing_models(): void

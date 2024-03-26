@@ -7,7 +7,7 @@ use Kolossal\Multiplex\DataType\HandlerInterface;
 use Kolossal\Multiplex\DataType\Registry;
 use Kolossal\Multiplex\Exceptions\DataTypeException;
 
-class RegistryTest extends TestCase
+final class RegistryTest extends TestCase
 {
     #[Test]
     public function it_can_set_a_handler(): void

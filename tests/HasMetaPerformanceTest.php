@@ -9,7 +9,7 @@ use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Mattiasgeniar\PhpunitQueryCountAssertions\AssertsQueryCounts;
 
-class HasMetaPerformanceTest extends TestCase
+final class HasMetaPerformanceTest extends TestCase
 {
     use AssertsQueryCounts;
     use RefreshDatabase;

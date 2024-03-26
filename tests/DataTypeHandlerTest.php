@@ -19,7 +19,7 @@ use stdClass;
  *
  * @link https://github.com/plank/laravel-metable
  */
-class DataTypeHandlerTest extends TestCase
+final class DataTypeHandlerTest extends TestCase
 {
     public static function handlerProvider(): array
     {

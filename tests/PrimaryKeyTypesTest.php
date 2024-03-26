@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 
-class PrimaryKeyTypesTest extends TestCase
+final class PrimaryKeyTypesTest extends TestCase
 {
     use RefreshDatabase;
 

@@ -11,7 +11,7 @@ use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\PostWithExistingColumn;
 use Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties;
 
-class ExistingColumnOverrideTest extends TestCase
+final class ExistingColumnOverrideTest extends TestCase
 {
     use AccessesProtectedProperties;
     use RefreshDatabase;

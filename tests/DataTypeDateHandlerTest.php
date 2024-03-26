@@ -6,7 +6,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Carbon\Carbon;
 use Kolossal\Multiplex\DataType\DateHandler;
 
-class DataTypeDateHandlerTest extends TestCase
+final class DataTypeDateHandlerTest extends TestCase
 {
     #[Test]
     public function it_will_parse_to_specified_date_format(): void
