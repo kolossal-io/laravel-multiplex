@@ -38,4 +38,24 @@ final class DataTypeDateHandlerTest extends TestCase
             $handler->unserializeValue('01.04.2022 14:00 Europe/Berlin')->eq(Carbon::create(2022, 3, 31, 22))
         );
     }
+
+    /** @test */
+    public function it_can_handle_handle_date_strings(): void
+    {
+        $handler = new DateHandler;
+
+        $this->assertTrue($handler->canHandleValue('2024-03-29'));
+        $this->assertTrue($handler->canHandleValue('1970-01-01'));
+    }
+
+    /** @test */
+    public function it_cannot_handle_handle_invalid_values(): void
+    {
+        $handler = new DateHandler;
+
+        $this->assertFalse($handler->canHandleValue(now()));
+        $this->assertFalse($handler->canHandleValue('2024-3-29'));
+        $this->assertFalse($handler->canHandleValue('20240329'));
+        $this->assertFalse($handler->canHandleValue(true));
+    }
 }

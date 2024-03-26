@@ -39,4 +39,12 @@ final class DataTypeModelHandlerTest extends TestCase
         $this->assertEquals('Kolossal\Multiplex\Tests\Mocks\Post#1', $serialized);
         $this->assertTrue($unserialized->is($model));
     }
+
+    /** @test */
+    public function it_will_resolve_null_as_null(): void
+    {
+        $handler = new DataType\ModelHandler;
+
+        $this->assertNull($handler->unserializeValue(null));
+    }
 }

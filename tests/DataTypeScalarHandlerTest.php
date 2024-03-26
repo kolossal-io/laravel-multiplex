@@ -28,4 +28,14 @@ final class DataTypeScalarHandlerTest extends TestCase
 
         $handler->serializeValue([1, 2, 3]);
     }
+
+    /** @test */
+    public function it_will_resolve_null_as_null(): void
+    {
+        $handler = new StringHandler;
+
+        $this->assertInstanceOf(ScalarHandler::class, $handler);
+
+        $this->assertNull($handler->unserializeValue(null));
+    }
 }
