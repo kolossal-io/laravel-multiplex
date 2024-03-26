@@ -346,10 +346,12 @@ final class MetaTest extends TestCase
 
         $this->travelTo(Carbon::now()->addSeconds(10));
 
-        $meta = Meta::onlyCurrent()->get()->pluck('value');
+        $metaModels = Meta::onlyCurrent()->get();
+        $meta = $metaModels->pluck('value');
         $modelMeta = $model->allMeta()->onlyCurrent()->get()->pluck('value');
 
-        $this->assertCount(3, $meta);
+        $this->assertCount(3, $meta, print_r($meta, true) . ' does not match a count of 3. Values were plucked from ' . print_r($metaModels->toArray(), true));
+
         $this->assertContains('another', $meta);
         $this->assertContains('foo', $meta);
         $this->assertContains(2, $meta);
