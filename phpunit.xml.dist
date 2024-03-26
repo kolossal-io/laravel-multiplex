@@ -21,6 +21,7 @@
     </include>
   </source>
   <php>
+    <env name="DB_CONNECTION" value="testing"/>
     <env name="MULTIPLEX_MORPH_TYPE" value="integer"/>
   </php>
 </phpunit>
