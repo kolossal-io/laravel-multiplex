@@ -2,7 +2,6 @@
 
 namespace Kolossal\Multiplex\Tests;
 
-use PHPUnit\Framework\Attributes\Test;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +16,7 @@ use Kolossal\Multiplex\Tests\Mocks\PostWithExistingColumn;
 use Kolossal\Multiplex\Tests\Mocks\PostWithoutSoftDelete;
 use Kolossal\Multiplex\Tests\Mocks\User;
 use PDOException;
+use PHPUnit\Framework\Attributes\Test;
 
 final class HasMetaTest extends TestCase
 {

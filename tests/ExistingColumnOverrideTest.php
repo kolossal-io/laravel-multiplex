@@ -2,7 +2,6 @@
 
 namespace Kolossal\Multiplex\Tests;
 
-use PHPUnit\Framework\Attributes\Test;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +9,7 @@ use Kolossal\Multiplex\Exceptions\MetaException;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\PostWithExistingColumn;
 use Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties;
+use PHPUnit\Framework\Attributes\Test;
 
 final class ExistingColumnOverrideTest extends TestCase
 {

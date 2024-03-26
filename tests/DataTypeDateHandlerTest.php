@@ -2,9 +2,9 @@
 
 namespace Kolossal\Multiplex\Tests;
 
-use PHPUnit\Framework\Attributes\Test;
 use Carbon\Carbon;
 use Kolossal\Multiplex\DataType\DateHandler;
+use PHPUnit\Framework\Attributes\Test;
 
 final class DataTypeDateHandlerTest extends TestCase
 {

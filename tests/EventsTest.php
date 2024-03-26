@@ -2,12 +2,12 @@
 
 namespace Kolossal\Multiplex\Tests;
 
-use PHPUnit\Framework\Attributes\Test;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Kolossal\Multiplex\Events\MetaHasBeenAdded;
 use Kolossal\Multiplex\Events\MetaHasBeenRemoved;
 use Kolossal\Multiplex\Tests\Mocks\Post;
+use PHPUnit\Framework\Attributes\Test;
 
 final class EventsTest extends TestCase
 {

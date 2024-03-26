@@ -2,14 +2,14 @@
 
 namespace Kolossal\Multiplex\Tests;
 
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Kolossal\Multiplex\DataType;
 use Kolossal\Multiplex\DataType\HandlerInterface;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
 use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 
 /**

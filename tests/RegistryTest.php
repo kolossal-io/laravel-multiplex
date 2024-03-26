@@ -2,10 +2,10 @@
 
 namespace Kolossal\Multiplex\Tests;
 
-use PHPUnit\Framework\Attributes\Test;
 use Kolossal\Multiplex\DataType\HandlerInterface;
 use Kolossal\Multiplex\DataType\Registry;
 use Kolossal\Multiplex\Exceptions\DataTypeException;
+use PHPUnit\Framework\Attributes\Test;
 
 final class RegistryTest extends TestCase
 {

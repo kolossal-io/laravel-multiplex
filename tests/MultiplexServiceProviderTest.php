@@ -2,8 +2,8 @@
 
 namespace Kolossal\Multiplex\Tests;
 
-use PHPUnit\Framework\Attributes\Test;
 use Kolossal\Multiplex\MultiplexServiceProvider;
+use PHPUnit\Framework\Attributes\Test;
 
 final class MultiplexServiceProviderTest extends TestCase
 {

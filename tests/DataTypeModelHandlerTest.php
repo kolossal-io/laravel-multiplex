@@ -2,9 +2,9 @@
 
 namespace Kolossal\Multiplex\Tests;
 
-use PHPUnit\Framework\Attributes\Test;
 use Kolossal\Multiplex\DataType;
 use Kolossal\Multiplex\Tests\Mocks\Post;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 
 final class DataTypeModelHandlerTest extends TestCase

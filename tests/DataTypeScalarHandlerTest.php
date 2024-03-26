@@ -2,10 +2,10 @@
 
 namespace Kolossal\Multiplex\Tests;
 
-use PHPUnit\Framework\Attributes\Test;
 use Exception;
 use Kolossal\Multiplex\DataType\ScalarHandler;
 use Kolossal\Multiplex\DataType\StringHandler;
+use PHPUnit\Framework\Attributes\Test;
 
 final class DataTypeScalarHandlerTest extends TestCase
 {

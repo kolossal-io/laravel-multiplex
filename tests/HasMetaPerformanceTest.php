@@ -2,12 +2,12 @@
 
 namespace Kolossal\Multiplex\Tests;
 
-use PHPUnit\Framework\Attributes\Test;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Mattiasgeniar\PhpunitQueryCountAssertions\AssertsQueryCounts;
+use PHPUnit\Framework\Attributes\Test;
 
 final class HasMetaPerformanceTest extends TestCase
 {
