@@ -5,7 +5,6 @@ namespace Kolossal\Multiplex\Tests;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Kolossal\Multiplex\MultiplexServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
-use function Orchestra\Testbench\workbench_path;
 
 class TestCase extends Orchestra
 {
