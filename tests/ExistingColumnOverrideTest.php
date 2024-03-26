@@ -2,6 +2,7 @@
 
 namespace Kolossal\Multiplex\Tests;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -9,14 +10,15 @@ use Kolossal\Multiplex\Exceptions\MetaException;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\PostWithExistingColumn;
 use Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties;
+use PHPUnit\Framework\Attributes\Test;
 
-class ExistingColumnOverrideTest extends TestCase
+final class ExistingColumnOverrideTest extends TestCase
 {
     use AccessesProtectedProperties;
     use RefreshDatabase;
 
     /** @test */
-    public function it_will_throw_for_key_equal_to_existing_column_name()
+    public function it_will_throw_for_key_equal_to_existing_column_name(): void
     {
         $this->assertDatabaseCount('meta', 0);
 
@@ -29,7 +31,7 @@ class ExistingColumnOverrideTest extends TestCase
     }
 
     /** @test */
-    public function it_will_set_existing_columns_as_expected()
+    public function it_will_set_existing_columns_as_expected(): void
     {
         $this->assertDatabaseCount('meta', 0);
 
@@ -45,7 +47,7 @@ class ExistingColumnOverrideTest extends TestCase
     }
 
     /** @test */
-    public function it_will_allow_existing_column_to_be_allowed_explicitely()
+    public function it_will_allow_existing_column_to_be_allowed_explicitely(): void
     {
         $this->assertDatabaseCount('meta', 0);
 
@@ -69,7 +71,7 @@ class ExistingColumnOverrideTest extends TestCase
     }
 
     /** @test */
-    public function it_will_prefer_meta_over_existing_column_if_defined_explicitly()
+    public function it_will_prefer_meta_over_existing_column_if_defined_explicitly(): void
     {
         $model = Post::factory()->create(['title' => 'Initial title']);
 
@@ -94,7 +96,7 @@ class ExistingColumnOverrideTest extends TestCase
     }
 
     /** @test */
-    public function it_will_fallback_to_existing_column_for_explicitly_defined_meta_keys()
+    public function it_will_fallback_to_existing_column_for_explicitly_defined_meta_keys(): void
     {
         $model = with(
             DB::table('sample_posts')->insertGetId(['title' => 'Initial title']),
@@ -117,7 +119,7 @@ class ExistingColumnOverrideTest extends TestCase
     }
 
     /** @test */
-    public function it_will_fallback_to_existing_column_for_dynamically_defined_meta_keys()
+    public function it_will_fallback_to_existing_column_for_dynamically_defined_meta_keys(): void
     {
         $model = Post::factory()->create(['title' => 'Initial title']);
 
@@ -142,7 +144,7 @@ class ExistingColumnOverrideTest extends TestCase
     }
 
     /** @test */
-    public function it_will_fallback_to_existing_column_for_unpublished_meta()
+    public function it_will_fallback_to_existing_column_for_unpublished_meta(): void
     {
         $model = with(
             DB::table('sample_posts')->insertGetId(['title' => 'Initial title']),
@@ -154,15 +156,15 @@ class ExistingColumnOverrideTest extends TestCase
 
         $this->assertSame('Initial title', $model->title);
 
-        $model->saveMetaAt('title', 'Changed title', '+1 hour');
+        $model->saveMetaAt('title', 'Changed title', Carbon::now()->addHour());
         $this->assertSame('Initial title', $model->refresh()->title);
 
-        $this->travelTo('+1 hour');
+        $this->travelTo(Carbon::now()->addHour());
         $this->assertSame('Changed title', $model->refresh()->title);
     }
 
     /** @test */
-    public function it_will_fallback_to_null_for_unpublished_meta()
+    public function it_will_fallback_to_null_for_unpublished_meta(): void
     {
         $model = with(
             DB::table('sample_posts')->insertGetId(['title' => null]),
@@ -171,15 +173,15 @@ class ExistingColumnOverrideTest extends TestCase
 
         $this->assertNull($model->title);
 
-        $model->saveMetaAt('title', 'Changed title', '+1 hour');
+        $model->saveMetaAt('title', 'Changed title', Carbon::now()->addHour());
         $this->assertNull($model->title);
 
-        $this->travelTo('+1 hour');
+        $this->travelTo(Carbon::now()->addHour());
         $this->assertSame('Changed title', $model->refresh()->title);
     }
 
     /** @test */
-    public function it_will_not_touch_database_for_explicitly_defined_keys()
+    public function it_will_not_touch_database_for_explicitly_defined_keys(): void
     {
         $a = with(
             DB::table('sample_posts')->insertGetId(['title' => 'Initial title']),
@@ -222,7 +224,7 @@ class ExistingColumnOverrideTest extends TestCase
     }
 
     /** @test */
-    public function it_will_remove_database_attributes_equals_to_explicit_keys_when_retrieving()
+    public function it_will_remove_database_attributes_equals_to_explicit_keys_when_retrieving(): void
     {
         $modelA = with(
             DB::table('sample_posts')->insertGetId(['title' => 'Title A']),
@@ -259,7 +261,7 @@ class ExistingColumnOverrideTest extends TestCase
     }
 
     /** @test */
-    public function it_will_not_change_meta_when_using_update_method()
+    public function it_will_not_change_meta_when_using_update_method(): void
     {
         DB::table('sample_posts')->insertGetId(['title' => 'Title']);
 
@@ -277,7 +279,7 @@ class ExistingColumnOverrideTest extends TestCase
     }
 
     /** @test */
-    public function it_will_include_meta_value_in_collection_if_overriding_column()
+    public function it_will_include_meta_value_in_collection_if_overriding_column(): void
     {
         Collection::times(10, function ($num) {
             DB::table('sample_posts')->insertGetId(['title' => "Title {$num}"]);
@@ -313,7 +315,7 @@ class ExistingColumnOverrideTest extends TestCase
     }
 
     /** @test */
-    public function it_will_include_column_values_in_collection_if_not_overriding_column()
+    public function it_will_include_column_values_in_collection_if_not_overriding_column(): void
     {
         Collection::times(10, function ($num) {
             DB::table('sample_posts')->insertGetId(['title' => "Title {$num}"]);
@@ -338,7 +340,7 @@ class ExistingColumnOverrideTest extends TestCase
     }
 
     /** @test */
-    public function it_can_append_overwriting_meta_values_in_array()
+    public function it_can_append_overwriting_meta_values_in_array(): void
     {
         DB::table('sample_posts')->insertGetId(['title' => 'Title']);
 
@@ -360,7 +362,7 @@ class ExistingColumnOverrideTest extends TestCase
     }
 
     /** @test */
-    public function it_can_append_overwriting_meta_values_in_collection_array()
+    public function it_can_append_overwriting_meta_values_in_collection_array(): void
     {
         Collection::times(10, function ($num) {
             DB::table('sample_posts')->insertGetId(['title' => "Title {$num}"]);
@@ -385,7 +387,7 @@ class ExistingColumnOverrideTest extends TestCase
     }
 
     /** @test */
-    public function it_can_assign_meta_when_creating_by_array()
+    public function it_can_assign_meta_when_creating_by_array(): void
     {
         $this->assertDatabaseCount('meta', 0);
 
@@ -404,7 +406,7 @@ class ExistingColumnOverrideTest extends TestCase
     }
 
     /** @test */
-    public function it_will_cast_fallback_fields_as_expected()
+    public function it_will_cast_fallback_fields_as_expected(): void
     {
         $this->assertDatabaseCount('meta', 0);
 

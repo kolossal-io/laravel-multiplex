@@ -8,6 +8,8 @@ use Kolossal\Multiplex\DataType;
 use Kolossal\Multiplex\DataType\HandlerInterface;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
 use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 
 /**
@@ -17,9 +19,9 @@ use stdClass;
  *
  * @link https://github.com/plank/laravel-metable
  */
-class DataTypeHandlerTest extends TestCase
+final class DataTypeHandlerTest extends TestCase
 {
-    public static function handlerProvider()
+    public static function handlerProvider(): array
     {
         $timestamp = '2017-01-01 00:00:00.000000+0000';
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s.uO', $timestamp);
@@ -105,22 +107,16 @@ class DataTypeHandlerTest extends TestCase
         ];
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
-    public function it_specifies_a_datatype_identifier(HandlerInterface $handler, $type)
+    /** @test */
+    /** @dataProvider handlerProvider */
+    public function it_specifies_a_datatype_identifier(HandlerInterface $handler, $type): void
     {
         $this->assertEquals($type, $handler->getDataType());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
-    public function it_can_verify_compatibility(HandlerInterface $handler, $type, $value, $incompatible)
+    /** @test */
+    /** @dataProvider handlerProvider */
+    public function it_can_verify_compatibility(HandlerInterface $handler, $type, $value, $incompatible): void
     {
         $this->assertTrue($handler->canHandleValue($value));
 
@@ -129,12 +125,9 @@ class DataTypeHandlerTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
-    public function it_can_serialize_and_unserialize_values(HandlerInterface $handler, $type, $value, $incompatible, ?callable $closure = null)
+    /** @test */
+    /** @dataProvider handlerProvider */
+    public function it_can_serialize_and_unserialize_values(HandlerInterface $handler, $type, $value, $incompatible, ?callable $closure = null): void
     {
         $serialized = $handler->serializeValue($value);
         $unserialized = $handler->unserializeValue($serialized);
@@ -146,12 +139,9 @@ class DataTypeHandlerTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
-    public function it_can_handle_null_values(HandlerInterface $handler)
+    /** @test */
+    /** @dataProvider handlerProvider */
+    public function it_can_handle_null_values(HandlerInterface $handler): void
     {
         $unserialized = $handler->unserializeValue(null);
         $this->assertNull($unserialized);

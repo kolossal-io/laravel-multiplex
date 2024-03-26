@@ -22,6 +22,7 @@ trait HasConfigurableMorphType
             return;
         }
 
+        // @codeCoverageIgnoreStart
         static::creating(function (self $model) {
             foreach ($model->uniqueIds() as $column) {
                 if (empty($model->{$column})) {
@@ -29,6 +30,7 @@ trait HasConfigurableMorphType
                 }
             }
         });
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -36,11 +38,7 @@ trait HasConfigurableMorphType
      */
     protected function morphType(): string
     {
-        if (!is_string(config('multiplex.morph_type'))) {
-            return 'integer';
-        }
-
-        if (in_array(config('multiplex.morph_type'), ['uuid', 'ulid'])) {
+        if (is_string(config('multiplex.morph_type')) && in_array(config('multiplex.morph_type'), ['uuid', 'ulid'])) {
             return config('multiplex.morph_type');
         }
 
