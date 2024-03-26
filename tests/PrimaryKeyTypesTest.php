@@ -2,7 +2,6 @@
 
 namespace Kolossal\Multiplex\Tests;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Kolossal\Multiplex\Tests\Mocks\Post;
@@ -11,14 +10,13 @@ use PHPUnit\Framework\Attributes\Test;
 
 final class PrimaryKeyTypesTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected function refreshDatabaseWithType(string $type): void
     {
         config()->set('multiplex.morph_type', $type);
 
-        $this->artisan('migrate:fresh', $this->migrateFreshUsing());
-        $this->useDatabase();
+        $this->artisan('migrate:fresh');
+
+        $this->defineDatabaseMigrations();
     }
 
     #[Test]
