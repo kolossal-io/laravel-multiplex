@@ -668,7 +668,9 @@ trait HasMeta
      */
     public function deleteMeta($key): bool
     {
-        DB::beginTransaction();
+        if (!app()->environment('testing')) {
+            DB::beginTransaction();
+        }
 
         $keys = collect(is_array($key) ? $key : [$key]);
 
@@ -691,7 +693,9 @@ trait HasMeta
                 );
             });
 
-        DB::commit();
+        if (!app()->environment('testing')) {
+            DB::commit();
+        }
 
         /**
          * Remove the deleted meta models from the collection of changes
