@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\Test;
 
 final class RegistryTest extends TestCase
 {
-    #[Test]
+    /** @test */
     public function it_can_set_a_handler(): void
     {
         $registry = new Registry();
@@ -22,7 +22,7 @@ final class RegistryTest extends TestCase
         $this->assertEquals($handler, $registry->getHandlerForType('foo'));
     }
 
-    #[Test]
+    /** @test */
     public function it_can_remove_a_handler(): void
     {
         $registry = new Registry();
@@ -35,7 +35,7 @@ final class RegistryTest extends TestCase
         $this->assertFalse($registry->hasHandlerForType('foo'));
     }
 
-    #[Test]
+    /** @test */
     public function it_throws_an_exception_if_no_handler_set(): void
     {
         $registry = new Registry();
@@ -44,7 +44,7 @@ final class RegistryTest extends TestCase
         $registry->getHandlerForType('foo');
     }
 
-    #[Test]
+    /** @test */
     public function it_determines_best_handler_for_a_value(): void
     {
         $stringHandler = $this->mockHandlerWithType('str');
@@ -68,7 +68,7 @@ final class RegistryTest extends TestCase
         $this->assertEquals('str', $type2);
     }
 
-    #[Test]
+    /** @test */
     public function it_throws_an_exception_if_no_type_matches_value(): void
     {
         $registry = new Registry();

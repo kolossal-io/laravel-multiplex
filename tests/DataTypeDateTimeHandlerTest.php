@@ -8,7 +8,7 @@ use PHPUnit\Framework\Attributes\Test;
 
 final class DataTypeDateTimeHandlerTest extends TestCase
 {
-    #[Test]
+    /** @test */
     public function it_will_parse_to_specified_datetime_format(): void
     {
         $handler = new DateTimeHandler;
@@ -19,7 +19,7 @@ final class DataTypeDateTimeHandlerTest extends TestCase
         );
     }
 
-    #[Test]
+    /** @test */
     public function it_will_unserialize_using_specified_datetime_format_if_possible(): void
     {
         $handler = new DateTimeHandler;
@@ -29,7 +29,7 @@ final class DataTypeDateTimeHandlerTest extends TestCase
         );
     }
 
-    #[Test]
+    /** @test */
     public function it_will_fallback_to_carbon_parse(): void
     {
         $handler = new DateTimeHandler;

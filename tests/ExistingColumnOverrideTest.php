@@ -17,7 +17,7 @@ final class ExistingColumnOverrideTest extends TestCase
     use AccessesProtectedProperties;
     use RefreshDatabase;
 
-    #[Test]
+    /** @test */
     public function it_will_throw_for_key_equal_to_existing_column_name(): void
     {
         $this->assertDatabaseCount('meta', 0);
@@ -30,7 +30,7 @@ final class ExistingColumnOverrideTest extends TestCase
         $model->setMeta('title', 'bar');
     }
 
-    #[Test]
+    /** @test */
     public function it_will_set_existing_columns_as_expected(): void
     {
         $this->assertDatabaseCount('meta', 0);
@@ -46,7 +46,7 @@ final class ExistingColumnOverrideTest extends TestCase
         $this->assertDatabaseCount('meta', 1);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_allow_existing_column_to_be_allowed_explicitely(): void
     {
         $this->assertDatabaseCount('meta', 0);
@@ -70,7 +70,7 @@ final class ExistingColumnOverrideTest extends TestCase
         $this->assertSame('Changed title', $model->getMeta('title'));
     }
 
-    #[Test]
+    /** @test */
     public function it_will_prefer_meta_over_existing_column_if_defined_explicitly(): void
     {
         $model = Post::factory()->create(['title' => 'Initial title']);
@@ -95,7 +95,7 @@ final class ExistingColumnOverrideTest extends TestCase
         $this->assertSame('Changed again', $model->title);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_fallback_to_existing_column_for_explicitly_defined_meta_keys(): void
     {
         $model = with(
@@ -118,7 +118,7 @@ final class ExistingColumnOverrideTest extends TestCase
         $this->assertSame('Initial title', $model->title);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_fallback_to_existing_column_for_dynamically_defined_meta_keys(): void
     {
         $model = Post::factory()->create(['title' => 'Initial title']);
@@ -143,7 +143,7 @@ final class ExistingColumnOverrideTest extends TestCase
         $this->assertSame('Initial title', $model->title);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_fallback_to_existing_column_for_unpublished_meta(): void
     {
         $model = with(
@@ -163,7 +163,7 @@ final class ExistingColumnOverrideTest extends TestCase
         $this->assertSame('Changed title', $model->refresh()->title);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_fallback_to_null_for_unpublished_meta(): void
     {
         $model = with(
@@ -180,7 +180,7 @@ final class ExistingColumnOverrideTest extends TestCase
         $this->assertSame('Changed title', $model->refresh()->title);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_not_touch_database_for_explicitly_defined_keys(): void
     {
         $a = with(
@@ -223,7 +223,7 @@ final class ExistingColumnOverrideTest extends TestCase
         $this->assertSame(null, $c->title);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_remove_database_attributes_equals_to_explicit_keys_when_retrieving(): void
     {
         $modelA = with(
@@ -260,7 +260,7 @@ final class ExistingColumnOverrideTest extends TestCase
         $this->assertSame('Another Title B', $modelB->title);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_not_change_meta_when_using_update_method(): void
     {
         DB::table('sample_posts')->insertGetId(['title' => 'Title']);
@@ -278,7 +278,7 @@ final class ExistingColumnOverrideTest extends TestCase
         $this->assertSame('Updated Title', PostWithExistingColumn::first()->title);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_include_meta_value_in_collection_if_overriding_column(): void
     {
         Collection::times(10, function ($num) {
@@ -314,7 +314,7 @@ final class ExistingColumnOverrideTest extends TestCase
         });
     }
 
-    #[Test]
+    /** @test */
     public function it_will_include_column_values_in_collection_if_not_overriding_column(): void
     {
         Collection::times(10, function ($num) {
@@ -339,7 +339,7 @@ final class ExistingColumnOverrideTest extends TestCase
         });
     }
 
-    #[Test]
+    /** @test */
     public function it_can_append_overwriting_meta_values_in_array(): void
     {
         DB::table('sample_posts')->insertGetId(['title' => 'Title']);
@@ -361,7 +361,7 @@ final class ExistingColumnOverrideTest extends TestCase
         $this->assertSame('Title', PostWithExistingColumn::first()->toArray()['title']);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_append_overwriting_meta_values_in_collection_array(): void
     {
         Collection::times(10, function ($num) {
@@ -386,7 +386,7 @@ final class ExistingColumnOverrideTest extends TestCase
         });
     }
 
-    #[Test]
+    /** @test */
     public function it_can_assign_meta_when_creating_by_array(): void
     {
         $this->assertDatabaseCount('meta', 0);
@@ -405,7 +405,7 @@ final class ExistingColumnOverrideTest extends TestCase
         $this->assertSame('bar', PostWithExistingColumn::first()->foo);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_cast_fallback_fields_as_expected(): void
     {
         $this->assertDatabaseCount('meta', 0);

@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\Test;
 
 final class DataTypeScalarHandlerTest extends TestCase
 {
-    #[Test]
+    /** @test */
     public function it_will_throw_an_exception_for_invalid_values(): void
     {
         $handler = new StringHandler;

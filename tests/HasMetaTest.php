@@ -29,7 +29,7 @@ final class HasMetaTest extends TestCase
         Post::travelBack();
     }
 
-    #[Test]
+    /** @test */
     public function it_can_set_any_keys_as_meta_by_default(): void
     {
         $this->assertDatabaseCount('meta', 0);
@@ -43,7 +43,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseCount('meta', 2);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_set_meta_fluently(): void
     {
         $this->assertDatabaseCount('meta', 0);
@@ -57,7 +57,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseCount('meta', 2);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_save_meta_when_model_is_saved(): void
     {
         $model = Post::factory()->create();
@@ -74,7 +74,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseCount('meta', 2);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_save_model_without_meta(): void
     {
         $model = Post::factory()->create();
@@ -95,7 +95,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseCount('meta', 2);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_disable_meta_autosave(): void
     {
         $model = Post::factory()->create();
@@ -119,7 +119,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseCount('meta', 2);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_handle_allowed_keys(): void
     {
         $model = Post::factory()->create();
@@ -139,7 +139,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseCount('meta', 2);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_handle_allowed_keys_in_arrays(): void
     {
         $model = Post::factory()->create();
@@ -161,7 +161,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseCount('meta', 2);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_use_meta_keys_from_property(): void
     {
         /** @var PostWithoutSoftDelete */
@@ -183,7 +183,7 @@ final class HasMetaTest extends TestCase
         $this->assertEquals(['title', 'foo', 'bar'], $model->getExplicitlyAllowedMetaKeys());
     }
 
-    #[Test]
+    /** @test */
     public function it_will_use_meta_keys_from_method(): void
     {
         /** @var PostWithoutSoftDelete */
@@ -207,7 +207,7 @@ final class HasMetaTest extends TestCase
         $this->assertEquals(['title', 'bar'], $model->getExplicitlyAllowedMetaKeys());
     }
 
-    #[Test]
+    /** @test */
     public function it_will_use_default_meta_keys_as_fallback(): void
     {
         $model = Post::factory()->create();
@@ -215,7 +215,7 @@ final class HasMetaTest extends TestCase
         $this->assertEquals(['appendable_foo'], $model->getExplicitlyAllowedMetaKeys());
     }
 
-    #[Test]
+    /** @test */
     public function it_will_throw_for_unallowed_keys(): void
     {
         $model = Post::factory()->create();
@@ -232,7 +232,7 @@ final class HasMetaTest extends TestCase
         $model->setMeta('bar', 125);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_throw_for_unallowed_keys_in_arrays(): void
     {
         $this->expectException(MetaException::class);
@@ -254,7 +254,7 @@ final class HasMetaTest extends TestCase
         $model->save();
     }
 
-    #[Test]
+    /** @test */
     public function it_lets_laravel_handle_unallowed_keys_assigned_fluently(): void
     {
         $this->expectException(PDOException::class);
@@ -271,7 +271,7 @@ final class HasMetaTest extends TestCase
         $model->save();
     }
 
-    #[Test]
+    /** @test */
     public function it_can_unguard_meta_keys(): void
     {
         $model = Post::factory()->create();
@@ -295,7 +295,7 @@ final class HasMetaTest extends TestCase
         Post::unguardMeta(false);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_reguard_meta_keys(): void
     {
         $this->expectException(MetaException::class);
@@ -316,7 +316,7 @@ final class HasMetaTest extends TestCase
         $model->setMeta('bar', 125);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_contain_wildcard_mixed_with_allowed_keys(): void
     {
         $model = Post::factory()->create();
@@ -339,7 +339,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseCount('meta', 3);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_return_meta_by_get_accessor(): void
     {
         $model = Post::factory()->create();
@@ -349,7 +349,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame('bar', Post::first()->getMeta('foo'));
     }
 
-    #[Test]
+    /** @test */
     public function it_will_return_null_if_meta_is_not_found(): void
     {
         $model = Post::factory()->create();
@@ -360,7 +360,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame(123, Post::first()->getMeta('bar'));
     }
 
-    #[Test]
+    /** @test */
     public function it_can_return_fallback_if_meta_is_not_found(): void
     {
         $model = Post::factory()->create();
@@ -371,7 +371,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame(123, Post::first()->getMeta('bar', 'fallback'));
     }
 
-    #[Test]
+    /** @test */
     public function it_will_show_if_meta_exists(): void
     {
         $model = Post::factory()->create();
@@ -383,7 +383,7 @@ final class HasMetaTest extends TestCase
         $this->assertTrue($model->hasMeta('foo'));
     }
 
-    #[Test]
+    /** @test */
     public function it_can_set_meta_from_array(): void
     {
         $model = Post::factory()->create();
@@ -397,7 +397,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame(123, $model->refresh()->bar);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_set_meta_for_the_future(): void
     {
         $model = Post::factory()->create();
@@ -414,7 +414,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame('change', Post::first()->foo);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_set_meta_for_the_future_by_array(): void
     {
         $model = Post::factory()->create();
@@ -435,7 +435,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame(true, Post::first()->bar);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_save_meta_for_the_future(): void
     {
         $model = Post::factory()->create();
@@ -450,7 +450,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame('change', $model->refresh()->foo);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_save_meta_with_same_value_for_different_timestamps(): void
     {
         $this->travelTo('2020-02-01 00:00:00');
@@ -466,7 +466,7 @@ final class HasMetaTest extends TestCase
         $this->assertEquals(3, $model->allMeta()->count());
     }
 
-    #[Test]
+    /** @test */
     public function it_can_save_multiple_meta_for_the_future(): void
     {
         $model = Post::factory()->create();
@@ -487,7 +487,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame(123, $model->bar);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_set_meta_for_future_from_array(): void
     {
         $model = Post::factory()->create();
@@ -511,7 +511,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame(false, $model->refresh()->bar);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_handle_future_meta_versions_as_non_existent(): void
     {
         $model = Post::factory()->create();
@@ -527,7 +527,7 @@ final class HasMetaTest extends TestCase
         $this->assertTrue($model->refresh()->hasMeta('foo'));
     }
 
-    #[Test]
+    /** @test */
     public function it_will_return_meta_fluently(): void
     {
         $model = Post::factory()->create(['title' => 'Title']);
@@ -541,7 +541,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame(123, Post::first()->bar);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_respect_get_meta_accessors(): void
     {
         $model = PostWithAccessor::factory()->create(['title' => null]);
@@ -557,7 +557,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame('Testing Accessor passed.', $model->title);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_use_meta_accessors_for_fallback_values(): void
     {
         $model = PostWithAccessor::factory()->create(['title' => null]);
@@ -574,7 +574,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame('Testing Fallback Accessor passed.', $model->refresh()->title);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_respect_set_meta_mutators(): void
     {
         $model = Post::factory()->create();
@@ -594,7 +594,7 @@ final class HasMetaTest extends TestCase
         ]);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_delete_meta(): void
     {
         $model = Post::factory()->create();
@@ -610,7 +610,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseMissing('meta', ['key' => 'foo']);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_delete_all_meta_versions(): void
     {
         $model = Post::factory()->create();
@@ -635,7 +635,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseMissing('meta', ['key' => 'foo']);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_delete_meta_from_array(): void
     {
         $model = Post::factory()->create();
@@ -659,7 +659,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseMissing('meta', ['key' => 'another']);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_throw_when_deleting_invalid_keys(): void
     {
         $this->expectException(MetaException::class);
@@ -691,7 +691,7 @@ final class HasMetaTest extends TestCase
         }
     }
 
-    #[Test]
+    /** @test */
     public function it_can_reset_meta_key_before_save(): void
     {
         $model = Post::factory()->create();
@@ -707,7 +707,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseMissing('meta', ['key' => 'foo', 'value' => 'changed']);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_reset_all_meta(): void
     {
         $model = Post::factory()->create();
@@ -729,7 +729,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseMissing('meta', ['key' => 'bar', 'value' => '234']);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_save_meta_directly(): void
     {
         Post::factory()->create()->saveMeta('foo', 'bar');
@@ -737,7 +737,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseHas('meta', ['key' => 'foo', 'value' => 'bar']);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_save_selected_meta_key_only(): void
     {
         $model = Post::factory()->create();
@@ -758,7 +758,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseHas('meta', ['key' => 'bar', 'value' => '234']);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_save_meta_updates_even_if_parent_is_clean(): void
     {
         $this->travelTo('2022-10-01 12:00:00');
@@ -790,7 +790,7 @@ final class HasMetaTest extends TestCase
         $this->assertTrue(Meta::whereDate('created_at', '2022-10-04')->exists());
     }
 
-    #[Test]
+    /** @test */
     public function it_contains_only_most_recent_meta_per_key(): void
     {
         $this->travelTo('2021-10-01 12:00:00');
@@ -817,7 +817,7 @@ final class HasMetaTest extends TestCase
         ], $model->meta->pluck('value', 'key')->sort()->toArray());
     }
 
-    #[Test]
+    /** @test */
     public function it_contains_only_published_meta_data(): void
     {
         $this->travelTo('2021-10-01 12:00:00');
@@ -857,7 +857,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame(340.987, $model->meta->pluck('value', 'key')['bar']);
     }
 
-    #[Test]
+    /** @test */
     public function it_may_change_datatype_of_meta_data(): void
     {
         $model = Post::factory()->create();
@@ -877,7 +877,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame(false, $model->meta->first()->value);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_store_dirty_meta_only(): void
     {
         $this->travelTo('2022-10-01 12:00:00');
@@ -913,7 +913,7 @@ final class HasMetaTest extends TestCase
         $this->assertTrue($model->meta->pluck('updated_at', 'key')->get('bar')->isSameDay('2022-10-02'));
     }
 
-    #[Test]
+    /** @test */
     public function it_will_show_if_meta_is_dirty(): void
     {
         $model = Post::factory()->create();
@@ -938,7 +938,7 @@ final class HasMetaTest extends TestCase
         $this->assertCount(0, $model->getDirtyMeta());
     }
 
-    #[Test]
+    /** @test */
     public function it_can_add_casted_meta_fields_to_models_visible_fields(): void
     {
         $model = Post::factory()->create(['title' => 'Title']);
@@ -957,7 +957,7 @@ final class HasMetaTest extends TestCase
         );
     }
 
-    #[Test]
+    /** @test */
     public function it_will_return_null_for_casted_meta_field_without_trait(): void
     {
         $model = new Dummy;
@@ -967,7 +967,7 @@ final class HasMetaTest extends TestCase
         );
     }
 
-    #[Test]
+    /** @test */
     public function it_can_set_casted_fields_not_in_whitelist(): void
     {
         $model = Post::factory()->create(['title' => 'Title']);
@@ -989,7 +989,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame('this also works.', Post::first()->append('appendable_foo')->toArray()['appendable_foo']);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_return_correct_datatype_for_casted_meta_attributes(): void
     {
         $model = Post::factory()->create(['title' => 'Title']);
@@ -1009,7 +1009,7 @@ final class HasMetaTest extends TestCase
         $this->assertNull(Post::first()->appendable_foo);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_return_null_for_undefined_casted_meta_field(): void
     {
         $model = Post::factory()->create(['title' => 'Title']);
@@ -1019,7 +1019,7 @@ final class HasMetaTest extends TestCase
         $this->assertNull(Post::first()->appendable_foo);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_return_column_value_for_casted_meta_fields_having_equally_named_column(): void
     {
         $model = Post::factory()->create(['title' => 'Title']);
@@ -1042,7 +1042,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame(8000.99, Post::first()->appendable_foo);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_save_multiple_meta_for_a_given_date(): void
     {
         $model = Post::factory()->create();
@@ -1071,7 +1071,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame(125, Post::first()->bar);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_inspect_model_meta_at_a_given_point_in_time(): void
     {
         $this->travelTo('2022-10-01 12:00:00');
@@ -1144,7 +1144,7 @@ final class HasMetaTest extends TestCase
         ], $post->withCurrentMeta()->only($keys));
     }
 
-    #[Test]
+    /** @test */
     public function it_can_travel_to_the_future(): void
     {
         $model = Post::factory()->create();
@@ -1169,7 +1169,7 @@ final class HasMetaTest extends TestCase
         ], Post::first()->withMetaAt('+1 year')->only($keys));
     }
 
-    #[Test]
+    /** @test */
     public function it_can_create_meta_along_with_the_model(): void
     {
         Post::factory()->create([
@@ -1185,7 +1185,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame('works', Post::first()->bar);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_fill_meta_with_attributes(): void
     {
         $post = Post::factory()->create();
@@ -1209,7 +1209,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame('also true', $post->getMeta('bar'));
     }
 
-    #[Test]
+    /** @test */
     public function it_will_delete_meta_with_the_model(): void
     {
         Post::factory()->create([
@@ -1223,7 +1223,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseCount('meta', 0);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_not_delete_meta_for_soft_deleted_model(): void
     {
         Post::factory()->create([
@@ -1237,7 +1237,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseCount('meta', 2);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_delete_meta_model_without_soft_delete(): void
     {
         PostWithoutSoftDelete::factory()->create([
@@ -1251,7 +1251,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseCount('meta', 0);
     }
 
-    #[Test]
+    /** @test */
     public function it_loads_meta_relation(): void
     {
         $post = Post::factory()->create();
@@ -1265,7 +1265,7 @@ final class HasMetaTest extends TestCase
         $this->assertCount(2, Post::first()->meta);
     }
 
-    #[Test]
+    /** @test */
     public function it_loads_published_meta_relation(): void
     {
         $post = Post::factory()->create();
@@ -1279,7 +1279,7 @@ final class HasMetaTest extends TestCase
         $this->assertCount(3, Post::first()->publishedMeta);
     }
 
-    #[Test]
+    /** @test */
     public function it_loads_all_meta_relation(): void
     {
         $post = Post::factory()->create();
@@ -1293,7 +1293,7 @@ final class HasMetaTest extends TestCase
         $this->assertCount(4, Post::first()->allMeta);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_throw_an_error_for_relation_attributes(): void
     {
         $post = Post::factory()->create();
@@ -1312,7 +1312,7 @@ final class HasMetaTest extends TestCase
         $post->saveMeta('meta', 'Meta Value');
     }
 
-    #[Test]
+    /** @test */
     public function it_refreshes_relations_after_save(): void
     {
         $post = Post::factory()->create();
@@ -1339,7 +1339,7 @@ final class HasMetaTest extends TestCase
         $this->assertCount(5, $post->allMeta);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_not_store_clean_meta(): void
     {
         $model = Post::factory()->create();
@@ -1352,7 +1352,7 @@ final class HasMetaTest extends TestCase
         $this->assertDatabaseCount('meta', 2);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_assign_meta_when_creating_by_array(): void
     {
         $this->assertDatabaseCount('meta', 0);
@@ -1371,7 +1371,7 @@ final class HasMetaTest extends TestCase
         $this->assertSame('bar', Post::first()->foo);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_get_meta_when_selecting_with_id(): void
     {
         Post::factory(2)->has(Meta::factory()->state(['key' => 'foo']))->create();
@@ -1383,7 +1383,7 @@ final class HasMetaTest extends TestCase
         })->count());
     }
 
-    #[Test]
+    /** @test */
     public function it_cannot_get_meta_when_selecting_without_id(): void
     {
         Post::factory(2)->has(Meta::factory()->state(['key' => 'foo']))->create();
@@ -1395,7 +1395,7 @@ final class HasMetaTest extends TestCase
         })->count());
     }
 
-    #[Test]
+    /** @test */
     public function it_can_pluck_meta_values(): void
     {
         $a = Post::factory()->create();
@@ -1428,7 +1428,7 @@ final class HasMetaTest extends TestCase
         ], $b->pluckMeta()->toArray());
     }
 
-    #[Test]
+    /** @test */
     public function it_does_not_load_meta_if_relation_is_null(): void
     {
         $post = Post::factory()->create();
@@ -1437,7 +1437,7 @@ final class HasMetaTest extends TestCase
         $this->assertFalse($post->relationLoaded('meta'));
     }
 
-    #[Test]
+    /** @test */
     public function it_does_not_load_meta_if_relation_is_not_null(): void
     {
         $post = Post::factory()->for(User::factory())->create();

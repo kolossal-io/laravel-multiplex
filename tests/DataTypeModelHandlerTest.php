@@ -9,7 +9,7 @@ use stdClass;
 
 final class DataTypeModelHandlerTest extends TestCase
 {
-    #[Test]
+    /** @test */
     public function it_can_handle_non_existing_models(): void
     {
         $model = Post::factory()->make();
@@ -25,7 +25,7 @@ final class DataTypeModelHandlerTest extends TestCase
         $this->assertInstanceOf(Post::class, $unserialized);
     }
 
-    #[Test]
+    /** @test */
     public function it_can_handle_existing_models(): void
     {
         $model = Post::factory()->create();

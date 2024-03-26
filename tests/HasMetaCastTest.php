@@ -11,7 +11,7 @@ final class HasMetaCastTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[Test]
+    /** @test */
     public function it_can_force_type_casts(): void
     {
         $model = $this->getModel();
@@ -45,7 +45,7 @@ final class HasMetaCastTest extends TestCase
         $this->assertSame(123.000, $model->dbl);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_handle_null_values(): void
     {
         $model = $this->getModel();
@@ -79,7 +79,7 @@ final class HasMetaCastTest extends TestCase
         $this->assertNull($model->dbl);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_handle_falsy_values(): void
     {
         $model = $this->getModel();
@@ -105,7 +105,7 @@ final class HasMetaCastTest extends TestCase
         $this->assertSame(0.0, $model->dbl);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_handle_empty_values(): void
     {
         $model = $this->getModel();

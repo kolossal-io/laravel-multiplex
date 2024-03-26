@@ -25,7 +25,7 @@ final class EventsTest extends TestCase
         ]);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_fire_meta_added_event(): void
     {
         $model = Post::factory()->create();
@@ -38,7 +38,7 @@ final class EventsTest extends TestCase
         Event::assertDispatched(MetaHasBeenAdded::class);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_fire_meta_added_event_when_creating(): void
     {
         Post::factory()->create([
@@ -55,7 +55,7 @@ final class EventsTest extends TestCase
         Event::assertDispatched(MetaHasBeenAdded::class);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_fire_meta_added_event_when_assigning_fluently(): void
     {
         $model = Post::factory()->create();
@@ -73,7 +73,7 @@ final class EventsTest extends TestCase
         Event::assertDispatched(MetaHasBeenAdded::class);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_fire_meta_added_event_when_saving_directly(): void
     {
         $model = Post::factory()->create();
@@ -82,7 +82,7 @@ final class EventsTest extends TestCase
         Event::assertDispatched(MetaHasBeenAdded::class);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_fire_meta_added_event_only_for_dirty_meta(): void
     {
         $model = Post::factory()->create();
@@ -103,7 +103,7 @@ final class EventsTest extends TestCase
         Event::assertDispatchedTimes(MetaHasBeenAdded::class, 2);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_fire_meta_added_event_for_each_meta_individually(): void
     {
         $model = Post::factory()->create();
@@ -121,7 +121,7 @@ final class EventsTest extends TestCase
         Event::assertDispatchedTimes(MetaHasBeenAdded::class, 3);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_pass_meta_to_meta_added_event(): void
     {
         $model = Post::factory()->create();
@@ -133,7 +133,7 @@ final class EventsTest extends TestCase
         });
     }
 
-    #[Test]
+    /** @test */
     public function it_will_pass_metable_class_name_to_meta_added_event(): void
     {
         $model = Post::factory()->create();
@@ -145,7 +145,7 @@ final class EventsTest extends TestCase
         });
     }
 
-    #[Test]
+    /** @test */
     public function it_will_pass_metable_model_to_meta_added_event(): void
     {
         $model = Post::factory()->create();
@@ -157,7 +157,7 @@ final class EventsTest extends TestCase
         });
     }
 
-    #[Test]
+    /** @test */
     public function it_will_fire_meta_removed_event(): void
     {
         $model = Post::factory()->create();
@@ -172,7 +172,7 @@ final class EventsTest extends TestCase
         Event::assertDispatched(MetaHasBeenRemoved::class);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_fire_meta_removed_event_for_meta_individually(): void
     {
         $model = Post::factory()->create();
@@ -186,7 +186,7 @@ final class EventsTest extends TestCase
         Event::assertDispatchedTimes(MetaHasBeenRemoved::class, 2);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_not_fire_meta_removed_event_when_purging(): void
     {
         $model = Post::factory()->create();
@@ -198,7 +198,7 @@ final class EventsTest extends TestCase
         Event::assertNotDispatched(MetaHasBeenRemoved::class);
     }
 
-    #[Test]
+    /** @test */
     public function it_will_fire_meta_removed_only_with_latest_meta(): void
     {
         $model = Post::factory()->create();
@@ -224,7 +224,7 @@ final class EventsTest extends TestCase
         });
     }
 
-    #[Test]
+    /** @test */
     public function it_will_not_fire_meta_removed_for_nonexistent_meta(): void
     {
         $model = Post::factory()->create();

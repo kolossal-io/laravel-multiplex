@@ -12,7 +12,7 @@ final class MultiplexServiceProviderTest extends TestCase
         return [];
     }
 
-    #[Test]
+    /** @test */
     public function it_skips_migrations(): void
     {
         config(['multiplex.migrations' => false]);
@@ -23,7 +23,7 @@ final class MultiplexServiceProviderTest extends TestCase
         $this->assertEmpty(app('migrator')->paths());
     }
 
-    #[Test]
+    /** @test */
     public function it_applies_migrations(): void
     {
         config()->set('multiplex.migrations', true);

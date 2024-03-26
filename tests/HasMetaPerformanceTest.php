@@ -23,7 +23,7 @@ final class HasMetaPerformanceTest extends TestCase
             ->toArray();
     }
 
-    #[Test]
+    /** @test */
     public function it_will_not_load_meta_relations_by_default(): void
     {
         Post::factory()
@@ -35,7 +35,7 @@ final class HasMetaPerformanceTest extends TestCase
         });
     }
 
-    #[Test]
+    /** @test */
     public function it_will_load_meta_relation_if_meta_value_is_used(): void
     {
         Post::factory()
@@ -47,7 +47,7 @@ final class HasMetaPerformanceTest extends TestCase
         });
     }
 
-    #[Test]
+    /** @test */
     public function it_will_used_cache_meta_on_subsequent_meta_calls(): void
     {
         Post::factory()
@@ -66,7 +66,7 @@ final class HasMetaPerformanceTest extends TestCase
         });
     }
 
-    #[Test]
+    /** @test */
     public function it_will_lazy_load_meta_relations_by_default(): void
     {
         Post::factory(20)
@@ -92,7 +92,7 @@ final class HasMetaPerformanceTest extends TestCase
         });
     }
 
-    #[Test]
+    /** @test */
     public function it_can_eager_load_meta_relations(): void
     {
         Post::factory(20)

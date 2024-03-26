@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\Test;
 
 final class DataTypeModelCollectionHandlerTest extends TestCase
 {
-    #[Test]
+    /** @test */
     public function it_can_handle_non_existing_models(): void
     {
         $models = Post::factory(3)->make();
@@ -27,7 +27,7 @@ final class DataTypeModelCollectionHandlerTest extends TestCase
         $unserialized->every(fn ($item) => $this->assertInstanceOf(Post::class, $item));
     }
 
-    #[Test]
+    /** @test */
     public function it_can_handle_existing_models(): void
     {
         Post::factory()->create(['title' => 'a']);
@@ -51,7 +51,7 @@ final class DataTypeModelCollectionHandlerTest extends TestCase
         );
     }
 
-    #[Test]
+    /** @test */
     public function it_will_serialize_empty_value_if_no_collection_is_passed(): void
     {
         $model = Post::factory()->create();
@@ -64,7 +64,7 @@ final class DataTypeModelCollectionHandlerTest extends TestCase
         $this->assertNull($handler->unserializeValue($serialized));
     }
 
-    #[Test]
+    /** @test */
     public function it_will_unserialize_to_null_for_invalid_values(): void
     {
         $model = Post::factory()->create();
