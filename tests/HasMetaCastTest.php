@@ -2,6 +2,7 @@
 
 namespace Kolossal\Multiplex\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Kolossal\Multiplex\Tests\Mocks\Post;
@@ -10,7 +11,7 @@ class HasMetaCastTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_can_force_type_casts()
     {
         $model = $this->getModel();
@@ -44,7 +45,7 @@ class HasMetaCastTest extends TestCase
         $this->assertSame(123.000, $model->dbl);
     }
 
-    /** @test */
+    #[Test]
     public function it_will_handle_null_values()
     {
         $model = $this->getModel();
@@ -78,7 +79,7 @@ class HasMetaCastTest extends TestCase
         $this->assertNull($model->dbl);
     }
 
-    /** @test */
+    #[Test]
     public function it_will_handle_falsy_values()
     {
         $model = $this->getModel();
@@ -104,7 +105,7 @@ class HasMetaCastTest extends TestCase
         $this->assertSame(0.0, $model->dbl);
     }
 
-    /** @test */
+    #[Test]
     public function it_will_handle_empty_values()
     {
         $model = $this->getModel();

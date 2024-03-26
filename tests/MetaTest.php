@@ -2,6 +2,8 @@
 
 namespace Kolossal\Multiplex\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -75,7 +77,7 @@ class MetaTest extends TestCase
         ];
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_and_set_value()
     {
         $meta = Meta::factory()->make();
@@ -86,7 +88,7 @@ class MetaTest extends TestCase
         $this->assertEquals('string', $meta->type);
     }
 
-    /** @test */
+    #[Test]
     public function it_exposes_its_serialized_value()
     {
         $meta = Meta::factory()->make();
@@ -96,7 +98,7 @@ class MetaTest extends TestCase
         $this->assertEquals('123', $meta->raw_value);
     }
 
-    /** @test */
+    #[Test]
     public function it_caches_unserialized_value()
     {
         $meta = Meta::factory()->make();
@@ -111,7 +113,7 @@ class MetaTest extends TestCase
         $this->assertEquals('bar', $meta->raw_value);
     }
 
-    /** @test */
+    #[Test]
     public function it_clears_cache_on_set()
     {
         $meta = Meta::factory()->make();
@@ -125,7 +127,7 @@ class MetaTest extends TestCase
         $this->assertEquals('bar', $meta->value);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_its_model_relation()
     {
         $meta = Meta::factory()->make();
@@ -137,7 +139,7 @@ class MetaTest extends TestCase
         $this->assertEquals('metable_id', $relation->getForeignKeyName());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_determine_if_it_is_current()
     {
         $model = Post::factory()->create();
@@ -155,7 +157,7 @@ class MetaTest extends TestCase
         $this->assertFalse(Meta::whereValue(4)->first()->is_current);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_determine_if_it_is_planned()
     {
         $model = Post::factory()->create();
@@ -173,7 +175,7 @@ class MetaTest extends TestCase
         $this->assertTrue($meta->get(2)->is_planned);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_query_published_meta()
     {
         $model = Post::factory()->create();
@@ -196,7 +198,7 @@ class MetaTest extends TestCase
         $this->assertNotContains(3, $meta);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_query_unpublished_meta()
     {
         $model = Post::factory()->create();
@@ -217,7 +219,7 @@ class MetaTest extends TestCase
         $this->assertContains('foo', $meta);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_query_published_meta_by_date()
     {
         $model = Post::factory()->create();
@@ -238,7 +240,7 @@ class MetaTest extends TestCase
         $this->assertNotContains(3, $meta);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_exclude_current()
     {
         $model = Post::factory()->create();
@@ -283,7 +285,7 @@ class MetaTest extends TestCase
         $this->assertContains(3, $meta);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_exclude_history()
     {
         $model = Post::factory()->create();
@@ -326,7 +328,7 @@ class MetaTest extends TestCase
         $this->assertContains(3, $meta);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_include_only_current()
     {
         $model = Post::factory()->create();
@@ -362,11 +364,8 @@ class MetaTest extends TestCase
         $this->assertContains(1, $meta);
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
+    #[Test]
+    #[DataProvider('handlerProvider')]
     public function it_can_store_and_retrieve_datatypes($type, $input)
     {
         $meta = Meta::factory()->make([
@@ -385,11 +384,8 @@ class MetaTest extends TestCase
         $this->assertTrue(is_string($meta->raw_value) || is_null($meta->raw_value));
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
+    #[Test]
+    #[DataProvider('handlerProvider')]
     public function it_can_query_by_value($type, $input)
     {
         $meta = Meta::factory()->make([
@@ -407,9 +403,7 @@ class MetaTest extends TestCase
         $this->assertEquals($type, $result->type);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_will_return_null_for_undefined_value()
     {
         $meta = new Meta;
@@ -418,9 +412,7 @@ class MetaTest extends TestCase
         $this->assertNull($meta->type);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_return_value_and_type_once_defined()
     {
         $meta = new Meta;
@@ -431,9 +423,7 @@ class MetaTest extends TestCase
         $this->assertSame('float', $meta->type);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_will_cache_value_when_accessing()
     {
         $meta = new Meta;
@@ -445,9 +435,7 @@ class MetaTest extends TestCase
         $this->assertSame(123.0, $this->getProtectedProperty($meta, 'cachedValue'));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_will_reset_cache_when_setting_value()
     {
         $meta = new Meta;

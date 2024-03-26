@@ -2,13 +2,14 @@
 
 namespace Kolossal\Multiplex\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use Kolossal\Multiplex\DataType\HandlerInterface;
 use Kolossal\Multiplex\DataType\Registry;
 use Kolossal\Multiplex\Exceptions\DataTypeException;
 
 class RegistryTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_can_set_a_handler()
     {
         $registry = new Registry();
@@ -21,7 +22,7 @@ class RegistryTest extends TestCase
         $this->assertEquals($handler, $registry->getHandlerForType('foo'));
     }
 
-    /** @test */
+    #[Test]
     public function it_can_remove_a_handler()
     {
         $registry = new Registry();
@@ -34,7 +35,7 @@ class RegistryTest extends TestCase
         $this->assertFalse($registry->hasHandlerForType('foo'));
     }
 
-    /** @test */
+    #[Test]
     public function it_throws_an_exception_if_no_handler_set()
     {
         $registry = new Registry();
@@ -43,7 +44,7 @@ class RegistryTest extends TestCase
         $registry->getHandlerForType('foo');
     }
 
-    /** @test */
+    #[Test]
     public function it_determines_best_handler_for_a_value()
     {
         $stringHandler = $this->mockHandlerWithType('str');
@@ -67,7 +68,7 @@ class RegistryTest extends TestCase
         $this->assertEquals('str', $type2);
     }
 
-    /** @test */
+    #[Test]
     public function it_throws_an_exception_if_no_type_matches_value()
     {
         $registry = new Registry();

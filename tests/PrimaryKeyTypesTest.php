@@ -2,6 +2,8 @@
 
 namespace Kolossal\Multiplex\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -19,11 +21,8 @@ class PrimaryKeyTypesTest extends TestCase
         $this->useDatabase();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider morphTypes
-     * */
+    #[Test]
+    #[DataProvider('morphTypes')]
     public function it_uses_the_configured_column_type(string $type, string $column_type)
     {
         $this->refreshDatabaseWithType($type);

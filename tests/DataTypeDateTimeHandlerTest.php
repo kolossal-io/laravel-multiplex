@@ -2,14 +2,13 @@
 
 namespace Kolossal\Multiplex\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use Carbon\Carbon;
 use Kolossal\Multiplex\DataType\DateTimeHandler;
 
 class DataTypeDateTimeHandlerTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_will_parse_to_specified_datetime_format()
     {
         $handler = new DateTimeHandler;
@@ -20,9 +19,7 @@ class DataTypeDateTimeHandlerTest extends TestCase
         );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_will_unserialize_using_specified_datetime_format_if_possible()
     {
         $handler = new DateTimeHandler;
@@ -32,9 +29,7 @@ class DataTypeDateTimeHandlerTest extends TestCase
         );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_will_fallback_to_carbon_parse()
     {
         $handler = new DateTimeHandler;

@@ -2,15 +2,14 @@
 
 namespace Kolossal\Multiplex\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use Exception;
 use Kolossal\Multiplex\DataType\ScalarHandler;
 use Kolossal\Multiplex\DataType\StringHandler;
 
 class DataTypeScalarHandlerTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_will_throw_an_exception_for_invalid_values()
     {
         $handler = new StringHandler;

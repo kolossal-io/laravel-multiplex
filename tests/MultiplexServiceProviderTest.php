@@ -2,6 +2,7 @@
 
 namespace Kolossal\Multiplex\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use Kolossal\Multiplex\MultiplexServiceProvider;
 
 class MultiplexServiceProviderTest extends TestCase
@@ -11,7 +12,7 @@ class MultiplexServiceProviderTest extends TestCase
         return [];
     }
 
-    /** @test */
+    #[Test]
     public function it_skips_migrations()
     {
         config(['multiplex.migrations' => false]);
@@ -22,7 +23,7 @@ class MultiplexServiceProviderTest extends TestCase
         $this->assertEmpty(app('migrator')->paths());
     }
 
-    /** @test */
+    #[Test]
     public function it_applies_migrations()
     {
         config()->set('multiplex.migrations', true);

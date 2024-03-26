@@ -2,6 +2,8 @@
 
 namespace Kolossal\Multiplex\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Kolossal\Multiplex\DataType;
@@ -105,21 +107,15 @@ class DataTypeHandlerTest extends TestCase
         ];
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
+    #[Test]
+    #[DataProvider('handlerProvider')]
     public function it_specifies_a_datatype_identifier(HandlerInterface $handler, $type)
     {
         $this->assertEquals($type, $handler->getDataType());
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
+    #[Test]
+    #[DataProvider('handlerProvider')]
     public function it_can_verify_compatibility(HandlerInterface $handler, $type, $value, $incompatible)
     {
         $this->assertTrue($handler->canHandleValue($value));
@@ -129,11 +125,8 @@ class DataTypeHandlerTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
+    #[Test]
+    #[DataProvider('handlerProvider')]
     public function it_can_serialize_and_unserialize_values(HandlerInterface $handler, $type, $value, $incompatible, ?callable $closure = null)
     {
         $serialized = $handler->serializeValue($value);
@@ -146,11 +139,8 @@ class DataTypeHandlerTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
+    #[Test]
+    #[DataProvider('handlerProvider')]
     public function it_can_handle_null_values(HandlerInterface $handler)
     {
         $unserialized = $handler->unserializeValue(null);

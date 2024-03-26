@@ -2,6 +2,8 @@
 
 namespace Kolossal\Multiplex\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,7 +24,7 @@ class HasMetaScopeTest extends TestCase
         Post::travelBack();
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_where_has_meta()
     {
         $this->seedRandomModels();
@@ -36,7 +38,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereHasMeta('one')->orWhereHasMeta('three'), 'a,c');
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_where_has_meta_from_array()
     {
         $this->seedRandomModels();
@@ -47,7 +49,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereHasMeta(['one', 'two'])->orWhereHasMeta('three'), 'a,b,c');
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_where_doesnt_have_meta()
     {
         $this->seedModels();
@@ -61,7 +63,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereDoesntHaveMeta(['one', 'three']), 'b');
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_where_doesnt_have_meta_from_array()
     {
         $this->seedModels();
@@ -70,7 +72,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereDoesntHaveMeta(['two', 'three']));
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_where_meta()
     {
         $this->seedRandomModels();
@@ -94,11 +96,8 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMeta('foo', true)->orWhereMeta('bar', 12), 'b,c');
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider datatypeProvider
-     * */
+    #[Test]
+    #[DataProvider('datatypeProvider')]
     public function it_scopes_where_meta_with_datatype($type, $input, $another)
     {
         $this->seedRandomModels();
@@ -119,7 +118,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMeta('foo', $another), 'a');
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_where_meta_with_operators()
     {
         $this->seedRandomModels();
@@ -155,7 +154,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMeta('foo', '!=', true)->orWhereMeta('bar', '<', 0), 'c,d');
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_where_raw_meta()
     {
         $this->seedRandomModels();
@@ -194,7 +193,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereRawMeta('foo', '!=', '')->orWhereRawMeta('foo', '<', '0'), 'a,b,c');
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_where_meta_of_type()
     {
         $this->seedRandomModels();
@@ -224,7 +223,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMetaOfType('integer', 'bar', -4)->orWhereMetaOfType('null', 'foo', null), 'c,d');
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_where_meta_in_array()
     {
         $this->seedRandomModels();
@@ -250,7 +249,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMeta('foo', 'one')->orWhereMetaIn('foo', [2, 3, 4]), 'a,b,c');
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_after_time_traveling()
     {
         $this->seedRandomModels();
@@ -287,7 +286,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::travelTo('+3 days')->whereMeta('bar', '>=', 123), 'c');
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_where_meta_empty()
     {
         Post::factory()
@@ -316,7 +315,7 @@ class HasMetaScopeTest extends TestCase
         $this->testScope(Post::whereMeta('foo', false)->orWhereMetaEmpty('bar'), 'a,b,c,d');
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_where_meta_not_empty()
     {
         $this->seedRandomModels();

@@ -2,15 +2,14 @@
 
 namespace Kolossal\Multiplex\Tests;
 
+use PHPUnit\Framework\Attributes\Test;
 use Illuminate\Database\Eloquent\Collection;
 use Kolossal\Multiplex\DataType;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 
 class DataTypeModelCollectionHandlerTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_handle_non_existing_models()
     {
         $models = Post::factory(3)->make();
@@ -28,9 +27,7 @@ class DataTypeModelCollectionHandlerTest extends TestCase
         $unserialized->every(fn ($item) => $this->assertInstanceOf(Post::class, $item));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_can_handle_existing_models()
     {
         Post::factory()->create(['title' => 'a']);
@@ -54,9 +51,7 @@ class DataTypeModelCollectionHandlerTest extends TestCase
         );
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_will_serialize_empty_value_if_no_collection_is_passed()
     {
         $model = Post::factory()->create();
@@ -69,9 +64,7 @@ class DataTypeModelCollectionHandlerTest extends TestCase
         $this->assertNull($handler->unserializeValue($serialized));
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function it_will_unserialize_to_null_for_invalid_values()
     {
         $model = Post::factory()->create();
