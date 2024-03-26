@@ -21,7 +21,7 @@ use stdClass;
  */
 class DataTypeHandlerTest extends TestCase
 {
-    public static function handlerProvider()
+    public static function handlerProvider(): array
     {
         $timestamp = '2017-01-01 00:00:00.000000+0000';
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s.uO', $timestamp);
@@ -109,14 +109,14 @@ class DataTypeHandlerTest extends TestCase
 
     #[Test]
     #[DataProvider('handlerProvider')]
-    public function it_specifies_a_datatype_identifier(HandlerInterface $handler, $type)
+    public function it_specifies_a_datatype_identifier(HandlerInterface $handler, $type): void
     {
         $this->assertEquals($type, $handler->getDataType());
     }
 
     #[Test]
     #[DataProvider('handlerProvider')]
-    public function it_can_verify_compatibility(HandlerInterface $handler, $type, $value, $incompatible)
+    public function it_can_verify_compatibility(HandlerInterface $handler, $type, $value, $incompatible): void
     {
         $this->assertTrue($handler->canHandleValue($value));
 
@@ -127,7 +127,7 @@ class DataTypeHandlerTest extends TestCase
 
     #[Test]
     #[DataProvider('handlerProvider')]
-    public function it_can_serialize_and_unserialize_values(HandlerInterface $handler, $type, $value, $incompatible, ?callable $closure = null)
+    public function it_can_serialize_and_unserialize_values(HandlerInterface $handler, $type, $value, $incompatible, ?callable $closure = null): void
     {
         $serialized = $handler->serializeValue($value);
         $unserialized = $handler->unserializeValue($serialized);
@@ -141,7 +141,7 @@ class DataTypeHandlerTest extends TestCase
 
     #[Test]
     #[DataProvider('handlerProvider')]
-    public function it_can_handle_null_values(HandlerInterface $handler)
+    public function it_can_handle_null_values(HandlerInterface $handler): void
     {
         $unserialized = $handler->unserializeValue(null);
         $this->assertNull($unserialized);

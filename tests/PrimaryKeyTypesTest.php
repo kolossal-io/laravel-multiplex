@@ -23,7 +23,7 @@ class PrimaryKeyTypesTest extends TestCase
 
     #[Test]
     #[DataProvider('morphTypes')]
-    public function it_uses_the_configured_column_type(string $type, string $column_type)
+    public function it_uses_the_configured_column_type(string $type, string $column_type): void
     {
         $this->refreshDatabaseWithType($type);
 

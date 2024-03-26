@@ -10,7 +10,7 @@ use Kolossal\Multiplex\Exceptions\DataTypeException;
 class RegistryTest extends TestCase
 {
     #[Test]
-    public function it_can_set_a_handler()
+    public function it_can_set_a_handler(): void
     {
         $registry = new Registry();
         $handler = $this->mockHandlerWithType('foo');
@@ -23,7 +23,7 @@ class RegistryTest extends TestCase
     }
 
     #[Test]
-    public function it_can_remove_a_handler()
+    public function it_can_remove_a_handler(): void
     {
         $registry = new Registry();
         $handler = $this->mockHandlerWithType('foo');
@@ -36,7 +36,7 @@ class RegistryTest extends TestCase
     }
 
     #[Test]
-    public function it_throws_an_exception_if_no_handler_set()
+    public function it_throws_an_exception_if_no_handler_set(): void
     {
         $registry = new Registry();
 
@@ -45,7 +45,7 @@ class RegistryTest extends TestCase
     }
 
     #[Test]
-    public function it_determines_best_handler_for_a_value()
+    public function it_determines_best_handler_for_a_value(): void
     {
         $stringHandler = $this->mockHandlerWithType('str');
         $stringHandler->method('canHandleValue')
@@ -69,7 +69,7 @@ class RegistryTest extends TestCase
     }
 
     #[Test]
-    public function it_throws_an_exception_if_no_type_matches_value()
+    public function it_throws_an_exception_if_no_type_matches_value(): void
     {
         $registry = new Registry();
 

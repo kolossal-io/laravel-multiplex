@@ -10,7 +10,7 @@ use stdClass;
 class DataTypeModelHandlerTest extends TestCase
 {
     #[Test]
-    public function it_can_handle_non_existing_models()
+    public function it_can_handle_non_existing_models(): void
     {
         $model = Post::factory()->make();
         $handler = new DataType\ModelHandler;
@@ -26,7 +26,7 @@ class DataTypeModelHandlerTest extends TestCase
     }
 
     #[Test]
-    public function it_can_handle_existing_models()
+    public function it_can_handle_existing_models(): void
     {
         $model = Post::factory()->create();
         $handler = new DataType\ModelHandler;

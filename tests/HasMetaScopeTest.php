@@ -25,7 +25,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     #[Test]
-    public function it_scopes_where_has_meta()
+    public function it_scopes_where_has_meta(): void
     {
         $this->seedRandomModels();
         $this->seedModels();
@@ -39,7 +39,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     #[Test]
-    public function it_scopes_where_has_meta_from_array()
+    public function it_scopes_where_has_meta_from_array(): void
     {
         $this->seedRandomModels();
         $this->seedModels();
@@ -50,7 +50,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     #[Test]
-    public function it_scopes_where_doesnt_have_meta()
+    public function it_scopes_where_doesnt_have_meta(): void
     {
         $this->seedModels();
 
@@ -64,7 +64,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     #[Test]
-    public function it_scopes_where_doesnt_have_meta_from_array()
+    public function it_scopes_where_doesnt_have_meta_from_array(): void
     {
         $this->seedModels();
 
@@ -73,7 +73,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     #[Test]
-    public function it_scopes_where_meta()
+    public function it_scopes_where_meta(): void
     {
         $this->seedRandomModels();
 
@@ -98,7 +98,7 @@ class HasMetaScopeTest extends TestCase
 
     #[Test]
     #[DataProvider('datatypeProvider')]
-    public function it_scopes_where_meta_with_datatype($type, $input, $another)
+    public function it_scopes_where_meta_with_datatype($type, $input, $another): void
     {
         $this->seedRandomModels();
 
@@ -119,7 +119,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     #[Test]
-    public function it_scopes_where_meta_with_operators()
+    public function it_scopes_where_meta_with_operators(): void
     {
         $this->seedRandomModels();
 
@@ -155,7 +155,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     #[Test]
-    public function it_scopes_where_raw_meta()
+    public function it_scopes_where_raw_meta(): void
     {
         $this->seedRandomModels();
 
@@ -194,7 +194,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     #[Test]
-    public function it_scopes_where_meta_of_type()
+    public function it_scopes_where_meta_of_type(): void
     {
         $this->seedRandomModels();
 
@@ -224,7 +224,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     #[Test]
-    public function it_scopes_where_meta_in_array()
+    public function it_scopes_where_meta_in_array(): void
     {
         $this->seedRandomModels();
 
@@ -250,7 +250,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     #[Test]
-    public function it_scopes_after_time_traveling()
+    public function it_scopes_after_time_traveling(): void
     {
         $this->seedRandomModels();
 
@@ -287,7 +287,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     #[Test]
-    public function it_scopes_where_meta_empty()
+    public function it_scopes_where_meta_empty(): void
     {
         Post::factory()
             ->has(Meta::factory()->state(['key' => 'foo', 'value' => '']))
@@ -316,7 +316,7 @@ class HasMetaScopeTest extends TestCase
     }
 
     #[Test]
-    public function it_scopes_where_meta_not_empty()
+    public function it_scopes_where_meta_not_empty(): void
     {
         $this->seedRandomModels();
 
@@ -389,7 +389,7 @@ class HasMetaScopeTest extends TestCase
         return $result;
     }
 
-    public static function datatypeProvider()
+    public static function datatypeProvider(): array
     {
         $timestamp = '2017-01-01 00:00:00.000000+0000';
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s.uO', $timestamp);

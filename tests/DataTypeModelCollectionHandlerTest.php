@@ -10,7 +10,7 @@ use Kolossal\Multiplex\Tests\Mocks\Post;
 class DataTypeModelCollectionHandlerTest extends TestCase
 {
     #[Test]
-    public function it_can_handle_non_existing_models()
+    public function it_can_handle_non_existing_models(): void
     {
         $models = Post::factory(3)->make();
         $handler = new DataType\ModelCollectionHandler;
@@ -28,7 +28,7 @@ class DataTypeModelCollectionHandlerTest extends TestCase
     }
 
     #[Test]
-    public function it_can_handle_existing_models()
+    public function it_can_handle_existing_models(): void
     {
         Post::factory()->create(['title' => 'a']);
         Post::factory()->create(['title' => 'b']);
@@ -52,7 +52,7 @@ class DataTypeModelCollectionHandlerTest extends TestCase
     }
 
     #[Test]
-    public function it_will_serialize_empty_value_if_no_collection_is_passed()
+    public function it_will_serialize_empty_value_if_no_collection_is_passed(): void
     {
         $model = Post::factory()->create();
 
@@ -65,7 +65,7 @@ class DataTypeModelCollectionHandlerTest extends TestCase
     }
 
     #[Test]
-    public function it_will_unserialize_to_null_for_invalid_values()
+    public function it_will_unserialize_to_null_for_invalid_values(): void
     {
         $model = Post::factory()->create();
 

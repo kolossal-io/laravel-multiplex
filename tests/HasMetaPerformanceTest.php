@@ -24,7 +24,7 @@ class HasMetaPerformanceTest extends TestCase
     }
 
     #[Test]
-    public function it_will_not_load_meta_relations_by_default()
+    public function it_will_not_load_meta_relations_by_default(): void
     {
         Post::factory()
             ->has(Meta::factory()->state(['key' => 'foo']))
@@ -36,7 +36,7 @@ class HasMetaPerformanceTest extends TestCase
     }
 
     #[Test]
-    public function it_will_load_meta_relation_if_meta_value_is_used()
+    public function it_will_load_meta_relation_if_meta_value_is_used(): void
     {
         Post::factory()
             ->has(Meta::factory()->state(['key' => 'foo']))
@@ -48,7 +48,7 @@ class HasMetaPerformanceTest extends TestCase
     }
 
     #[Test]
-    public function it_will_used_cache_meta_on_subsequent_meta_calls()
+    public function it_will_used_cache_meta_on_subsequent_meta_calls(): void
     {
         Post::factory()
             ->has(Meta::factory()->state(['key' => 'foo']))
@@ -67,7 +67,7 @@ class HasMetaPerformanceTest extends TestCase
     }
 
     #[Test]
-    public function it_will_lazy_load_meta_relations_by_default()
+    public function it_will_lazy_load_meta_relations_by_default(): void
     {
         Post::factory(20)
             ->has(Meta::factory(3))
@@ -93,7 +93,7 @@ class HasMetaPerformanceTest extends TestCase
     }
 
     #[Test]
-    public function it_can_eager_load_meta_relations()
+    public function it_can_eager_load_meta_relations(): void
     {
         Post::factory(20)
             ->has(Meta::factory(3))

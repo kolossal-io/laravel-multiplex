@@ -9,7 +9,7 @@ use Kolossal\Multiplex\DataType\DateTimeHandler;
 class DataTypeDateTimeHandlerTest extends TestCase
 {
     #[Test]
-    public function it_will_parse_to_specified_datetime_format()
+    public function it_will_parse_to_specified_datetime_format(): void
     {
         $handler = new DateTimeHandler;
 
@@ -20,7 +20,7 @@ class DataTypeDateTimeHandlerTest extends TestCase
     }
 
     #[Test]
-    public function it_will_unserialize_using_specified_datetime_format_if_possible()
+    public function it_will_unserialize_using_specified_datetime_format_if_possible(): void
     {
         $handler = new DateTimeHandler;
 
@@ -30,7 +30,7 @@ class DataTypeDateTimeHandlerTest extends TestCase
     }
 
     #[Test]
-    public function it_will_fallback_to_carbon_parse()
+    public function it_will_fallback_to_carbon_parse(): void
     {
         $handler = new DateTimeHandler;
 

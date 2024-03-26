@@ -13,7 +13,7 @@ class MultiplexServiceProviderTest extends TestCase
     }
 
     #[Test]
-    public function it_skips_migrations()
+    public function it_skips_migrations(): void
     {
         config(['multiplex.migrations' => false]);
 
@@ -24,7 +24,7 @@ class MultiplexServiceProviderTest extends TestCase
     }
 
     #[Test]
-    public function it_applies_migrations()
+    public function it_applies_migrations(): void
     {
         config()->set('multiplex.migrations', true);
 
