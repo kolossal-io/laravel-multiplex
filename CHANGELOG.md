@@ -2,6 +2,18 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v1.3.0 - 2024-03-26
+
+### [1.3.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.2.1...v1.3.0) (2024-03-26)
+
+##### Bug Fixes
+
+* fix database migrations in test cases ([0cc05f1](https://github.com/kolossal-io/laravel-multiplex/commit/0cc05f129db434506a3d36f90a2649ac1d48631a))
+
+##### Features
+
+* add support for Laravel 11 ([00c0ebb](https://github.com/kolossal-io/laravel-multiplex/commit/00c0ebbc38c0b0aeeac7c26daf8d9e3892dea403))
+
 ## v1.2.1 - 2024-01-30
 
 ### [1.2.1](https://github.com/kolossal-io/laravel-multiplex/compare/v1.2.0...v1.2.1) (2024-01-30)
