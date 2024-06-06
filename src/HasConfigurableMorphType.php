@@ -75,6 +75,8 @@ trait HasConfigurableMorphType
 
     /**
      * Get the columns that should receive a unique identifier.
+     *
+     * @return array<string>
      */
     public function uniqueIds(): array
     {
@@ -104,10 +106,10 @@ trait HasConfigurableMorphType
     /**
      * Retrieve the model for a bound value.
      *
-     * @param  \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation  $query
+     * @param  \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation<\Illuminate\Database\Eloquent\Model>  $query
      * @param  mixed  $value
      * @param  string|null  $field
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     * @return \Illuminate\Database\Eloquent\Relations\Relation<\Illuminate\Database\Eloquent\Model>
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */

@@ -103,6 +103,8 @@ class Meta extends Model
 
     /**
      * Metable Relation.
+     *
+     * @return MorphTo<Model, Meta>
      */
     public function metable(): MorphTo
     {
@@ -211,6 +213,8 @@ class Meta extends Model
 
     /**
      * Query records where value is considered empty.
+     *
+     * @param  Builder<Meta>  $query
      */
     public function scopeWhereValueEmpty(Builder $query): void
     {
@@ -219,6 +223,8 @@ class Meta extends Model
 
     /**
      * Query records where value is considered not empty.
+     *
+     * @param  Builder<Meta>  $query
      */
     public function scopeWhereValueNotEmpty(Builder $query): void
     {
@@ -229,8 +235,9 @@ class Meta extends Model
      * Query records where value equals the serialized version of the given value.
      * If `$type` is omited the type will be taken from the data type registry.
      *
-     * @param  mixed  $operator
+     * @param  Builder<Meta>  $query
      * @param  mixed  $value
+     * @param  mixed  $operator
      * @param  ?string  $type
      */
     public function scopeWhereValue(Builder $query, $value, $operator = '=', ?string $type = null): void
@@ -251,6 +258,7 @@ class Meta extends Model
      * If `$type` is omited the type will be taken from the data type registry.
      *
      * @param  Builder<Meta>  $query
+     * @param  array<mixed>  $values
      * @param  ?string  $type
      */
     public function scopeWhereValueIn(Builder $query, array $values, ?string $type = null): void

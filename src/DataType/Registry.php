@@ -16,7 +16,7 @@ class Registry
     /**
      * List of registered handlers .
      *
-     * @var array
+     * @var array<string, HandlerInterface>
      */
     protected $handlers = [];
 

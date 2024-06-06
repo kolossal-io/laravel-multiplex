@@ -4,6 +4,9 @@ namespace Kolossal\Multiplex;
 
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
+/**
+ * @implements CastsAttributes<mixed, mixed>
+ */
 class MetaAttribute implements CastsAttributes
 {
     /**
@@ -12,7 +15,7 @@ class MetaAttribute implements CastsAttributes
      * @param  \Illuminate\Database\Eloquent\Model  $model
      * @param  string  $key
      * @param  mixed  $value
-     * @param  array  $attributes
+     * @param  array<mixed>  $attributes
      */
     public function get($model, $key, $value, $attributes): mixed
     {
@@ -30,7 +33,7 @@ class MetaAttribute implements CastsAttributes
      * @param  \Illuminate\Database\Eloquent\Model  $model
      * @param  string  $key
      * @param  mixed  $value
-     * @param  array  $attributes
+     * @param  array<mixed>  $attributes
      */
     public function set($model, $key, $value, $attributes): mixed
     {

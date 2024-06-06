@@ -372,6 +372,7 @@ final class MetaTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider handlerProvider
      */
     public function it_can_store_and_retrieve_datatypes($type, $input): void
@@ -394,6 +395,7 @@ final class MetaTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider handlerProvider
      */
     public function it_can_query_by_value($type, $input): void

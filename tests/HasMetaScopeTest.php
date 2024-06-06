@@ -98,6 +98,7 @@ final class HasMetaScopeTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider datatypeProvider
      */
     public function it_scopes_where_meta_with_datatype($type, $input, $another): void

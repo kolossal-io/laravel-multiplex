@@ -33,7 +33,7 @@ class ModelCollectionHandler implements HandlerInterface
     /**
      * Convert the value to a string, so that it can be stored in the database.
      *
-     * @param  Collection  $value
+     * @param  Collection<string, Model>  $value
      */
     public function serializeValue($value): string
     {
@@ -60,18 +60,29 @@ class ModelCollectionHandler implements HandlerInterface
             return null;
         }
 
+        /** @var null|array<string, null|string|array<string, array<string, string|int|null>>> */
         $data = json_decode($value, true);
 
-        if (is_null($data) || !is_array($data) || !isset($data['class'])) {
+        if (
+            is_null($data)
+            || !is_array($data)
+            || !isset($data['items'])
+            || !is_array($data['items'])
+            || !isset($data['class'])
+        ) {
             return null;
         }
 
-        /** @var Collection */
+        /** @var Collection<string, Model> */
         $collection = new $data['class']();
-        $models = $this->loadModels($data['items']);
+
+        /** @var array<string, array<string, string|int|null>> */
+        $items = $data['items'];
+
+        $models = $this->loadModels($items);
 
         // Repopulate collection keys with loaded models.
-        foreach ($data['items'] as $key => $item) {
+        foreach ($items as $key => $item) {
             if (is_null($item['key']) && ($model = new $item['class']()) instanceof Model) {
                 $collection->put($key, $model);
             } elseif (isset($models[$item['class']][$item['key']])) {
@@ -84,6 +95,9 @@ class ModelCollectionHandler implements HandlerInterface
 
     /**
      * Load each model instance, grouped by class.
+     *
+     * @param  array<string, array<string, string|int|null>>  $items
+     * @return array<int|string, \Illuminate\Database\Eloquent\Collection<int|string, Model>>
      */
     private function loadModels(array $items): array
     {
