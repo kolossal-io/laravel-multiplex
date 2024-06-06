@@ -337,7 +337,9 @@ final class MetaTest extends TestCase
 
         $model->setMetaTimestamp(Carbon::now());
 
-        Post::factory()->create()->saveMeta('foo', 'another');
+        $this->travelTo(Carbon::now());
+
+        Post::factory()->create()->saveMetaAt('foo', 'another', Carbon::now());
 
         $model->saveMeta('bar', 'foo');
         $model->saveMetaAt('foo', 1, Carbon::now()->subDay());
