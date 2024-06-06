@@ -109,7 +109,7 @@ trait HasConfigurableMorphType
      * @param  \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation<\Illuminate\Database\Eloquent\Model>  $query
      * @param  mixed  $value
      * @param  string|null  $field
-     * @return \Illuminate\Database\Eloquent\Relations\Relation<\Illuminate\Database\Eloquent\Model>
+     * @return \Illuminate\Contracts\Database\Eloquent\Builder
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
