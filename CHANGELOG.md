@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v1.3.2 - 2024-06-06
+
+### [1.3.2](https://github.com/kolossal-io/laravel-multiplex/compare/v1.3.1...v1.3.2) (2024-06-06)
+
+#### Bug Fixes
+
+* fix return type ([2c999d3](https://github.com/kolossal-io/laravel-multiplex/commit/2c999d3a86629fa399b72a315d9f424beaf99eab))
+
 ## v1.3.1 - 2024-06-06
 
 ### [1.3.1](https://github.com/kolossal-io/laravel-multiplex/compare/v1.3.0...v1.3.1) (2024-06-06)
