@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v1.4.0 - 2024-08-20
+
+### [1.4.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.3.2...v1.4.0) (2024-08-20)
+
+##### Features
+
+* add enum handler ([#43](https://github.com/kolossal-io/laravel-multiplex/issues/43)) ([59cbab9](https://github.com/kolossal-io/laravel-multiplex/commit/59cbab9073f73009d2a27053f001851d50d77853)), closes [#33](https://github.com/kolossal-io/laravel-multiplex/issues/33)
+
 ## v1.3.2 - 2024-06-06
 
 ### [1.3.2](https://github.com/kolossal-io/laravel-multiplex/compare/v1.3.1...v1.3.2) (2024-06-06)
