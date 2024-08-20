@@ -15,6 +15,7 @@ final class DataTypeEnumHandlerTest extends TestCase
 
     /**
      * @test
+     *
      * @requires PHP 8.1
      * */
     public function it_can_serialize_backed_enums(): void
@@ -30,6 +31,7 @@ final class DataTypeEnumHandlerTest extends TestCase
 
     /**
      * @test
+     *
      * @requires PHP 8.1
      * */
     public function it_cannot_serialize_basic_enums(): void
@@ -42,6 +44,7 @@ final class DataTypeEnumHandlerTest extends TestCase
 
     /**
      * @test
+     *
      * @requires PHP 8.1
      * */
     public function it_cannot_unserialize_null(): void
@@ -53,6 +56,7 @@ final class DataTypeEnumHandlerTest extends TestCase
 
     /**
      * @test
+     *
      * @requires PHP 8.1
      * */
     public function it_cannot_unserialize_invalid_value(): void
@@ -64,6 +68,7 @@ final class DataTypeEnumHandlerTest extends TestCase
 
     /**
      * @test
+     *
      * @requires PHP 8.1
      * */
     public function it_cannot_unserialize_not_existing_enums(): void
@@ -75,6 +80,7 @@ final class DataTypeEnumHandlerTest extends TestCase
 
     /**
      * @test
+     *
      * @requires PHP 8.1
      * */
     public function it_cannot_unserialize_non_enum_classes(): void
@@ -86,6 +92,7 @@ final class DataTypeEnumHandlerTest extends TestCase
 
     /**
      * @test
+     *
      * @requires PHP 8.1
      * */
     public function it_can_unserialize_backed_enums(): void
@@ -100,6 +107,7 @@ final class DataTypeEnumHandlerTest extends TestCase
 
     /**
      * @test
+     *
      * @requires PHP 8.1
      * */
     public function it_cannot_unserialize_invalid_values(): void
@@ -113,6 +121,7 @@ final class DataTypeEnumHandlerTest extends TestCase
 
     /**
      * @test
+     *
      * @requires PHP 8.1
      * */
     public function it_cannot_unserialize_basic_enums(): void
@@ -126,6 +135,7 @@ final class DataTypeEnumHandlerTest extends TestCase
 
     /**
      * @test
+     *
      * @requires PHP 8.1
      * */
     public function it_will_handle_backed_enum_value(): void
@@ -145,6 +155,7 @@ final class DataTypeEnumHandlerTest extends TestCase
 
     /**
      * @test
+     *
      * @requires PHP 8.1
      * */
     public function it_will_not_handle_basic_enum_value(): void
