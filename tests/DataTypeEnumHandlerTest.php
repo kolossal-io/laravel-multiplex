@@ -13,7 +13,10 @@ final class DataTypeEnumHandlerTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     * @requires PHP 8.1
+     * */
     public function it_can_serialize_backed_enums(): void
     {
         $handler = new EnumHandler;
@@ -25,7 +28,10 @@ final class DataTypeEnumHandlerTest extends TestCase
         $this->assertEquals('Kolossal\Multiplex\Tests\Mocks\BackedEnum::three', $handler->serializeValue(BackedEnum::Three));
     }
 
-    /** @test */
+    /**
+     * @test
+     * @requires PHP 8.1
+     * */
     public function it_cannot_serialize_basic_enums(): void
     {
         $handler = new EnumHandler;
@@ -34,7 +40,10 @@ final class DataTypeEnumHandlerTest extends TestCase
         $this->assertSame('', $handler->serializeValue(Enum::One));
     }
 
-    /** @test */
+    /**
+     * @test
+     * @requires PHP 8.1
+     * */
     public function it_cannot_unserialize_null(): void
     {
         $handler = new EnumHandler;
@@ -42,7 +51,10 @@ final class DataTypeEnumHandlerTest extends TestCase
         $this->assertNull($handler->unserializeValue(null));
     }
 
-    /** @test */
+    /**
+     * @test
+     * @requires PHP 8.1
+     * */
     public function it_cannot_unserialize_invalid_value(): void
     {
         $handler = new EnumHandler;
@@ -50,7 +62,10 @@ final class DataTypeEnumHandlerTest extends TestCase
         $this->assertNull($handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\BackedEnum'));
     }
 
-    /** @test */
+    /**
+     * @test
+     * @requires PHP 8.1
+     * */
     public function it_cannot_unserialize_not_existing_enums(): void
     {
         $handler = new EnumHandler;
@@ -58,7 +73,10 @@ final class DataTypeEnumHandlerTest extends TestCase
         $this->assertNull($handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\InvalidEnum::one'));
     }
 
-    /** @test */
+    /**
+     * @test
+     * @requires PHP 8.1
+     * */
     public function it_cannot_unserialize_non_enum_classes(): void
     {
         $handler = new EnumHandler;
@@ -66,7 +84,10 @@ final class DataTypeEnumHandlerTest extends TestCase
         $this->assertNull($handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\Dummy::one'));
     }
 
-    /** @test */
+    /**
+     * @test
+     * @requires PHP 8.1
+     * */
     public function it_can_unserialize_backed_enums(): void
     {
         $handler = new EnumHandler;
@@ -77,7 +98,10 @@ final class DataTypeEnumHandlerTest extends TestCase
         $this->assertNotSame(BackedEnum::One, $enum);
     }
 
-    /** @test */
+    /**
+     * @test
+     * @requires PHP 8.1
+     * */
     public function it_cannot_unserialize_invalid_values(): void
     {
         $handler = new EnumHandler;
@@ -87,7 +111,10 @@ final class DataTypeEnumHandlerTest extends TestCase
         $this->assertNull($enum);
     }
 
-    /** @test */
+    /**
+     * @test
+     * @requires PHP 8.1
+     * */
     public function it_cannot_unserialize_basic_enums(): void
     {
         $handler = new EnumHandler;
@@ -97,7 +124,10 @@ final class DataTypeEnumHandlerTest extends TestCase
         $this->assertNull($enum);
     }
 
-    /** @test */
+    /**
+     * @test
+     * @requires PHP 8.1
+     * */
     public function it_will_handle_backed_enum_value(): void
     {
         $model = Post::factory()->create();
@@ -113,7 +143,10 @@ final class DataTypeEnumHandlerTest extends TestCase
         $this->assertSame(BackedEnum::Two, Post::first()->enum_test);
     }
 
-    /** @test */
+    /**
+     * @test
+     * @requires PHP 8.1
+     * */
     public function it_will_not_handle_basic_enum_value(): void
     {
         $model = Post::factory()->create();
