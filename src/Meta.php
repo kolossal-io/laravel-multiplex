@@ -113,8 +113,6 @@ class Meta extends Model
 
     /**
      * Set forced type to be used.
-     *
-     * @param  ?string  $value
      */
     public function forceType(?string $value): self
     {
@@ -195,8 +193,6 @@ class Meta extends Model
 
     /**
      * Retrieve the underlying serialized value.
-     *
-     * @return ?string
      */
     public function getRawValueAttribute(): ?string
     {
@@ -238,7 +234,6 @@ class Meta extends Model
      * @param  Builder<Meta>  $query
      * @param  mixed  $value
      * @param  mixed  $operator
-     * @param  ?string  $type
      */
     public function scopeWhereValue(Builder $query, $value, $operator = '=', ?string $type = null): void
     {
@@ -259,7 +254,6 @@ class Meta extends Model
      *
      * @param  Builder<Meta>  $query
      * @param  array<mixed>  $values
-     * @param  ?string  $type
      */
     public function scopeWhereValueIn(Builder $query, array $values, ?string $type = null): void
     {

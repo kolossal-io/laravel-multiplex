@@ -397,7 +397,7 @@ final class HasMetaScopeTest extends TestCase
         $timestamp = '2017-01-01 00:00:00.000000+0000';
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s.uO', $timestamp);
 
-        $object = new stdClass();
+        $object = new stdClass;
         $object->foo = 'bar';
         $object->baz = 3;
 
@@ -435,7 +435,7 @@ final class HasMetaScopeTest extends TestCase
             'object' => [
                 'object',
                 $object,
-                new stdClass(),
+                new stdClass,
             ],
             'serializable' => [
                 'serializable',

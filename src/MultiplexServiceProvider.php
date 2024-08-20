@@ -37,12 +37,12 @@ class MultiplexServiceProvider extends ServiceProvider
     protected function registerDataTypeRegistry(): void
     {
         $this->app->singleton(Registry::class, function (): Registry {
-            $registry = new Registry();
+            $registry = new Registry;
             $datatypes = (array) config('multiplex.datatypes', []);
 
             foreach ($datatypes as $handler) {
                 /** @var \Kolossal\Multiplex\DataType\HandlerInterface */
-                $handler = new $handler();
+                $handler = new $handler;
                 $registry->addHandler($handler);
             }
 
