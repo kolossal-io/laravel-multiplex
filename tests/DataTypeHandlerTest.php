@@ -26,7 +26,7 @@ final class DataTypeHandlerTest extends TestCase
         $timestamp = '2017-01-01 00:00:00.000000+0000';
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s.uO', $timestamp);
 
-        $object = new stdClass();
+        $object = new stdClass;
         $object->foo = 'bar';
         $object->baz = 3;
 
@@ -35,7 +35,7 @@ final class DataTypeHandlerTest extends TestCase
                 new DataType\ArrayHandler,
                 'array',
                 ['foo' => ['bar'], 'baz'],
-                [new stdClass()],
+                [new stdClass],
             ],
             'boolean' => [
                 new DataType\BooleanHandler,
@@ -72,7 +72,7 @@ final class DataTypeHandlerTest extends TestCase
                 new DataType\ModelHandler,
                 'model',
                 new Dummy,
-                [new stdClass()],
+                [new stdClass],
             ],
             'model collection' => [
                 new DataType\ModelCollectionHandler,

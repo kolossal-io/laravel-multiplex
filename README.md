@@ -74,6 +74,7 @@ And it’s low profile: If you don't like it, just [remove the `HasMeta` Trait](
 -   [Deleting Metadata](#deleting-metadata)
 -   [Performance](#performance)
 -   [Configuration](#configuration)
+-   [Enum Support](#enum-support)
 -   [UUID and ULID Support](#uuid-and-ulid-support)
 
 ## Installation
@@ -637,6 +638,23 @@ There is no need to configure anything but if you like, you can publish the conf
 
 ```bash
 php artisan vendor:publish --tag="multiplex-config"
+```
+
+## Enum Support
+
+Multiplex supports [backed enumerations](https://www.php.net/manual/en/language.enumerations.backed.php) introduced in PHP 8.1 whereas basic enumerations would not work.
+
+```php
+enum SampleEnum: string
+{
+    case Hearts = 'hearts';
+    case Diamonds = 'diamonds';
+}
+
+$model->saveMeta('some_key', SampleEnum::Diamonds);
+
+// true
+$model->some_key === SampleEnum::Diamonds;
 ```
 
 ## UUID and ULID Support

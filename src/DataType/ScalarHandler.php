@@ -33,7 +33,7 @@ abstract class ScalarHandler implements HandlerInterface
      */
     public function canHandleValue($value): bool
     {
-        return gettype($value) == $this->type;
+        return gettype($value) === $this->type;
     }
 
     /**
