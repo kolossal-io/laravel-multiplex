@@ -74,7 +74,7 @@ class ModelCollectionHandler implements HandlerInterface
         }
 
         /** @var Collection<string, Model> */
-        $collection = new $data['class']();
+        $collection = new $data['class'];
 
         /** @var array<string, array<string, string|int|null>> */
         $items = $data['items'];
@@ -83,7 +83,7 @@ class ModelCollectionHandler implements HandlerInterface
 
         // Repopulate collection keys with loaded models.
         foreach ($items as $key => $item) {
-            if (is_null($item['key']) && ($model = new $item['class']()) instanceof Model) {
+            if (is_null($item['key']) && ($model = new $item['class']) instanceof Model) {
                 $collection->put($key, $model);
             } elseif (isset($models[$item['class']][$item['key']])) {
                 $collection->put($key, $models[$item['class']][$item['key']]);
@@ -114,7 +114,7 @@ class ModelCollectionHandler implements HandlerInterface
         // Iterate list of classes and load all records matching a key.
         foreach ($classes as $class => $keys) {
             /** @var \Illuminate\Database\Eloquent\Model */
-            $model = new $class();
+            $model = new $class;
 
             $results[$class] = $model
                 ->whereIn($model->getKeyName(), $keys)
