@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Kolossal\Multiplex\Meta;
+use Kolossal\Multiplex\Tests\Mocks\BackedEnum;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
@@ -41,6 +42,10 @@ final class MetaTest extends TestCase
             'datetime' => [
                 'datetime',
                 $datetime,
+            ],
+            'enum' => [
+                'enum',
+                BackedEnum::Two,
             ],
             'float' => [
                 'float',

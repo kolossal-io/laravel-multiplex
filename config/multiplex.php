@@ -39,6 +39,7 @@ return [
         Kolossal\Multiplex\DataType\DateTimeHandler::class,
         Kolossal\Multiplex\DataType\DateHandler::class,
         Kolossal\Multiplex\DataType\ArrayHandler::class,
+        Kolossal\Multiplex\DataType\EnumHandler::class,
         Kolossal\Multiplex\DataType\ModelHandler::class,
         Kolossal\Multiplex\DataType\ModelCollectionHandler::class,
         Kolossal\Multiplex\DataType\SerializableHandler::class,
