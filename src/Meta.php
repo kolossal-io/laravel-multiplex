@@ -57,8 +57,10 @@ use Kolossal\Multiplex\DataType\Registry;
 class Meta extends Model
 {
     use HasConfigurableMorphType;
+
     /** @use HasFactory<\Kolossal\Multiplex\Tests\Factories\MetaFactory> */
     use HasFactory;
+
     use HasTimestamps;
 
     protected $guarded = [
