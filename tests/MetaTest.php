@@ -12,7 +12,7 @@ use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
 uses(\Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties::class);
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-dataset('handlerProvider', function () {
+dataset('metaHandlerProvider', function () {
     $timestamp = '2017-01-01 00:00:00.000000+0000';
     $datetime = Carbon::createFromFormat('Y-m-d H:i:s.uO', $timestamp);
 
@@ -356,7 +356,7 @@ it('can store and retrieve datatypes', function ($type, $input) {
     expect($meta->type)->toEqual($type);
     expect($meta->value)->toEqual($input);
     expect(is_string($meta->raw_value) || is_null($meta->raw_value))->toBeTrue();
-})->with('handlerProvider');
+})->with('metaHandlerProvider');
 
 it('can query by value', function ($type, $input) {
     $meta = Meta::factory()->make([
@@ -372,7 +372,7 @@ it('can query by value', function ($type, $input) {
 
     expect($result->value)->toEqual($input);
     expect($result->type)->toEqual($type);
-})->with('handlerProvider');
+})->with('metaHandlerProvider');
 
 it('will return null for undefined value', function () {
     $meta = new Meta;

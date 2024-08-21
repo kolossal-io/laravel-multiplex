@@ -35,7 +35,7 @@ dataset('handlerProvider', function () {
             'date',
             '2017-01-01',
             [2017, Carbon::parse('2017-01-01')],
-            fn (Carbon $value) => $value->isSameDay('2017-01-01'),
+            fn () => fn (Carbon $value) => $value->isSameDay('2017-01-01'),
         ],
         'datetime' => [
             new DataType\DateTimeHandler,
@@ -120,7 +120,8 @@ it('can serialize and unserialize values', function (HandlerInterface $handler, 
     $unserialized = $handler->unserializeValue($serialized);
 
     if ($closure) {
-        expect(call_user_func($closure, $unserialized))->toBeTrue();
+        $result = call_user_func($closure, $unserialized);
+        expect(is_callable($result) ? call_user_func($result, $unserialized) : $result)->toBeTrue();
     } else {
         expect($unserialized)->toEqual($value);
     }
