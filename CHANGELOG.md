@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v1.4.1 - 2024-08-21
+
+### [1.4.1](https://github.com/kolossal-io/laravel-multiplex/compare/v1.4.0...v1.4.1) (2024-08-21)
+
+#### Bug Fixes
+
+* refactor configurable morph type and rewrite tests for pest ([801fbbe](https://github.com/kolossal-io/laravel-multiplex/commit/801fbbe5655557be137ac508a7a6456ccf5ca30e))
+
 ## v1.4.0 - 2024-08-20
 
 ### [1.4.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.3.2...v1.4.0) (2024-08-20)
