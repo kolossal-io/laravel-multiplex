@@ -54,7 +54,7 @@ class ModelHandler implements HandlerInterface
 
         // Return blank instances.
         if (strpos($value, '#') === false) {
-            return new $value();
+            return new $value;
         }
 
         // Fetch specific instances.

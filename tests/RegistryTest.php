@@ -12,7 +12,7 @@ final class RegistryTest extends TestCase
     /** @test */
     public function it_can_set_a_handler(): void
     {
-        $registry = new Registry();
+        $registry = new Registry;
         $handler = $this->mockHandlerWithType('foo');
         $this->assertFalse($registry->hasHandlerForType('foo'));
 
@@ -25,7 +25,7 @@ final class RegistryTest extends TestCase
     /** @test */
     public function it_can_remove_a_handler(): void
     {
-        $registry = new Registry();
+        $registry = new Registry;
         $handler = $this->mockHandlerWithType('foo');
         $registry->addHandler($handler);
         $this->assertTrue($registry->hasHandlerForType('foo'));
@@ -38,7 +38,7 @@ final class RegistryTest extends TestCase
     /** @test */
     public function it_throws_an_exception_if_no_handler_set(): void
     {
-        $registry = new Registry();
+        $registry = new Registry;
 
         $this->expectException(DataTypeException::class);
         $registry->getHandlerForType('foo');
@@ -57,7 +57,7 @@ final class RegistryTest extends TestCase
             ->will($this->returnCallback(function ($value) {
                 return is_int($value);
             }));
-        $registry = new Registry();
+        $registry = new Registry;
         $registry->addHandler($stringHandler);
         $registry->addHandler($integerHandler);
 
@@ -71,7 +71,7 @@ final class RegistryTest extends TestCase
     /** @test */
     public function it_throws_an_exception_if_no_type_matches_value(): void
     {
-        $registry = new Registry();
+        $registry = new Registry;
 
         $this->expectException(DataTypeException::class);
 

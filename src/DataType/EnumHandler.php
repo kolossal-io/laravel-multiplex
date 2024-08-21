@@ -24,7 +24,7 @@ class EnumHandler implements HandlerInterface
      */
     public function canHandleValue($value): bool
     {
-        return $value instanceof BackedEnum;
+        return $value instanceof BackedEnum && class_exists(ReflectionEnum::class);
     }
 
     /**
