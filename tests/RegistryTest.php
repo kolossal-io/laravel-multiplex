@@ -1,91 +1,76 @@
 <?php
 
-namespace Kolossal\Multiplex\Tests;
-
 use Kolossal\Multiplex\DataType\HandlerInterface;
 use Kolossal\Multiplex\DataType\Registry;
 use Kolossal\Multiplex\Exceptions\DataTypeException;
-use PHPUnit\Framework\Attributes\Test;
+use Mockery\MockInterface;
 
-final class RegistryTest extends TestCase
+it('can set a handler', function () {
+    $registry = new Registry;
+    $handler = mockHandlerWithType('foo');
+    expect($registry->hasHandlerForType('foo'))->toBeFalse();
+
+    $registry->addHandler($handler);
+
+    expect($registry->hasHandlerForType('foo'))->toBeTrue();
+    expect($registry->getHandlerForType('foo'))->toEqual($handler);
+});
+
+it('can remove a handler', function () {
+    $registry = new Registry;
+    $handler = mockHandlerWithType('foo');
+    $registry->addHandler($handler);
+    expect($registry->hasHandlerForType('foo'))->toBeTrue();
+
+    $registry->removeHandlerForType('foo');
+
+    expect($registry->hasHandlerForType('foo'))->toBeFalse();
+});
+
+it('throws an exception if no handler set', function () {
+    $registry = new Registry;
+
+    $this->expectException(DataTypeException::class);
+    $registry->getHandlerForType('foo');
+});
+
+it('determines best handler for a value', function () {
+    $stringHandler = mockHandlerWithType('str');
+    $stringHandler->shouldReceive('canHandleValue')
+        ->andReturnUsing(function ($value) {
+            return is_string($value);
+        });
+    $integerHandler = mockHandlerWithType('int');
+    $integerHandler->shouldReceive('canHandleValue')
+        ->andReturnUsing(function ($value) {
+            return is_int($value);
+        });
+    $registry = new Registry;
+    $registry->addHandler($stringHandler);
+    $registry->addHandler($integerHandler);
+
+    $type1 = $registry->getTypeForValue(123);
+    $type2 = $registry->getTypeForValue('abc');
+
+    expect($type1)->toEqual('int');
+    expect($type2)->toEqual('str');
+});
+
+it('throws an exception if no type matches value', function () {
+    $registry = new Registry;
+
+    $this->expectException(DataTypeException::class);
+
+    $registry->getTypeForValue([]);
+});
+
+function mockHandlerWithType($type): MockInterface|HandlerInterface
 {
-    /** @test */
-    public function it_can_set_a_handler(): void
-    {
-        $registry = new Registry;
-        $handler = $this->mockHandlerWithType('foo');
-        $this->assertFalse($registry->hasHandlerForType('foo'));
-
-        $registry->addHandler($handler);
-
-        $this->assertTrue($registry->hasHandlerForType('foo'));
-        $this->assertEquals($handler, $registry->getHandlerForType('foo'));
-    }
-
-    /** @test */
-    public function it_can_remove_a_handler(): void
-    {
-        $registry = new Registry;
-        $handler = $this->mockHandlerWithType('foo');
-        $registry->addHandler($handler);
-        $this->assertTrue($registry->hasHandlerForType('foo'));
-
-        $registry->removeHandlerForType('foo');
-
-        $this->assertFalse($registry->hasHandlerForType('foo'));
-    }
-
-    /** @test */
-    public function it_throws_an_exception_if_no_handler_set(): void
-    {
-        $registry = new Registry;
-
-        $this->expectException(DataTypeException::class);
-        $registry->getHandlerForType('foo');
-    }
-
-    /** @test */
-    public function it_determines_best_handler_for_a_value(): void
-    {
-        $stringHandler = $this->mockHandlerWithType('str');
-        $stringHandler->method('canHandleValue')
-            ->will($this->returnCallback(function ($value) {
-                return is_string($value);
-            }));
-        $integerHandler = $this->mockHandlerWithType('int');
-        $integerHandler->method('canHandleValue')
-            ->will($this->returnCallback(function ($value) {
-                return is_int($value);
-            }));
-        $registry = new Registry;
-        $registry->addHandler($stringHandler);
-        $registry->addHandler($integerHandler);
-
-        $type1 = $registry->getTypeForValue(123);
-        $type2 = $registry->getTypeForValue('abc');
-
-        $this->assertEquals('int', $type1);
-        $this->assertEquals('str', $type2);
-    }
-
-    /** @test */
-    public function it_throws_an_exception_if_no_type_matches_value(): void
-    {
-        $registry = new Registry;
-
-        $this->expectException(DataTypeException::class);
-
-        $registry->getTypeForValue([]);
-    }
-
     /**
-     * @return \PHPUnit\Framework\MockObject\MockObject|HandlerInterface
+     * @template TMock of HandlerInterface
      */
-    protected function mockHandlerWithType($type): HandlerInterface
-    {
-        $handler = $this->createMock(HandlerInterface::class);
-        $handler->method('getDataType')->willReturn($type);
+    $handler = Mockery::mock(HandlerInterface::class);
+    $handler->shouldReceive('getDataType')->andReturn($type);
 
-        return $handler;
-    }
+    return $handler;
 }

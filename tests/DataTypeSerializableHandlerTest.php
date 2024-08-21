@@ -1,64 +1,45 @@
 <?php
 
-namespace Kolossal\Multiplex\Tests;
-
 use Kolossal\Multiplex\DataType\SerializableHandler;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
 use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
-use PHPUnit\Framework\Attributes\Test;
 
-final class DataTypeSerializableHandlerTest extends TestCase
-{
-    /** @test */
-    public function it_will_resolve_null_as_null(): void
-    {
-        $handler = new SerializableHandler;
+it('will resolve null as null', function () {
+    $handler = new SerializableHandler;
 
-        $this->assertInstanceOf(SerializableHandler::class, $handler);
+    expect($handler)->toBeInstanceOf(SerializableHandler::class);
 
-        $this->assertNull($handler->unserializeValue(null));
-    }
+    expect($handler->unserializeValue(null))->toBeNull();
+});
 
-    /** @test */
-    public function it_can_handle_serializable_values(): void
-    {
-        $handler = new SerializableHandler;
+it('can handle serializable values', function () {
+    $handler = new SerializableHandler;
 
-        $this->assertTrue($handler->canHandleValue(new SampleSerializable(['id' => 123])));
-    }
+    expect($handler->canHandleValue(new SampleSerializable(['id' => 123])))->toBeTrue();
+});
 
-    /** @test */
-    public function it_cannot_handle_other_values(): void
-    {
-        $handler = new SerializableHandler;
+it('cannot handle other values', function () {
+    $handler = new SerializableHandler;
 
-        $this->assertFalse($handler->canHandleValue(new Dummy));
-        $this->assertFalse($handler->canHandleValue(123));
-        $this->assertFalse($handler->canHandleValue(false));
-        $this->assertFalse($handler->canHandleValue(['id' => 123]));
-        $this->assertFalse($handler->canHandleValue((object) ['id' => 123]));
-    }
+    expect($handler->canHandleValue(new Dummy))->toBeFalse();
+    expect($handler->canHandleValue(123))->toBeFalse();
+    expect($handler->canHandleValue(false))->toBeFalse();
+    expect($handler->canHandleValue(['id' => 123]))->toBeFalse();
+    expect($handler->canHandleValue((object) ['id' => 123]))->toBeFalse();
+});
 
-    /** @test */
-    public function it_serializes_value(): void
-    {
-        $handler = new SerializableHandler;
+it('serializes value', function () {
+    $handler = new SerializableHandler;
 
-        $this->assertSame(
-            'O:49:"Kolossal\Multiplex\Tests\Mocks\SampleSerializable":1:{s:2:"id";i:123;}',
-            $handler->serializeValue(new SampleSerializable(['id' => 123]))
-        );
-    }
+    expect($handler->serializeValue(new SampleSerializable(['id' => 123])))->toBe('O:49:"Kolossal\Multiplex\Tests\Mocks\SampleSerializable":1:{s:2:"id";i:123;}');
+});
 
-    /** @test */
-    public function it_unserializes_value(): void
-    {
-        $handler = new SerializableHandler;
+it('unserializes value', function () {
+    $handler = new SerializableHandler;
 
-        $value = $handler->unserializeValue('O:49:"Kolossal\Multiplex\Tests\Mocks\SampleSerializable":1:{s:2:"id";i:123;}');
+    $value = $handler->unserializeValue('O:49:"Kolossal\Multiplex\Tests\Mocks\SampleSerializable":1:{s:2:"id";i:123;}');
 
-        $this->assertInstanceOf(SampleSerializable::class, $value);
+    expect($value)->toBeInstanceOf(SampleSerializable::class);
 
-        $this->assertSame(123, $value->data['id']);
-    }
-}
+    expect($value->data['id'])->toBe(123);
+});

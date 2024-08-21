@@ -1,41 +1,30 @@
 <?php
 
-namespace Kolossal\Multiplex\Tests;
-
-use Exception;
 use Kolossal\Multiplex\DataType\ScalarHandler;
 use Kolossal\Multiplex\DataType\StringHandler;
-use PHPUnit\Framework\Attributes\Test;
 
-final class DataTypeScalarHandlerTest extends TestCase
-{
-    /** @test */
-    public function it_will_throw_an_exception_for_invalid_values(): void
-    {
-        $handler = new StringHandler;
+it('will throw an exception for invalid values', function () {
+    $handler = new StringHandler;
 
-        $this->assertInstanceOf(ScalarHandler::class, $handler);
+    expect($handler)->toBeInstanceOf(ScalarHandler::class);
 
-        $this->assertSame('Test', $handler->serializeValue('Test'));
-        $this->assertSame('', $handler->serializeValue(null));
-        $this->assertSame('145.12', $handler->serializeValue(145.12));
-        $this->assertSame('145', $handler->serializeValue(145));
-        $this->assertSame('1', $handler->serializeValue(true));
-        $this->assertSame('', $handler->serializeValue(false));
-        $this->assertStringStartsWith('Resource id #', $handler->serializeValue(stream_context_create()));
+    expect($handler->serializeValue('Test'))->toBe('Test');
+    expect($handler->serializeValue(null))->toBe('');
+    expect($handler->serializeValue(145.12))->toBe('145.12');
+    expect($handler->serializeValue(145))->toBe('145');
+    expect($handler->serializeValue(true))->toBe('1');
+    expect($handler->serializeValue(false))->toBe('');
+    expect($handler->serializeValue(stream_context_create()))->toStartWith('Resource id #');
 
-        $this->expectException(Exception::class);
+    $this->expectException(Exception::class);
 
-        $handler->serializeValue([1, 2, 3]);
-    }
+    $handler->serializeValue([1, 2, 3]);
+});
 
-    /** @test */
-    public function it_will_resolve_null_as_null(): void
-    {
-        $handler = new StringHandler;
+it('will resolve null as null', function () {
+    $handler = new StringHandler;
 
-        $this->assertInstanceOf(ScalarHandler::class, $handler);
+    expect($handler)->toBeInstanceOf(ScalarHandler::class);
 
-        $this->assertNull($handler->unserializeValue(null));
-    }
-}
+    expect($handler->unserializeValue(null))->toBeNull();
+});

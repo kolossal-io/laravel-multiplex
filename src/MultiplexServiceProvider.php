@@ -9,15 +9,25 @@ class MultiplexServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        if ($this->app->runningInConsole()) {
+        if ($this->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../config/multiplex.php' => config_path('multiplex.php'),
             ], 'multiplex-config');
         }
 
         if (config('multiplex.migrations', true)) {
-            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+            $this->loadMultiplexMigrations();
         }
+    }
+
+    protected function runningInConsole(): bool
+    {
+        return $this->app->runningInConsole();
+    }
+
+    protected function loadMultiplexMigrations(): void
+    {
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
     }
 
     public function register(): void

@@ -1,38 +1,38 @@
 <?php
 
-namespace Kolossal\Multiplex\Tests;
-
 use Kolossal\Multiplex\MultiplexServiceProvider;
-use PHPUnit\Framework\Attributes\Test;
+use Mockery\MockInterface;
 
-final class MultiplexServiceProviderTest extends TestCase
-{
-    protected function getPackageProviders($app)
-    {
-        return [];
-    }
+it('skips migrations if disabled', function () {
+    config()->set('multiplex.migrations', false);
 
-    /** @test */
-    public function it_skips_migrations(): void
-    {
-        config(['multiplex.migrations' => false]);
+    /**
+     * @var MultiplexServiceProvider|MockInterface
+     */
+    $mock = Mockery::mock(MultiplexServiceProvider::class)
+        ->makePartial()
+        ->shouldAllowMockingProtectedMethods();
 
-        $provider = new MultiplexServiceProvider(app());
-        $provider->boot();
+    $mock->shouldReceive('runningInConsole')->andReturn(true);
 
-        $this->assertEmpty(app('migrator')->paths());
-    }
+    $mock->shouldNotReceive('loadMultiplexMigrations');
 
-    /** @test */
-    public function it_applies_migrations(): void
-    {
-        config()->set('multiplex.migrations', true);
+    $mock->boot();
+});
 
-        $provider = new MultiplexServiceProvider(app());
-        $provider->boot();
+it('applies migrations if enabled', function () {
+    config()->set('multiplex.migrations', true);
 
-        $expected = realpath(dirname(__DIR__) . '/database/migrations');
+    /**
+     * @var MultiplexServiceProvider|MockInterface
+     */
+    $mock = Mockery::mock(MultiplexServiceProvider::class)
+        ->makePartial()
+        ->shouldAllowMockingProtectedMethods();
 
-        $this->assertSame($expected, realpath(app('migrator')->paths()[0]));
-    }
-}
+    $mock->shouldReceive('runningInConsole')->andReturn(true);
+
+    $mock->expects('loadMultiplexMigrations');
+
+    $mock->boot();
+});

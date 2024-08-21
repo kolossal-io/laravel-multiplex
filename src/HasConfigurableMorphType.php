@@ -50,27 +50,19 @@ trait HasConfigurableMorphType
      */
     protected function usesUniqueIdsInMorphType(): bool
     {
-        return $this->morphType() !== 'integer';
+        return in_array($this->morphType(), ['uuid', 'ulid']);
     }
 
     /**
      * Determine if the given value is a valid unique id.
      */
-    protected function isValidUniqueMorphId(mixed $value): bool
+    protected function isValidUniqueMorphId(string $value): bool
     {
-        if (!is_string($value)) {
-            return false;
-        }
-
         if ($this->morphType() === 'ulid') {
             return Str::isUlid($value);
         }
 
-        if ($this->morphType() === 'uuid') {
-            return Str::isUuid($value);
-        }
-
-        return false;
+        return Str::isUuid($value);
     }
 
     /**
