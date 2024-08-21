@@ -55,7 +55,7 @@ final class PrimaryKeyTypesTest extends TestCase
      *
      * @dataProvider stringMorphTypes
      */
-    public function it_throws_error_for_invalid_unique_ids(string $type): void
+    public function it_throws_model_not_found_exception_for_invalid_id(string $type): void
     {
         $this->refreshDatabaseWithType($type);
 
@@ -64,6 +64,50 @@ final class PrimaryKeyTypesTest extends TestCase
         $this->expectException(ModelNotFoundException::class);
 
         $meta->resolveRouteBinding('abc-123', 'id');
+    }
+
+    /**
+     * @test
+     *
+     * @dataProvider stringMorphTypes
+     */
+    public function it_throws_model_not_found_exception_if_morph_type_mismatches(string $type): void
+    {
+        $this->refreshDatabaseWithType($type);
+
+        $meta = Post::factory()->create()->saveMeta('foo', 'bar');
+
+        $this->expectException(ModelNotFoundException::class);
+
+        $meta->resolveRouteBinding('abc-123', 'id');
+    }
+
+    /**
+     * @test
+     *
+     * @dataProvider morphTypes
+     */
+    public function it_doesnt_create_a_unique_id_only_if_confiugured(string $type): void
+    {
+        $this->refreshDatabaseWithType($type);
+
+        $meta = Post::factory()->create()->saveMeta('foo', 'bar');
+
+        $id = $meta->newUniqueId();
+
+        switch ($type) {
+            case 'uuid':
+                $this->assertIsString($id);
+                $this->assertTrue(Str::isUuid($id));
+                break;
+            case 'ulid':
+                $this->assertIsString($id);
+                $this->assertTrue(Str::isUlid($id));
+                break;
+            default:
+                $this->assertNull($meta->newUniqueId());
+                break;
+        }
     }
 
     /**
