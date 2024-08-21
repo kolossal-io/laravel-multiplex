@@ -1,8 +1,5 @@
 <?php
 
-namespace Kolossal\Multiplex\Tests;
-
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -15,1434 +12,1277 @@ use Kolossal\Multiplex\Tests\Mocks\PostWithAccessor;
 use Kolossal\Multiplex\Tests\Mocks\PostWithExistingColumn;
 use Kolossal\Multiplex\Tests\Mocks\PostWithoutSoftDelete;
 use Kolossal\Multiplex\Tests\Mocks\User;
-use PDOException;
-use PHPUnit\Framework\Attributes\Test;
 
-final class HasMetaTest extends TestCase
-{
-    use RefreshDatabase;
+uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+beforeEach(function () {
+    Post::travelBack();
+});
 
-        Post::travelBack();
-    }
+it('can set any keys as meta by default', function () {
+    $this->assertDatabaseCount('meta', 0);
 
-    /** @test */
-    public function it_can_set_any_keys_as_meta_by_default(): void
-    {
-        $this->assertDatabaseCount('meta', 0);
+    $model = Post::factory()->create();
 
-        $model = Post::factory()->create();
+    $model->setMeta('foo', 'bar');
+    $model->setMeta('another', 125.12);
+    $model->save();
 
-        $model->setMeta('foo', 'bar');
-        $model->setMeta('another', 125.12);
-        $model->save();
+    $this->assertDatabaseCount('meta', 2);
+});
 
-        $this->assertDatabaseCount('meta', 2);
-    }
+it('can set meta fluently', function () {
+    $this->assertDatabaseCount('meta', 0);
 
-    /** @test */
-    public function it_can_set_meta_fluently(): void
-    {
-        $this->assertDatabaseCount('meta', 0);
+    $model = Post::factory()->create();
 
-        $model = Post::factory()->create();
+    $model->foo = 'bar';
+    $model->another = 125.12;
+    $model->save();
 
-        $model->foo = 'bar';
-        $model->another = 125.12;
-        $model->save();
+    $this->assertDatabaseCount('meta', 2);
+});
 
-        $this->assertDatabaseCount('meta', 2);
-    }
+it('will save meta when model is saved', function () {
+    $model = Post::factory()->create();
 
-    /** @test */
-    public function it_will_save_meta_when_model_is_saved(): void
-    {
-        $model = Post::factory()->create();
+    $model->title = 'Post title 2';
+    $model->setMeta('foo', 'bar');
+    $model->bar = 125;
 
-        $model->title = 'Post title 2';
-        $model->setMeta('foo', 'bar');
-        $model->bar = 125;
+    $this->assertDatabaseCount('meta', 0);
 
-        $this->assertDatabaseCount('meta', 0);
+    $model->save();
 
-        $model->save();
+    $this->assertDatabaseHas('sample_posts', ['title' => 'Post title 2']);
+    $this->assertDatabaseCount('meta', 2);
+});
 
-        $this->assertDatabaseHas('sample_posts', ['title' => 'Post title 2']);
-        $this->assertDatabaseCount('meta', 2);
-    }
+it('can save model without meta', function () {
+    $model = Post::factory()->create();
 
-    /** @test */
-    public function it_can_save_model_without_meta(): void
-    {
-        $model = Post::factory()->create();
+    $model->title = 'Post title 2';
+    $model->setMeta('foo', 'bar');
+    $model->bar = 125;
 
-        $model->title = 'Post title 2';
-        $model->setMeta('foo', 'bar');
-        $model->bar = 125;
+    $this->assertDatabaseCount('meta', 0);
 
-        $this->assertDatabaseCount('meta', 0);
+    $model->saveWithoutMeta();
 
-        $model->saveWithoutMeta();
+    $this->assertDatabaseHas('sample_posts', ['title' => 'Post title 2']);
+    $this->assertDatabaseCount('meta', 0);
 
-        $this->assertDatabaseHas('sample_posts', ['title' => 'Post title 2']);
-        $this->assertDatabaseCount('meta', 0);
+    $model->saveMeta();
 
-        $model->saveMeta();
+    $this->assertDatabaseCount('meta', 2);
+});
 
-        $this->assertDatabaseCount('meta', 2);
-    }
+it('can disable meta autosave', function () {
+    $model = Post::factory()->create();
 
-    /** @test */
-    public function it_can_disable_meta_autosave(): void
-    {
-        $model = Post::factory()->create();
+    $model->autosaveMeta(false);
 
-        $model->autosaveMeta(false);
+    $model->title = 'Post title 2';
+    $model->setMeta('foo', 'bar');
+    $model->bar = 125;
 
-        $model->title = 'Post title 2';
-        $model->setMeta('foo', 'bar');
-        $model->bar = 125;
+    $this->assertDatabaseCount('meta', 0);
 
-        $this->assertDatabaseCount('meta', 0);
+    $model->save();
 
-        $model->save();
+    $this->assertDatabaseHas('sample_posts', ['title' => 'Post title 2']);
+    $this->assertDatabaseCount('meta', 0);
 
-        $this->assertDatabaseHas('sample_posts', ['title' => 'Post title 2']);
-        $this->assertDatabaseCount('meta', 0);
+    $model->autosaveMeta();
+    $model->save();
 
-        $model->autosaveMeta();
-        $model->save();
+    $this->assertDatabaseCount('meta', 2);
+});
 
-        $this->assertDatabaseCount('meta', 2);
-    }
+it('will handle allowed keys', function () {
+    $model = Post::factory()->create();
 
-    /** @test */
-    public function it_will_handle_allowed_keys(): void
-    {
-        $model = Post::factory()->create();
+    $model->metaKeys([
+        'foo',
+        'bar',
+    ]);
 
-        $model->metaKeys([
-            'foo',
-            'bar',
-        ]);
+    $model->setMeta('foo', 'bar');
+    $model->bar = 125;
 
-        $model->setMeta('foo', 'bar');
-        $model->bar = 125;
+    $this->assertDatabaseCount('meta', 0);
 
-        $this->assertDatabaseCount('meta', 0);
+    $model->save();
 
-        $model->save();
+    $this->assertDatabaseCount('meta', 2);
+});
 
-        $this->assertDatabaseCount('meta', 2);
-    }
+it('will handle allowed keys in arrays', function () {
+    $model = Post::factory()->create();
 
-    /** @test */
-    public function it_will_handle_allowed_keys_in_arrays(): void
-    {
-        $model = Post::factory()->create();
+    $model->metaKeys([
+        'foo',
+        'bar',
+    ]);
 
-        $model->metaKeys([
-            'foo',
-            'bar',
-        ]);
+    $model->setMeta([
+        'foo' => 'bar',
+        'bar' => 125,
+    ]);
 
-        $model->setMeta([
-            'foo' => 'bar',
-            'bar' => 125,
-        ]);
+    $this->assertDatabaseCount('meta', 0);
 
-        $this->assertDatabaseCount('meta', 0);
+    $model->save();
 
-        $model->save();
+    $this->assertDatabaseCount('meta', 2);
+});
 
-        $this->assertDatabaseCount('meta', 2);
-    }
+it('will use meta keys from property', function () {
+    /** @var PostWithoutSoftDelete */
+    $model = $this->partialMock(PostWithoutSoftDelete::class, function ($mock) {
+        $reflectionClass = new \ReflectionClass($mock);
 
-    /** @test */
-    public function it_will_use_meta_keys_from_property(): void
-    {
-        /** @var PostWithoutSoftDelete */
-        $model = $this->partialMock(PostWithoutSoftDelete::class, function ($mock) {
-            $reflectionClass = new \ReflectionClass($mock);
-
-            tap($reflectionClass->getProperty('metaKeys'), function ($property) use ($mock) {
-                $property->setAccessible(true);
-                $property->setValue($mock, ['foo', 'bar']);
-            });
-
-            tap($reflectionClass->getProperty('casts'), function ($property) use ($mock) {
-                $property->setAccessible(true);
-                $property->setValue($mock, ['title' => MetaAttribute::class]);
-            });
+        tap($reflectionClass->getProperty('metaKeys'), function ($property) use ($mock) {
+            $property->setAccessible(true);
+            $property->setValue($mock, ['foo', 'bar']);
         });
 
-        $this->assertEquals(['foo', 'bar'], $model->metaKeys());
-        $this->assertEquals(['title', 'foo', 'bar'], $model->getExplicitlyAllowedMetaKeys());
-    }
+        tap($reflectionClass->getProperty('casts'), function ($property) use ($mock) {
+            $property->setAccessible(true);
+            $property->setValue($mock, ['title' => MetaAttribute::class]);
+        });
+    });
 
-    /** @test */
-    public function it_will_use_meta_keys_from_method(): void
-    {
-        /** @var PostWithoutSoftDelete */
-        $model = $this->partialMock(PostWithoutSoftDelete::class, function ($mock) {
-            $reflectionClass = new \ReflectionClass($mock);
+    expect($model->metaKeys())->toEqual(['foo', 'bar']);
+    expect($model->getExplicitlyAllowedMetaKeys())->toEqual(['title', 'foo', 'bar']);
+});
 
-            tap($reflectionClass->getProperty('metaKeys'), function ($property) use ($mock) {
-                $property->setAccessible(true);
-                $property->setValue($mock, ['foo']);
-            });
+it('will use meta keys from method', function () {
+    /** @var PostWithoutSoftDelete */
+    $model = $this->partialMock(PostWithoutSoftDelete::class, function ($mock) {
+        $reflectionClass = new \ReflectionClass($mock);
 
-            tap($reflectionClass->getProperty('casts'), function ($property) use ($mock) {
-                $property->setAccessible(true);
-                $property->setValue($mock, ['title' => MetaAttribute::class]);
-            });
+        tap($reflectionClass->getProperty('metaKeys'), function ($property) use ($mock) {
+            $property->setAccessible(true);
+            $property->setValue($mock, ['foo']);
         });
 
-        $model->metaKeys(['bar']);
+        tap($reflectionClass->getProperty('casts'), function ($property) use ($mock) {
+            $property->setAccessible(true);
+            $property->setValue($mock, ['title' => MetaAttribute::class]);
+        });
+    });
 
-        $this->assertEquals(['bar'], $model->metaKeys());
-        $this->assertEquals(['title', 'bar'], $model->getExplicitlyAllowedMetaKeys());
-    }
+    $model->metaKeys(['bar']);
 
-    /** @test */
-    public function it_will_use_default_meta_keys_as_fallback(): void
-    {
-        $model = Post::factory()->create();
-        $this->assertEquals(['*'], $model->metaKeys());
-        $this->assertEquals(['appendable_foo'], $model->getExplicitlyAllowedMetaKeys());
-    }
+    expect($model->metaKeys())->toEqual(['bar']);
+    expect($model->getExplicitlyAllowedMetaKeys())->toEqual(['title', 'bar']);
+});
 
-    /** @test */
-    public function it_will_throw_for_unallowed_keys(): void
-    {
-        $model = Post::factory()->create();
+it('will use default meta keys as fallback', function () {
+    $model = Post::factory()->create();
+    expect($model->metaKeys())->toEqual(['*']);
+    expect($model->getExplicitlyAllowedMetaKeys())->toEqual(['appendable_foo']);
+});
 
-        $model->metaKeys([
-            'foo',
-        ]);
+it('will throw for unallowed keys', function () {
+    $model = Post::factory()->create();
 
-        $model->setMeta('foo', 'bar');
+    $model->metaKeys([
+        'foo',
+    ]);
 
-        $this->expectException(MetaException::class);
-        $this->expectExceptionMessage('Meta key `bar` is not a valid key.');
+    $model->setMeta('foo', 'bar');
 
-        $model->setMeta('bar', 125);
-    }
+    $this->expectException(MetaException::class);
+    $this->expectExceptionMessage('Meta key `bar` is not a valid key.');
 
-    /** @test */
-    public function it_will_throw_for_unallowed_keys_in_arrays(): void
-    {
-        $this->expectException(MetaException::class);
-        $this->expectExceptionMessage('Meta key `another` is not a valid key.');
+    $model->setMeta('bar', 125);
+});
 
-        $model = Post::factory()->create();
+it('will throw for unallowed keys in arrays', function () {
+    $this->expectException(MetaException::class);
+    $this->expectExceptionMessage('Meta key `another` is not a valid key.');
 
-        $model->metaKeys([
-            'foo',
-            'bar',
-        ]);
+    $model = Post::factory()->create();
 
-        $model->setMeta([
-            'foo' => 'bar',
-            'bar' => 125,
-            'another' => 'one',
-        ]);
+    $model->metaKeys([
+        'foo',
+        'bar',
+    ]);
 
-        $model->save();
-    }
+    $model->setMeta([
+        'foo' => 'bar',
+        'bar' => 125,
+        'another' => 'one',
+    ]);
 
-    /** @test */
-    public function it_lets_laravel_handle_unallowed_keys_assigned_fluently(): void
-    {
-        $this->expectException(PDOException::class);
+    $model->save();
+});
 
-        $model = Post::factory()->create();
+it('lets laravel handle unallowed keys assigned fluently', function () {
+    $this->expectException(PDOException::class);
 
-        $model->metaKeys([
-            'foo',
-        ]);
+    $model = Post::factory()->create();
 
-        $model->setMeta('foo', 'bar');
-        $model->bar = 125;
+    $model->metaKeys([
+        'foo',
+    ]);
 
-        $model->save();
-    }
+    $model->setMeta('foo', 'bar');
+    $model->bar = 125;
 
-    /** @test */
-    public function it_can_unguard_meta_keys(): void
-    {
-        $model = Post::factory()->create();
+    $model->save();
+});
 
-        $model->metaKeys([
-            'foo',
-        ]);
+it('can unguard meta keys', function () {
+    $model = Post::factory()->create();
 
-        $this->assertFalse(Post::isMetaUnguarded());
+    $model->metaKeys([
+        'foo',
+    ]);
 
-        Post::unguardMeta();
+    expect(Post::isMetaUnguarded())->toBeFalse();
 
-        $model->setMeta('foo', 'bar');
-        $model->bar = 125;
+    Post::unguardMeta();
 
-        $model->save();
+    $model->setMeta('foo', 'bar');
+    $model->bar = 125;
 
-        $this->assertTrue(Post::isMetaUnguarded());
-        $this->assertDatabaseCount('meta', 2);
+    $model->save();
 
-        Post::unguardMeta(false);
-    }
+    expect(Post::isMetaUnguarded())->toBeTrue();
+    $this->assertDatabaseCount('meta', 2);
 
-    /** @test */
-    public function it_can_reguard_meta_keys(): void
-    {
-        $this->expectException(MetaException::class);
-        $this->expectExceptionMessage('Meta key `bar` is not a valid key.');
+    Post::unguardMeta(false);
+});
 
-        $model = Post::factory()->create();
+it('can reguard meta keys', function () {
+    $this->expectException(MetaException::class);
+    $this->expectExceptionMessage('Meta key `bar` is not a valid key.');
 
-        $model->metaKeys([
-            'foo',
-        ]);
+    $model = Post::factory()->create();
 
-        Post::unguardMeta();
-        $this->assertTrue(Post::isMetaUnguarded());
+    $model->metaKeys([
+        'foo',
+    ]);
 
-        Post::reguardMeta();
+    Post::unguardMeta();
+    expect(Post::isMetaUnguarded())->toBeTrue();
 
-        $model->setMeta('foo', 'bar');
-        $model->setMeta('bar', 125);
-    }
+    Post::reguardMeta();
 
-    /** @test */
-    public function it_can_contain_wildcard_mixed_with_allowed_keys(): void
-    {
-        $model = Post::factory()->create();
+    $model->setMeta('foo', 'bar');
+    $model->setMeta('bar', 125);
+});
 
-        $model->metaKeys([
-            'foo',
-            'bar',
-            '*',
-        ]);
+it('can contain wildcard mixed with allowed keys', function () {
+    $model = Post::factory()->create();
 
-        $model->setMeta('foo', 'bar');
-        $model->bar = 125;
-        $model->another = 'one';
-        $model->setMeta('bar', 124);
+    $model->metaKeys([
+        'foo',
+        'bar',
+        '*',
+    ]);
 
-        $this->assertDatabaseCount('meta', 0);
+    $model->setMeta('foo', 'bar');
+    $model->bar = 125;
+    $model->another = 'one';
+    $model->setMeta('bar', 124);
 
-        $model->save();
+    $this->assertDatabaseCount('meta', 0);
 
-        $this->assertDatabaseCount('meta', 3);
-    }
+    $model->save();
 
-    /** @test */
-    public function it_will_return_meta_by_get_accessor(): void
-    {
-        $model = Post::factory()->create();
+    $this->assertDatabaseCount('meta', 3);
+});
 
-        $model->saveMeta('foo', 'bar');
+it('will return meta by get accessor', function () {
+    $model = Post::factory()->create();
 
-        $this->assertSame('bar', Post::first()->getMeta('foo'));
-    }
+    $model->saveMeta('foo', 'bar');
 
-    /** @test */
-    public function it_will_return_null_if_meta_is_not_found(): void
-    {
-        $model = Post::factory()->create();
+    expect(Post::first()->getMeta('foo'))->toBe('bar');
+});
 
-        $model->saveMeta('bar', 123);
+it('will return null if meta is not found', function () {
+    $model = Post::factory()->create();
 
-        $this->assertNull(Post::first()->getMeta('foo'));
-        $this->assertSame(123, Post::first()->getMeta('bar'));
-    }
+    $model->saveMeta('bar', 123);
 
-    /** @test */
-    public function it_can_return_fallback_if_meta_is_not_found(): void
-    {
-        $model = Post::factory()->create();
+    expect(Post::first()->getMeta('foo'))->toBeNull();
+    expect(Post::first()->getMeta('bar'))->toBe(123);
+});
 
-        $model->saveMeta('bar', 123);
+it('can return fallback if meta is not found', function () {
+    $model = Post::factory()->create();
 
-        $this->assertSame('fallback', Post::first()->getMeta('foo', 'fallback'));
-        $this->assertSame(123, Post::first()->getMeta('bar', 'fallback'));
-    }
+    $model->saveMeta('bar', 123);
 
-    /** @test */
-    public function it_will_show_if_meta_exists(): void
-    {
-        $model = Post::factory()->create();
+    expect(Post::first()->getMeta('foo', 'fallback'))->toBe('fallback');
+    expect(Post::first()->getMeta('bar', 'fallback'))->toBe(123);
+});
 
-        $this->assertFalse($model->hasMeta('foo'));
+it('will show if meta exists', function () {
+    $model = Post::factory()->create();
 
-        $model->saveMeta('foo', 'bar');
+    expect($model->hasMeta('foo'))->toBeFalse();
 
-        $this->assertTrue($model->hasMeta('foo'));
-    }
+    $model->saveMeta('foo', 'bar');
 
-    /** @test */
-    public function it_can_set_meta_from_array(): void
-    {
-        $model = Post::factory()->create();
+    expect($model->hasMeta('foo'))->toBeTrue();
+});
 
-        $model->saveMeta([
-            'foo' => 'bar',
-            'bar' => 123,
-        ]);
+it('can set meta from array', function () {
+    $model = Post::factory()->create();
 
-        $this->assertSame('bar', $model->refresh()->foo);
-        $this->assertSame(123, $model->refresh()->bar);
-    }
+    $model->saveMeta([
+        'foo' => 'bar',
+        'bar' => 123,
+    ]);
 
-    /** @test */
-    public function it_can_set_meta_for_the_future(): void
-    {
-        $model = Post::factory()->create();
+    expect($model->refresh()->foo)->toBe('bar');
+    expect($model->refresh()->bar)->toBe(123);
+});
 
-        $model->setMeta('foo', 'bar');
-        $model->setMetaAt('foo', 'change', '+1 hour');
+it('can set meta for the future', function () {
+    $model = Post::factory()->create();
 
-        $model->save();
+    $model->setMeta('foo', 'bar');
+    $model->setMetaAt('foo', 'change', '+1 hour');
 
-        $this->assertNull(Post::first()->foo);
+    $model->save();
 
-        $this->travelTo(Carbon::now()->addHour());
+    expect(Post::first()->foo)->toBeNull();
 
-        $this->assertSame('change', Post::first()->foo);
-    }
+    $this->travelTo(Carbon::now()->addHour());
 
-    /** @test */
-    public function it_can_set_meta_for_the_future_by_array(): void
-    {
-        $model = Post::factory()->create();
+    expect(Post::first()->foo)->toBe('change');
+});
 
-        $model->setMetaAt([
-            'foo' => 'bar',
-            'bar' => true,
-        ], '+1 hour');
+it('can set meta for the future by array', function () {
+    $model = Post::factory()->create();
 
-        $model->save();
+    $model->setMetaAt([
+        'foo' => 'bar',
+        'bar' => true,
+    ], '+1 hour');
 
-        $this->assertNull(Post::first()->foo);
-        $this->assertNull(Post::first()->bar);
+    $model->save();
 
-        $this->travelTo(Carbon::now()->addHour());
+    expect(Post::first()->foo)->toBeNull();
+    expect(Post::first()->bar)->toBeNull();
 
-        $this->assertSame('bar', Post::first()->foo);
-        $this->assertSame(true, Post::first()->bar);
-    }
+    $this->travelTo(Carbon::now()->addHour());
 
-    /** @test */
-    public function it_can_save_meta_for_the_future(): void
-    {
-        $model = Post::factory()->create();
+    expect(Post::first()->foo)->toBe('bar');
+    expect(Post::first()->bar)->toBe(true);
+});
 
-        $model->saveMeta('foo', 'bar');
-        $model->saveMetaAt('foo', 'change', '+1 hour');
+it('can save meta for the future', function () {
+    $model = Post::factory()->create();
 
-        $this->assertSame('bar', $model->refresh()->foo);
+    $model->saveMeta('foo', 'bar');
+    $model->saveMetaAt('foo', 'change', '+1 hour');
 
-        $this->travelTo(Carbon::now()->addHour());
+    expect($model->refresh()->foo)->toBe('bar');
 
-        $this->assertSame('change', $model->refresh()->foo);
-    }
+    $this->travelTo(Carbon::now()->addHour());
 
-    /** @test */
-    public function it_can_save_meta_with_same_value_for_different_timestamps(): void
-    {
-        $this->travelTo('2020-02-01 00:00:00');
+    expect($model->refresh()->foo)->toBe('change');
+});
 
-        $model = Post::factory()->create();
+it('can save meta with same value for different timestamps', function () {
+    $this->travelTo('2020-02-01 00:00:00');
 
-        $this->assertEquals(0, $model->allMeta()->count());
+    $model = Post::factory()->create();
 
-        $model->saveMetaAt('foo', 123.29, '2020-01-01 00:00:00');
-        $model->saveMetaAt('foo', 123.29, '2019-01-01 00:00:00');
-        $model->saveMetaAt('foo', 123.29, '2021-01-01 00:00:00');
+    expect($model->allMeta()->count())->toEqual(0);
 
-        $this->assertEquals(3, $model->allMeta()->count());
-    }
+    $model->saveMetaAt('foo', 123.29, '2020-01-01 00:00:00');
+    $model->saveMetaAt('foo', 123.29, '2019-01-01 00:00:00');
+    $model->saveMetaAt('foo', 123.29, '2021-01-01 00:00:00');
 
-    /** @test */
-    public function it_can_save_multiple_meta_for_the_future(): void
-    {
-        $model = Post::factory()->create();
+    expect($model->allMeta()->count())->toEqual(3);
+});
 
-        $model->setMeta('foo', 'bar');
-        $model->setMeta('bar', 123);
+it('can save multiple meta for the future', function () {
+    $model = Post::factory()->create();
 
-        $model->saveMetaAt('+1 hour');
-        $model->refresh();
+    $model->setMeta('foo', 'bar');
+    $model->setMeta('bar', 123);
 
-        $this->assertNull($model->foo);
-        $this->assertNull($model->bar);
+    $model->saveMetaAt('+1 hour');
+    $model->refresh();
 
-        $this->travelTo(Carbon::now()->addHour());
-        $model->refresh();
+    expect($model->foo)->toBeNull();
+    expect($model->bar)->toBeNull();
 
-        $this->assertSame('bar', $model->foo);
-        $this->assertSame(123, $model->bar);
-    }
+    $this->travelTo(Carbon::now()->addHour());
+    $model->refresh();
 
-    /** @test */
-    public function it_can_set_meta_for_future_from_array(): void
-    {
-        $model = Post::factory()->create();
+    expect($model->foo)->toBe('bar');
+    expect($model->bar)->toBe(123);
+});
 
-        $model->saveMeta([
-            'foo' => 'bar',
-            'bar' => 123,
-        ]);
+it('can set meta for future from array', function () {
+    $model = Post::factory()->create();
 
-        $model->saveMetaAt([
-            'foo' => 'change',
-            'bar' => false,
-        ], '+1 hour');
+    $model->saveMeta([
+        'foo' => 'bar',
+        'bar' => 123,
+    ]);
 
-        $this->assertSame('bar', $model->refresh()->foo);
-        $this->assertSame(123, $model->refresh()->bar);
+    $model->saveMetaAt([
+        'foo' => 'change',
+        'bar' => false,
+    ], '+1 hour');
 
-        $this->travelTo(Carbon::now()->addHour());
+    expect($model->refresh()->foo)->toBe('bar');
+    expect($model->refresh()->bar)->toBe(123);
 
-        $this->assertSame('change', $model->refresh()->foo);
-        $this->assertSame(false, $model->refresh()->bar);
-    }
+    $this->travelTo(Carbon::now()->addHour());
 
-    /** @test */
-    public function it_will_handle_future_meta_versions_as_non_existent(): void
-    {
-        $model = Post::factory()->create();
+    expect($model->refresh()->foo)->toBe('change');
+    expect($model->refresh()->bar)->toBe(false);
+});
 
-        $this->assertFalse($model->hasMeta('foo'));
+it('will handle future meta versions as non existent', function () {
+    $model = Post::factory()->create();
 
-        $model->saveMetaAt('foo', 'bar', '+1 hour');
+    expect($model->hasMeta('foo'))->toBeFalse();
 
-        $this->assertFalse($model->refresh()->hasMeta('foo'));
+    $model->saveMetaAt('foo', 'bar', '+1 hour');
 
-        $this->travelTo(Carbon::now()->addHour());
+    expect($model->refresh()->hasMeta('foo'))->toBeFalse();
 
-        $this->assertTrue($model->refresh()->hasMeta('foo'));
-    }
+    $this->travelTo(Carbon::now()->addHour());
 
-    /** @test */
-    public function it_will_return_meta_fluently(): void
-    {
-        $model = Post::factory()->create(['title' => 'Title']);
+    expect($model->refresh()->hasMeta('foo'))->toBeTrue();
+});
 
-        $model->foo = 'bar';
-        $model->save();
-        $model->saveMeta('bar', 123);
+it('will return meta fluently', function () {
+    $model = Post::factory()->create(['title' => 'Title']);
 
-        $this->assertSame('Title', Post::first()->title);
-        $this->assertSame('bar', Post::first()->foo);
-        $this->assertSame(123, Post::first()->bar);
-    }
+    $model->foo = 'bar';
+    $model->save();
+    $model->saveMeta('bar', 123);
 
-    /** @test */
-    public function it_will_respect_get_meta_accessors(): void
-    {
-        $model = PostWithAccessor::factory()->create(['title' => null]);
+    expect(Post::first()->title)->toBe('Title');
+    expect(Post::first()->foo)->toBe('bar');
+    expect(Post::first()->bar)->toBe(123);
+});
 
-        $this->assertNull($model->title);
+it('will respect get meta accessors', function () {
+    $model = PostWithAccessor::factory()->create(['title' => null]);
 
-        $model->allMeta()->delete();
+    expect($model->title)->toBeNull();
 
-        $this->assertNull($model->title);
+    $model->allMeta()->delete();
 
-        $model->saveMeta('title', 'Accessor');
+    expect($model->title)->toBeNull();
 
-        $this->assertSame('Testing Accessor passed.', $model->title);
-    }
+    $model->saveMeta('title', 'Accessor');
 
-    /** @test */
-    public function it_will_use_meta_accessors_for_fallback_values(): void
-    {
-        $model = PostWithAccessor::factory()->create(['title' => null]);
+    expect($model->title)->toBe('Testing Accessor passed.');
+});
 
-        DB::table('meta')->truncate();
+it('will use meta accessors for fallback values', function () {
+    $model = PostWithAccessor::factory()->create(['title' => null]);
 
-        $this->assertNull($model->title);
+    DB::table('meta')->truncate();
 
-        DB::table('sample_posts')->where('id', $model->id)
-            ->update(['title' => 'Fallback Accessor']);
+    expect($model->title)->toBeNull();
 
-        $model = PostWithAccessor::first();
+    DB::table('sample_posts')->where('id', $model->id)
+        ->update(['title' => 'Fallback Accessor']);
 
-        $this->assertSame('Testing Fallback Accessor passed.', $model->refresh()->title);
-    }
+    $model = PostWithAccessor::first();
 
-    /** @test */
-    public function it_will_respect_set_meta_mutators(): void
-    {
-        $model = Post::factory()->create();
+    expect($model->refresh()->title)->toBe('Testing Fallback Accessor passed.');
+});
 
-        $model->metaKeys([
-            'foo',
-            'test_has_mutator',
-        ]);
+it('will respect set meta mutators', function () {
+    $model = Post::factory()->create();
 
-        $model->setMeta('foo', 'bar');
-        $model->test_has_mutator = '--passed';
+    $model->metaKeys([
+        'foo',
+        'test_has_mutator',
+    ]);
 
-        $model->save();
+    $model->setMeta('foo', 'bar');
+    $model->test_has_mutator = '--passed';
 
-        $this->assertDatabaseHas('meta', [
-            'value' => 'Test --passed.',
-        ]);
-    }
+    $model->save();
 
-    /** @test */
-    public function it_can_delete_meta(): void
-    {
-        $model = Post::factory()->create();
+    $this->assertDatabaseHas('meta', [
+        'value' => 'Test --passed.',
+    ]);
+});
 
-        $model->setMeta('foo', 'bar');
+it('can delete meta', function () {
+    $model = Post::factory()->create();
 
-        $model->save();
+    $model->setMeta('foo', 'bar');
 
-        $this->assertDatabaseHas('meta', ['key' => 'foo']);
+    $model->save();
 
-        $model->deleteMeta('foo');
+    $this->assertDatabaseHas('meta', ['key' => 'foo']);
 
-        $this->assertDatabaseMissing('meta', ['key' => 'foo']);
-    }
+    $model->deleteMeta('foo');
 
-    /** @test */
-    public function it_will_delete_all_meta_versions(): void
-    {
-        $model = Post::factory()->create();
+    $this->assertDatabaseMissing('meta', ['key' => 'foo']);
+});
 
-        $model->title = 'Title';
-        $model->setMeta('foo', 'bar');
-        $model->save();
+it('will delete all meta versions', function () {
+    $model = Post::factory()->create();
 
-        $model->title = 'Title2';
-        $model->setMeta('foo', 'bar2');
-        $model->save();
+    $model->title = 'Title';
+    $model->setMeta('foo', 'bar');
+    $model->save();
 
-        $model->title = 'Title3';
-        $model->foo = 'bar3';
-        $model->save();
+    $model->title = 'Title2';
+    $model->setMeta('foo', 'bar2');
+    $model->save();
 
-        $this->assertDatabaseCount('meta', 3);
-        $this->assertDatabaseHas('meta', ['key' => 'foo']);
+    $model->title = 'Title3';
+    $model->foo = 'bar3';
+    $model->save();
 
-        $model->deleteMeta('foo');
+    $this->assertDatabaseCount('meta', 3);
+    $this->assertDatabaseHas('meta', ['key' => 'foo']);
 
-        $this->assertDatabaseMissing('meta', ['key' => 'foo']);
-    }
+    $model->deleteMeta('foo');
 
-    /** @test */
-    public function it_can_delete_meta_from_array(): void
-    {
-        $model = Post::factory()->create();
+    $this->assertDatabaseMissing('meta', ['key' => 'foo']);
+});
 
-        $model->setMeta('foo', 'bar');
-        $model->setMeta('bar', true);
-        $model->another = 123;
+it('can delete meta from array', function () {
+    $model = Post::factory()->create();
 
-        $model->save();
+    $model->setMeta('foo', 'bar');
+    $model->setMeta('bar', true);
+    $model->another = 123;
 
+    $model->save();
+
+    $this->assertDatabaseCount('meta', 3);
+    $this->assertDatabaseHas('meta', ['key' => 'bar']);
+    $this->assertDatabaseHas('meta', ['key' => 'foo']);
+    $this->assertDatabaseHas('meta', ['key' => 'another']);
+
+    $model->deleteMeta(['foo', 'another']);
+
+    $this->assertDatabaseCount('meta', 1);
+    $this->assertDatabaseHas('meta', ['key' => 'bar']);
+    $this->assertDatabaseMissing('meta', ['key' => 'foo']);
+    $this->assertDatabaseMissing('meta', ['key' => 'another']);
+});
+
+it('will throw when deleting invalid keys', function () {
+    $this->expectException(MetaException::class);
+
+    $model = Post::factory()->create();
+
+    $model->metaKeys(['foo', 'bar', 'another']);
+
+    $model->setMeta('foo', 'bar');
+    $model->bar = true;
+    $model->setMeta('another', 123);
+
+    $model->save();
+
+    $this->assertDatabaseCount('meta', 3);
+    $this->assertDatabaseHas('meta', ['key' => 'bar']);
+    $this->assertDatabaseHas('meta', ['key' => 'foo']);
+    $this->assertDatabaseHas('meta', ['key' => 'another']);
+
+    try {
+        $model->deleteMeta(['foo', 'invalid']);
+    } catch (MetaException $exception) {
         $this->assertDatabaseCount('meta', 3);
         $this->assertDatabaseHas('meta', ['key' => 'bar']);
         $this->assertDatabaseHas('meta', ['key' => 'foo']);
         $this->assertDatabaseHas('meta', ['key' => 'another']);
 
-        $model->deleteMeta(['foo', 'another']);
-
-        $this->assertDatabaseCount('meta', 1);
-        $this->assertDatabaseHas('meta', ['key' => 'bar']);
-        $this->assertDatabaseMissing('meta', ['key' => 'foo']);
-        $this->assertDatabaseMissing('meta', ['key' => 'another']);
+        throw $exception;
     }
+});
 
-    /** @test */
-    public function it_will_throw_when_deleting_invalid_keys(): void
-    {
-        $this->expectException(MetaException::class);
+it('can reset meta key before save', function () {
+    $model = Post::factory()->create();
 
-        $model = Post::factory()->create();
+    $model->setMeta('foo', 'bar');
+    $model->save();
 
-        $model->metaKeys(['foo', 'bar', 'another']);
+    $model->setMeta('foo', 'changed');
+    $model->resetMeta('foo');
+    $model->save();
 
-        $model->setMeta('foo', 'bar');
-        $model->bar = true;
-        $model->setMeta('another', 123);
+    $this->assertDatabaseHas('meta', ['key' => 'foo', 'value' => 'bar']);
+    $this->assertDatabaseMissing('meta', ['key' => 'foo', 'value' => 'changed']);
+});
 
-        $model->save();
+it('can reset all meta', function () {
+    $model = Post::factory()->create();
 
-        $this->assertDatabaseCount('meta', 3);
-        $this->assertDatabaseHas('meta', ['key' => 'bar']);
-        $this->assertDatabaseHas('meta', ['key' => 'foo']);
-        $this->assertDatabaseHas('meta', ['key' => 'another']);
+    $model->setMeta('foo', 'bar');
+    $model->setMeta('bar', 123);
+    $model->save();
 
-        try {
-            $model->deleteMeta(['foo', 'invalid']);
-        } catch (MetaException $exception) {
-            $this->assertDatabaseCount('meta', 3);
-            $this->assertDatabaseHas('meta', ['key' => 'bar']);
-            $this->assertDatabaseHas('meta', ['key' => 'foo']);
-            $this->assertDatabaseHas('meta', ['key' => 'another']);
+    $model->setMeta('foo', 'changed');
+    $model->bar = 234;
 
-            throw $exception;
-        }
-    }
+    $model->resetMetaChanges();
+    $model->save();
 
-    /** @test */
-    public function it_can_reset_meta_key_before_save(): void
-    {
-        $model = Post::factory()->create();
+    $this->assertDatabaseHas('meta', ['key' => 'foo', 'value' => 'bar']);
+    $this->assertDatabaseHas('meta', ['key' => 'bar', 'value' => '123']);
 
-        $model->setMeta('foo', 'bar');
-        $model->save();
+    $this->assertDatabaseMissing('meta', ['key' => 'foo', 'value' => 'changed']);
+    $this->assertDatabaseMissing('meta', ['key' => 'bar', 'value' => '234']);
+});
 
-        $model->setMeta('foo', 'changed');
-        $model->resetMeta('foo');
-        $model->save();
+it('can save meta directly', function () {
+    Post::factory()->create()->saveMeta('foo', 'bar');
 
-        $this->assertDatabaseHas('meta', ['key' => 'foo', 'value' => 'bar']);
-        $this->assertDatabaseMissing('meta', ['key' => 'foo', 'value' => 'changed']);
-    }
+    $this->assertDatabaseHas('meta', ['key' => 'foo', 'value' => 'bar']);
+});
 
-    /** @test */
-    public function it_can_reset_all_meta(): void
-    {
-        $model = Post::factory()->create();
+it('can save selected meta key only', function () {
+    $model = Post::factory()->create();
 
-        $model->setMeta('foo', 'bar');
-        $model->setMeta('bar', 123);
-        $model->save();
+    $model->setMeta('foo', 'bar');
+    $model->setMeta('bar', 123);
+    $model->save();
 
-        $model->setMeta('foo', 'changed');
-        $model->bar = 234;
+    $model->setMeta('foo', 'changed');
+    $model->bar = 234;
 
-        $model->resetMetaChanges();
-        $model->save();
+    $model->saveMeta('bar');
 
-        $this->assertDatabaseHas('meta', ['key' => 'foo', 'value' => 'bar']);
-        $this->assertDatabaseHas('meta', ['key' => 'bar', 'value' => '123']);
+    $this->assertDatabaseHas('meta', ['key' => 'foo', 'value' => 'bar']);
+    $this->assertDatabaseHas('meta', ['key' => 'bar', 'value' => '123']);
 
-        $this->assertDatabaseMissing('meta', ['key' => 'foo', 'value' => 'changed']);
-        $this->assertDatabaseMissing('meta', ['key' => 'bar', 'value' => '234']);
-    }
+    $this->assertDatabaseMissing('meta', ['key' => 'foo', 'value' => 'changed']);
+    $this->assertDatabaseHas('meta', ['key' => 'bar', 'value' => '234']);
+});
 
-    /** @test */
-    public function it_can_save_meta_directly(): void
-    {
-        Post::factory()->create()->saveMeta('foo', 'bar');
+it('will save meta updates even if parent is clean', function () {
+    $this->travelTo('2022-10-01 12:00:00');
 
-        $this->assertDatabaseHas('meta', ['key' => 'foo', 'value' => 'bar']);
-    }
+    $model = Post::factory()->create();
 
-    /** @test */
-    public function it_can_save_selected_meta_key_only(): void
-    {
-        $model = Post::factory()->create();
+    $this->travelTo('2022-10-02 12:00:00');
 
-        $model->setMeta('foo', 'bar');
-        $model->setMeta('bar', 123);
-        $model->save();
+    $model->title = 'Title Update';
+    $model->setMeta('foo', 'bar');
+    $model->save();
 
-        $model->setMeta('foo', 'changed');
-        $model->bar = 234;
+    $this->travelTo('2022-10-03 12:00:00');
 
-        $model->saveMeta('bar');
+    $model->foo = 'bar2';
+    $model->save();
 
-        $this->assertDatabaseHas('meta', ['key' => 'foo', 'value' => 'bar']);
-        $this->assertDatabaseHas('meta', ['key' => 'bar', 'value' => '123']);
+    $this->travelTo('2022-10-04 12:00:00');
 
-        $this->assertDatabaseMissing('meta', ['key' => 'foo', 'value' => 'changed']);
-        $this->assertDatabaseHas('meta', ['key' => 'bar', 'value' => '234']);
-    }
+    $model->setMeta('foo', 'bar3');
+    $model->save();
 
-    /** @test */
-    public function it_will_save_meta_updates_even_if_parent_is_clean(): void
-    {
-        $this->travelTo('2022-10-01 12:00:00');
+    $this->assertDatabaseCount('sample_posts', 1);
+    $this->assertDatabaseCount('meta', 3);
 
-        $model = Post::factory()->create();
+    expect(Post::whereDate('updated_at', '2022-10-02')->exists())->toBeTrue();
+    expect(Meta::whereDate('created_at', '2022-10-02')->exists())->toBeTrue();
+    expect(Meta::whereDate('created_at', '2022-10-03')->exists())->toBeTrue();
+    expect(Meta::whereDate('created_at', '2022-10-04')->exists())->toBeTrue();
+});
 
-        $this->travelTo('2022-10-02 12:00:00');
+it('contains only most recent meta per key', function () {
+    $this->travelTo('2021-10-01 12:00:00');
 
-        $model->title = 'Title Update';
-        $model->setMeta('foo', 'bar');
-        $model->save();
+    $model = Post::factory()->create();
+    $model->saveMeta('foo', 'bar');
+    $model->bar = 123.45;
+    $model->save();
 
-        $this->travelTo('2022-10-03 12:00:00');
+    $this->travelTo('2022-10-01 12:00:00');
 
-        $model->foo = 'bar2';
-        $model->save();
+    $model->saveMeta('bar', 340.987);
 
-        $this->travelTo('2022-10-04 12:00:00');
+    $this->travelTo('2022-10-02 12:00:00');
 
-        $model->setMeta('foo', 'bar3');
-        $model->save();
+    $model->foo = 'changed';
+    $model->save();
 
-        $this->assertDatabaseCount('sample_posts', 1);
-        $this->assertDatabaseCount('meta', 3);
+    expect($model->meta)->toHaveCount(2);
 
-        $this->assertTrue(Post::whereDate('updated_at', '2022-10-02')->exists());
-        $this->assertTrue(Meta::whereDate('created_at', '2022-10-02')->exists());
-        $this->assertTrue(Meta::whereDate('created_at', '2022-10-03')->exists());
-        $this->assertTrue(Meta::whereDate('created_at', '2022-10-04')->exists());
-    }
+    expect($model->meta->pluck('value', 'key')->sort()->toArray())->toEqual([
+        'bar' => 340.987,
+        'foo' => 'changed',
+    ]);
+});
 
-    /** @test */
-    public function it_contains_only_most_recent_meta_per_key(): void
-    {
-        $this->travelTo('2021-10-01 12:00:00');
+it('contains only published meta data', function () {
+    $this->travelTo('2021-10-01 12:00:00');
 
-        $model = Post::factory()->create();
-        $model->saveMeta('foo', 'bar');
-        $model->bar = 123.45;
-        $model->save();
+    $model = Post::factory()->create();
+    $model->saveMeta('foo', 'bar');
 
-        $this->travelTo('2022-10-01 12:00:00');
+    $model->saveMetaAt('foo', 'changed', '2022-10-31 11:00:00');
+    $model->saveMetaAt('bar', 340.987, '2022-10-31 15:00:00');
+    $model->saveMetaAt('bar', true, '2022-10-31 12:00:00');
 
-        $model->saveMeta('bar', 340.987);
+    expect($model->allMeta)->toHaveCount(4);
+    expect($model->meta)->toHaveCount(1);
+    expect($model->meta->first()->value)->toBe('bar');
 
-        $this->travelTo('2022-10-02 12:00:00');
+    $this->travelTo('2022-10-31 11:30:00');
 
-        $model->foo = 'changed';
-        $model->save();
+    $model->refresh();
 
-        $this->assertCount(2, $model->meta);
+    expect($model->meta)->toHaveCount(1);
+    expect($model->meta->first()->value)->toBe('changed');
 
-        $this->assertEquals([
-            'bar' => 340.987,
-            'foo' => 'changed',
-        ], $model->meta->pluck('value', 'key')->sort()->toArray());
-    }
+    $this->travelTo('2022-10-31 12:00:00');
 
-    /** @test */
-    public function it_contains_only_published_meta_data(): void
-    {
-        $this->travelTo('2021-10-01 12:00:00');
+    $model->refresh();
 
-        $model = Post::factory()->create();
-        $model->saveMeta('foo', 'bar');
+    expect($model->meta)->toHaveCount(2);
+    expect($model->meta->pluck('value', 'key')['foo'])->toBe('changed');
+    expect($model->meta->pluck('value', 'key')['bar'])->toBe(true);
 
-        $model->saveMetaAt('foo', 'changed', '2022-10-31 11:00:00');
-        $model->saveMetaAt('bar', 340.987, '2022-10-31 15:00:00');
-        $model->saveMetaAt('bar', true, '2022-10-31 12:00:00');
+    $this->travelTo('2022-12-01 12:00:00');
 
-        $this->assertCount(4, $model->allMeta);
-        $this->assertCount(1, $model->meta);
-        $this->assertSame('bar', $model->meta->first()->value);
+    $model->refresh();
 
-        $this->travelTo('2022-10-31 11:30:00');
+    expect($model->meta)->toHaveCount(2);
+    expect($model->meta->pluck('value', 'key')['foo'])->toBe('changed');
+    expect($model->meta->pluck('value', 'key')['bar'])->toBe(340.987);
+});
 
-        $model->refresh();
+it('may change datatype of meta data', function () {
+    $model = Post::factory()->create();
+    $model->saveMeta('foo', 'bar');
 
-        $this->assertCount(1, $model->meta);
-        $this->assertSame('changed', $model->meta->first()->value);
+    expect($model->meta->first()->type)->toBe('string');
+    expect($model->meta->first()->value)->toBe('bar');
 
-        $this->travelTo('2022-10-31 12:00:00');
+    $model->saveMeta('foo', 123);
 
-        $model->refresh();
+    expect($model->meta->first()->type)->toBe('integer');
+    expect($model->meta->first()->value)->toBe(123);
 
-        $this->assertCount(2, $model->meta);
-        $this->assertSame('changed', $model->meta->pluck('value', 'key')['foo']);
-        $this->assertSame(true, $model->meta->pluck('value', 'key')['bar']);
+    $model->saveMeta('foo', false);
 
-        $this->travelTo('2022-12-01 12:00:00');
+    expect($model->meta->first()->type)->toBe('boolean');
+    expect($model->meta->first()->value)->toBe(false);
+});
 
-        $model->refresh();
+it('will store dirty meta only', function () {
+    $this->travelTo('2022-10-01 12:00:00');
 
-        $this->assertCount(2, $model->meta);
-        $this->assertSame('changed', $model->meta->pluck('value', 'key')['foo']);
-        $this->assertSame(340.987, $model->meta->pluck('value', 'key')['bar']);
-    }
+    $model = Post::factory()->create();
 
-    /** @test */
-    public function it_may_change_datatype_of_meta_data(): void
-    {
-        $model = Post::factory()->create();
-        $model->saveMeta('foo', 'bar');
+    $model->saveMeta('foo', 'bar');
+    $model->saveMeta('bar', 123);
 
-        $this->assertSame('string', $model->meta->first()->type);
-        $this->assertSame('bar', $model->meta->first()->value);
+    $this->assertDatabaseCount('meta', 2);
 
-        $model->saveMeta('foo', 123);
+    expect($model->getMeta('foo'))->toBe('bar');
+    expect($model->getMeta('bar'))->toBe(123);
+    expect($model->meta->pluck('updated_at', 'key')->get('foo')->isSameDay('2022-10-01'))->toBeTrue();
+    expect($model->meta->pluck('updated_at', 'key')->get('bar')->isSameDay('2022-10-01'))->toBeTrue();
 
-        $this->assertSame('integer', $model->meta->first()->type);
-        $this->assertSame(123, $model->meta->first()->value);
+    $this->travelTo('2022-10-02 12:00:00');
 
-        $model->saveMeta('foo', false);
+    $model->saveMeta('foo', 'bar');
+    $model->saveMeta('bar', 123);
 
-        $this->assertSame('boolean', $model->meta->first()->type);
-        $this->assertSame(false, $model->meta->first()->value);
-    }
+    $this->assertDatabaseCount('meta', 2);
 
-    /** @test */
-    public function it_will_store_dirty_meta_only(): void
-    {
-        $this->travelTo('2022-10-01 12:00:00');
+    $model->foo = 'bar';
+    $model->bar = 123.0;
+    $model->save();
 
-        $model = Post::factory()->create();
+    $this->assertDatabaseCount('meta', 3);
 
-        $model->saveMeta('foo', 'bar');
-        $model->saveMeta('bar', 123);
+    expect($model->getMeta('foo'))->toBe('bar');
+    expect($model->getMeta('bar'))->toBe(123.0);
+    expect($model->meta->pluck('updated_at', 'key')->get('foo')->isSameDay('2022-10-01'))->toBeTrue();
+    expect($model->meta->pluck('updated_at', 'key')->get('bar')->isSameDay('2022-10-02'))->toBeTrue();
+});
 
-        $this->assertDatabaseCount('meta', 2);
+it('will show if meta is dirty', function () {
+    $model = Post::factory()->create();
 
-        $this->assertSame('bar', $model->getMeta('foo'));
-        $this->assertSame(123, $model->getMeta('bar'));
-        $this->assertTrue($model->meta->pluck('updated_at', 'key')->get('foo')->isSameDay('2022-10-01'));
-        $this->assertTrue($model->meta->pluck('updated_at', 'key')->get('bar')->isSameDay('2022-10-01'));
+    expect($model->isMetaDirty())->toBeFalse();
+    expect($model->getDirtyMeta())->toHaveCount(0);
 
-        $this->travelTo('2022-10-02 12:00:00');
+    $model->foo = 'bar';
 
-        $model->saveMeta('foo', 'bar');
-        $model->saveMeta('bar', 123);
+    expect($model->isMetaDirty())->toBeTrue();
+    expect($model->getDirtyMeta())->toHaveCount(1);
 
-        $this->assertDatabaseCount('meta', 2);
+    $model->setMeta('foo', 'changed');
+    $model->bar = 12;
 
-        $model->foo = 'bar';
-        $model->bar = 123.0;
-        $model->save();
+    expect($model->isMetaDirty())->toBeTrue();
+    expect($model->getDirtyMeta())->toHaveCount(2);
 
-        $this->assertDatabaseCount('meta', 3);
+    $model->save();
 
-        $this->assertSame('bar', $model->getMeta('foo'));
-        $this->assertSame(123.0, $model->getMeta('bar'));
-        $this->assertTrue($model->meta->pluck('updated_at', 'key')->get('foo')->isSameDay('2022-10-01'));
-        $this->assertTrue($model->meta->pluck('updated_at', 'key')->get('bar')->isSameDay('2022-10-02'));
-    }
+    expect($model->isMetaDirty())->toBeFalse();
+    expect($model->getDirtyMeta())->toHaveCount(0);
+});
 
-    /** @test */
-    public function it_will_show_if_meta_is_dirty(): void
-    {
-        $model = Post::factory()->create();
+it('can add casted meta fields to models visible fields', function () {
+    $model = Post::factory()->create(['title' => 'Title']);
 
-        $this->assertFalse($model->isMetaDirty());
-        $this->assertCount(0, $model->getDirtyMeta());
+    $array = Post::first()->append('appendable_foo')->toArray();
 
-        $model->foo = 'bar';
+    expect($array)->toHaveKey('title');
+    expect($array)->toHaveKey('appendable_foo');
+    expect($array['appendable_foo'])->toBeNull();
 
-        $this->assertTrue($model->isMetaDirty());
-        $this->assertCount(1, $model->getDirtyMeta());
+    $model->saveMeta('appendable_foo', 'this works.');
 
-        $model->setMeta('foo', 'changed');
-        $model->bar = 12;
+    expect(Post::first()->append('appendable_foo')->toArray()['appendable_foo'])->toBe('this works.');
+});
 
-        $this->assertTrue($model->isMetaDirty());
-        $this->assertCount(2, $model->getDirtyMeta());
+it('will return null for casted meta field without trait', function () {
+    $model = new Dummy;
 
-        $model->save();
+    expect($model->append('appendable_foo')->toArray()['appendable_foo'])->toBeNull();
+});
 
-        $this->assertFalse($model->isMetaDirty());
-        $this->assertCount(0, $model->getDirtyMeta());
-    }
+it('can set casted fields not in whitelist', function () {
+    $model = Post::factory()->create(['title' => 'Title']);
 
-    /** @test */
-    public function it_can_add_casted_meta_fields_to_models_visible_fields(): void
-    {
-        $model = Post::factory()->create(['title' => 'Title']);
+    $model->metaKeys(['foo']);
 
-        $array = Post::first()->append('appendable_foo')->toArray();
+    $model->saveMeta('foo', 'bar');
+    $model->saveMeta('appendable_foo', 'this works.');
 
-        $this->assertArrayHasKey('title', $array);
-        $this->assertArrayHasKey('appendable_foo', $array);
-        $this->assertNull($array['appendable_foo']);
+    expect(Post::first()->appendable_foo)->toBe('this works.');
 
-        $model->saveMeta('appendable_foo', 'this works.');
+    $model = Post::first();
 
-        $this->assertSame(
-            'this works.',
-            Post::first()->append('appendable_foo')->toArray()['appendable_foo'],
-        );
-    }
+    $model->appendable_foo = 'this also works.';
+    $model->save();
 
-    /** @test */
-    public function it_will_return_null_for_casted_meta_field_without_trait(): void
-    {
-        $model = new Dummy;
+    expect(Post::first()->foo)->toBe('bar');
+    expect(Post::first()->appendable_foo)->toBe('this also works.');
+    expect(Post::first()->append('appendable_foo')->toArray()['appendable_foo'])->toBe('this also works.');
+});
 
-        $this->assertNull(
-            $model->append('appendable_foo')->toArray()['appendable_foo']
-        );
-    }
+it('will return correct datatype for casted meta attributes', function () {
+    $model = Post::factory()->create(['title' => 'Title']);
 
-    /** @test */
-    public function it_can_set_casted_fields_not_in_whitelist(): void
-    {
-        $model = Post::factory()->create(['title' => 'Title']);
+    $model->metaKeys(['foo']);
 
-        $model->metaKeys(['foo']);
+    $model->saveMeta('appendable_foo', 123);
+    expect(Post::first()->appendable_foo)->toBe(123);
 
-        $model->saveMeta('foo', 'bar');
-        $model->saveMeta('appendable_foo', 'this works.');
+    $model->saveMeta('appendable_foo', false);
+    expect(Post::first()->appendable_foo)->toBe(false);
 
-        $this->assertSame('this works.', Post::first()->appendable_foo);
+    $model->saveMeta('appendable_foo', 150.024);
+    expect(Post::first()->appendable_foo)->toBe(150.024);
 
-        $model = Post::first();
+    $model->saveMeta('appendable_foo', null);
+    expect(Post::first()->appendable_foo)->toBeNull();
+});
 
-        $model->appendable_foo = 'this also works.';
-        $model->save();
+it('will return null for undefined casted meta field', function () {
+    $model = Post::factory()->create(['title' => 'Title']);
 
-        $this->assertSame('bar', Post::first()->foo);
-        $this->assertSame('this also works.', Post::first()->appendable_foo);
-        $this->assertSame('this also works.', Post::first()->append('appendable_foo')->toArray()['appendable_foo']);
-    }
+    $model->metaKeys(['foo']);
 
-    /** @test */
-    public function it_will_return_correct_datatype_for_casted_meta_attributes(): void
-    {
-        $model = Post::factory()->create(['title' => 'Title']);
+    expect(Post::first()->appendable_foo)->toBeNull();
+});
 
-        $model->metaKeys(['foo']);
+it('will return column value for casted meta fields having equally named column', function () {
+    $model = Post::factory()->create(['title' => 'Title']);
 
-        $model->saveMeta('appendable_foo', 123);
-        $this->assertSame(123, Post::first()->appendable_foo);
+    $model->metaKeys(['foo']);
 
-        $model->saveMeta('appendable_foo', false);
-        $this->assertSame(false, Post::first()->appendable_foo);
+    Schema::table('sample_posts', fn ($table) => $table->string('appendable_foo')->nullable());
+    DB::table('sample_posts')->update(['appendable_foo' => 'Fallback']);
 
-        $model->saveMeta('appendable_foo', 150.024);
-        $this->assertSame(150.024, Post::first()->appendable_foo);
+    expect(Post::first()->appendable_foo)->toBe('Fallback');
 
-        $model->saveMeta('appendable_foo', null);
-        $this->assertNull(Post::first()->appendable_foo);
-    }
+    $model->saveMetaAt('appendable_foo', 8000.99, Carbon::now()->addDay());
 
-    /** @test */
-    public function it_will_return_null_for_undefined_casted_meta_field(): void
-    {
-        $model = Post::factory()->create(['title' => 'Title']);
+    $this->travelTo(Carbon::now()->addHours(23)->addMinutes(50));
 
-        $model->metaKeys(['foo']);
+    expect(Post::first()->appendable_foo)->toBe('Fallback');
 
-        $this->assertNull(Post::first()->appendable_foo);
-    }
+    $this->travelTo(Carbon::now()->addMinutes(10));
 
-    /** @test */
-    public function it_will_return_column_value_for_casted_meta_fields_having_equally_named_column(): void
-    {
-        $model = Post::factory()->create(['title' => 'Title']);
+    expect(Post::first()->appendable_foo)->toBe(8000.99);
+});
 
-        $model->metaKeys(['foo']);
+it('can save multiple meta for a given date', function () {
+    $model = Post::factory()->create();
 
-        Schema::table('sample_posts', fn ($table) => $table->string('appendable_foo')->nullable());
-        DB::table('sample_posts')->update(['appendable_foo' => 'Fallback']);
+    $model->setMeta('foo', 'bar');
+    $model->bar = 125;
 
-        $this->assertSame('Fallback', Post::first()->appendable_foo);
+    expect($model->saveMetaAt('+1 day'))->toBeTrue();
 
-        $model->saveMetaAt('appendable_foo', 8000.99, Carbon::now()->addDay());
+    expect(Post::first()->foo)->toBeNull();
+    expect(Post::first()->bar)->toBeNull();
 
-        $this->travelTo(Carbon::now()->addHours(23)->addMinutes(50));
+    $model->setMeta([
+        'foo' => 'old value',
+        'bar' => false,
+    ]);
 
-        $this->assertSame('Fallback', Post::first()->appendable_foo);
+    expect($model->saveMetaAt('-1 day'))->toBeTrue();
 
-        $this->travelTo(Carbon::now()->addMinutes(10));
+    expect(Post::first()->foo)->toBe('old value');
+    expect(Post::first()->bar)->toBe(false);
 
-        $this->assertSame(8000.99, Post::first()->appendable_foo);
-    }
+    $this->travelTo(Carbon::now()->addDay());
 
-    /** @test */
-    public function it_can_save_multiple_meta_for_a_given_date(): void
-    {
-        $model = Post::factory()->create();
+    expect(Post::first()->foo)->toBe('bar');
+    expect(Post::first()->bar)->toBe(125);
+});
 
-        $model->setMeta('foo', 'bar');
-        $model->bar = 125;
+it('can inspect model meta at a given point in time', function () {
+    $this->travelTo('2022-10-01 12:00:00');
 
-        $this->assertTrue($model->saveMetaAt('+1 day'));
+    $model = Post::factory()->create();
+    $keys = ['foo', 'another', 'bar'];
 
-        $this->assertNull(Post::first()->foo);
-        $this->assertNull(Post::first()->bar);
+    $model->saveMeta([
+        'foo' => 'bar',
+        'bar' => 125,
+    ]);
 
-        $model->setMeta([
-            'foo' => 'old value',
-            'bar' => false,
-        ]);
+    $this->travelTo(Carbon::now()->addDay());
+    $model->saveMeta('foo', 'updated');
 
-        $this->assertTrue($model->saveMetaAt('-1 day'));
+    $this->travelTo(Carbon::now()->addDays(2));
+    $model->saveMeta('another', true);
 
-        $this->assertSame('old value', Post::first()->foo);
-        $this->assertSame(false, Post::first()->bar);
+    $this->travelTo(Carbon::now()->addDay());
+    $model->saveMeta('bar', 999.125);
 
-        $this->travelTo(Carbon::now()->addDay());
+    expect(Post::first()->only($keys))->toEqual([
+        'foo' => 'updated',
+        'another' => true,
+        'bar' => 999.125,
+    ]);
 
-        $this->assertSame('bar', Post::first()->foo);
-        $this->assertSame(125, Post::first()->bar);
-    }
+    expect(Post::first()->withMetaAt('2022-10-01 15:00:00')->only($keys))->toEqual([
+        'foo' => 'bar',
+        'another' => null,
+        'bar' => 125,
+    ]);
 
-    /** @test */
-    public function it_can_inspect_model_meta_at_a_given_point_in_time(): void
-    {
-        $this->travelTo('2022-10-01 12:00:00');
+    expect(Post::with('meta')->first()->withMetaAt('2022-10-01 15:00:00')->only($keys))->toEqual([
+        'foo' => 'bar',
+        'another' => null,
+        'bar' => 125,
+    ]);
 
-        $model = Post::factory()->create();
-        $keys = ['foo', 'another', 'bar'];
+    expect(Post::with('meta')->first()->withMetaAt('2022-10-04 12:15:00')->only($keys))->toEqual([
+        'foo' => 'updated',
+        'another' => true,
+        'bar' => 125,
+    ]);
 
-        $model->saveMeta([
-            'foo' => 'bar',
-            'bar' => 125,
-        ]);
+    $post = Post::first()->withMetaAt('2022-10-02 15:00:00');
 
-        $this->travelTo(Carbon::now()->addDay());
-        $model->saveMeta('foo', 'updated');
+    expect($post->only($keys))->toEqual([
+        'foo' => 'updated',
+        'another' => null,
+        'bar' => 125,
+    ]);
 
-        $this->travelTo(Carbon::now()->addDays(2));
-        $model->saveMeta('another', true);
+    expect($post->withMetaAt('2022-10-04 12:15:00')->only($keys))->toEqual([
+        'foo' => 'updated',
+        'another' => true,
+        'bar' => 125,
+    ]);
 
-        $this->travelTo(Carbon::now()->addDay());
-        $model->saveMeta('bar', 999.125);
+    expect($post->withMetaAt('2022-08-05 12:15:00')->only($keys))->toEqual([
+        'foo' => null,
+        'another' => null,
+        'bar' => null,
+    ]);
 
-        $this->assertEquals([
-            'foo' => 'updated',
-            'another' => true,
-            'bar' => 999.125,
-        ], Post::first()->only($keys));
+    expect($post->withCurrentMeta()->only($keys))->toEqual([
+        'foo' => 'updated',
+        'another' => true,
+        'bar' => 999.125,
+    ]);
+});
 
-        $this->assertEquals([
-            'foo' => 'bar',
-            'another' => null,
-            'bar' => 125,
-        ], Post::first()->withMetaAt('2022-10-01 15:00:00')->only($keys));
+it('can travel to the future', function () {
+    $model = Post::factory()->create();
+    $keys = ['foo', 'another', 'bar'];
 
-        $this->assertEquals([
-            'foo' => 'bar',
-            'another' => null,
-            'bar' => 125,
-        ], Post::with('meta')->first()->withMetaAt('2022-10-01 15:00:00')->only($keys));
+    $model->saveMetaAt([
+        'foo' => 'updated',
+        'bar' => 999.125,
+        'another' => true,
+    ], '+1 year');
 
-        $this->assertEquals([
-            'foo' => 'updated',
-            'another' => true,
-            'bar' => 125,
-        ], Post::with('meta')->first()->withMetaAt('2022-10-04 12:15:00')->only($keys));
+    expect(Post::first()->only($keys))->toEqual([
+        'foo' => null,
+        'another' => null,
+        'bar' => null,
+    ]);
 
-        $post = Post::first()->withMetaAt('2022-10-02 15:00:00');
+    expect(Post::first()->withMetaAt('+1 year')->only($keys))->toEqual([
+        'foo' => 'updated',
+        'another' => true,
+        'bar' => 999.125,
+    ]);
+});
 
-        $this->assertEquals([
-            'foo' => 'updated',
-            'another' => null,
-            'bar' => 125,
-        ], $post->only($keys));
+it('can create meta along with the model', function () {
+    Post::factory()->create([
+        'title' => 'Post title',
+        'foo' => 123,
+        'bar' => 'works',
+    ]);
 
-        $this->assertEquals([
-            'foo' => 'updated',
-            'another' => true,
-            'bar' => 125,
-        ], $post->withMetaAt('2022-10-04 12:15:00')->only($keys));
+    $this->assertDatabaseCount('meta', 2);
 
-        $this->assertEquals([
-            'foo' => null,
-            'another' => null,
-            'bar' => null,
-        ], $post->withMetaAt('2022-08-05 12:15:00')->only($keys));
+    expect(Post::first()->title)->toBe('Post title');
+    expect(Post::first()->foo)->toBe(123);
+    expect(Post::first()->bar)->toBe('works');
+});
 
-        $this->assertEquals([
-            'foo' => 'updated',
-            'another' => true,
-            'bar' => 999.125,
-        ], $post->withCurrentMeta()->only($keys));
-    }
+it('can fill meta with attributes', function () {
+    $post = Post::factory()->create();
 
-    /** @test */
-    public function it_can_travel_to_the_future(): void
-    {
-        $model = Post::factory()->create();
-        $keys = ['foo', 'another', 'bar'];
+    $post->mergeFillable(['title', 'foo', 'bar']);
 
-        $model->saveMetaAt([
-            'foo' => 'updated',
-            'bar' => 999.125,
-            'another' => true,
-        ], '+1 year');
+    $post->fill([
+        'title' => 'New title',
+        'foo' => true,
+        'bar' => 'also true',
+    ]);
 
-        $this->assertEquals([
-            'foo' => null,
-            'another' => null,
-            'bar' => null,
-        ], Post::first()->only($keys));
+    $this->assertDatabaseCount('meta', 0);
 
-        $this->assertEquals([
-            'foo' => 'updated',
-            'another' => true,
-            'bar' => 999.125,
-        ], Post::first()->withMetaAt('+1 year')->only($keys));
-    }
+    $post->save();
 
-    /** @test */
-    public function it_can_create_meta_along_with_the_model(): void
-    {
-        Post::factory()->create([
-            'title' => 'Post title',
-            'foo' => 123,
-            'bar' => 'works',
-        ]);
+    $this->assertDatabaseCount('meta', 2);
 
-        $this->assertDatabaseCount('meta', 2);
+    expect($post->title)->toBe('New title');
+    expect($post->foo)->toBe(true);
+    expect($post->getMeta('bar'))->toBe('also true');
+});
 
-        $this->assertSame('Post title', Post::first()->title);
-        $this->assertSame(123, Post::first()->foo);
-        $this->assertSame('works', Post::first()->bar);
-    }
+it('will delete meta with the model', function () {
+    Post::factory()->create([
+        'title' => 'Post title',
+        'foo' => 123,
+        'bar' => 'works',
+    ]);
 
-    /** @test */
-    public function it_can_fill_meta_with_attributes(): void
-    {
-        $post = Post::factory()->create();
+    $this->assertDatabaseCount('meta', 2);
+    expect(Post::first()->forceDelete())->toBeTrue();
+    $this->assertDatabaseCount('meta', 0);
+});
 
-        $post->mergeFillable(['title', 'foo', 'bar']);
+it('will not delete meta for soft deleted model', function () {
+    Post::factory()->create([
+        'title' => 'Post title',
+        'foo' => 123,
+        'bar' => 'works',
+    ]);
 
-        $post->fill([
-            'title' => 'New title',
-            'foo' => true,
-            'bar' => 'also true',
-        ]);
+    $this->assertDatabaseCount('meta', 2);
+    expect(Post::first()->delete())->toBeTrue();
+    $this->assertDatabaseCount('meta', 2);
+});
 
-        $this->assertDatabaseCount('meta', 0);
+it('will delete meta model without soft delete', function () {
+    PostWithoutSoftDelete::factory()->create([
+        'title' => 'Post title',
+        'foo' => 123,
+        'bar' => 'works',
+    ]);
 
-        $post->save();
+    $this->assertDatabaseCount('meta', 2);
+    expect(PostWithoutSoftDelete::first()->delete())->toBeTrue();
+    $this->assertDatabaseCount('meta', 0);
+});
 
-        $this->assertDatabaseCount('meta', 2);
+it('loads meta relation', function () {
+    $post = Post::factory()->create();
 
-        $this->assertSame('New title', $post->title);
-        $this->assertSame(true, $post->foo);
-        $this->assertSame('also true', $post->getMeta('bar'));
-    }
+    $post->saveMetaAt('foo', false, '-1 day');
+    $post->saveMeta('foo', true);
+    $post->saveMetaAt('bar', false, '-1 day');
+    $post->saveMetaAt('future', false, '+1 day');
 
-    /** @test */
-    public function it_will_delete_meta_with_the_model(): void
-    {
-        Post::factory()->create([
-            'title' => 'Post title',
-            'foo' => 123,
-            'bar' => 'works',
-        ]);
+    $this->assertDatabaseCount('meta', 4);
+    expect(Post::first()->meta)->toHaveCount(2);
+});
 
-        $this->assertDatabaseCount('meta', 2);
-        $this->assertTrue(Post::first()->forceDelete());
-        $this->assertDatabaseCount('meta', 0);
-    }
+it('loads published meta relation', function () {
+    $post = Post::factory()->create();
 
-    /** @test */
-    public function it_will_not_delete_meta_for_soft_deleted_model(): void
-    {
-        Post::factory()->create([
-            'title' => 'Post title',
-            'foo' => 123,
-            'bar' => 'works',
-        ]);
+    $post->saveMetaAt('foo', false, '-1 day');
+    $post->saveMeta('foo', true);
+    $post->saveMetaAt('bar', false, '-1 day');
+    $post->saveMetaAt('future', false, '+1 day');
 
-        $this->assertDatabaseCount('meta', 2);
-        $this->assertTrue(Post::first()->delete());
-        $this->assertDatabaseCount('meta', 2);
-    }
+    $this->assertDatabaseCount('meta', 4);
+    expect(Post::first()->publishedMeta)->toHaveCount(3);
+});
 
-    /** @test */
-    public function it_will_delete_meta_model_without_soft_delete(): void
-    {
-        PostWithoutSoftDelete::factory()->create([
-            'title' => 'Post title',
-            'foo' => 123,
-            'bar' => 'works',
-        ]);
+it('loads all meta relation', function () {
+    $post = Post::factory()->create();
 
-        $this->assertDatabaseCount('meta', 2);
-        $this->assertTrue(PostWithoutSoftDelete::first()->delete());
-        $this->assertDatabaseCount('meta', 0);
-    }
+    $post->saveMetaAt('foo', false, '-1 day');
+    $post->saveMeta('foo', true);
+    $post->saveMetaAt('bar', false, '-1 day');
+    $post->saveMetaAt('future', false, '+1 day');
 
-    /** @test */
-    public function it_loads_meta_relation(): void
-    {
-        $post = Post::factory()->create();
+    $this->assertDatabaseCount('meta', 4);
+    expect(Post::first()->allMeta)->toHaveCount(4);
+});
 
-        $post->saveMetaAt('foo', false, '-1 day');
-        $post->saveMeta('foo', true);
-        $post->saveMetaAt('bar', false, '-1 day');
-        $post->saveMetaAt('future', false, '+1 day');
+it('will throw an error for relation attributes', function () {
+    $post = Post::factory()->create();
 
-        $this->assertDatabaseCount('meta', 4);
-        $this->assertCount(2, Post::first()->meta);
-    }
+    $post->saveMeta('other', 'Other Value');
 
-    /** @test */
-    public function it_loads_published_meta_relation(): void
-    {
-        $post = Post::factory()->create();
+    $this->assertDatabaseCount('meta', 1);
 
-        $post->saveMetaAt('foo', false, '-1 day');
-        $post->saveMeta('foo', true);
-        $post->saveMetaAt('bar', false, '-1 day');
-        $post->saveMetaAt('future', false, '+1 day');
+    expect($post->getMeta('other'))->toBe('Other Value');
+    expect($post->other)->toBe('Other Value');
+    expect($post->other)->toBeString();
+    expect($post->getAttribute('other'))->toBeString();
 
-        $this->assertDatabaseCount('meta', 4);
-        $this->assertCount(3, Post::first()->publishedMeta);
-    }
+    $this->expectException(MetaException::class);
 
-    /** @test */
-    public function it_loads_all_meta_relation(): void
-    {
-        $post = Post::factory()->create();
+    $post->saveMeta('meta', 'Meta Value');
+});
 
-        $post->saveMetaAt('foo', false, '-1 day');
-        $post->saveMeta('foo', true);
-        $post->saveMetaAt('bar', false, '-1 day');
-        $post->saveMetaAt('future', false, '+1 day');
+it('refreshes relations after save', function () {
+    $post = Post::factory()->create();
 
-        $this->assertDatabaseCount('meta', 4);
-        $this->assertCount(4, Post::first()->allMeta);
-    }
+    $post->saveMeta([
+        'foo' => 'bar',
+        'bar' => true,
+    ]);
 
-    /** @test */
-    public function it_will_throw_an_error_for_relation_attributes(): void
-    {
-        $post = Post::factory()->create();
+    $post->saveMetaAt('foo', 'old', '-1 day');
+    $post->saveMetaAt('bar', false, '+1 day');
 
-        $post->saveMeta('other', 'Other Value');
+    $post = Post::first();
 
-        $this->assertDatabaseCount('meta', 1);
+    expect($post->meta)->toHaveCount(2);
+    expect($post->publishedMeta)->toHaveCount(3);
+    expect($post->allMeta)->toHaveCount(4);
 
-        $this->assertSame('Other Value', $post->getMeta('other'));
-        $this->assertSame('Other Value', $post->other);
-        $this->assertIsString($post->other);
-        $this->assertIsString($post->getAttribute('other'));
+    $post->foo = 'changed';
+    $post->saveMeta();
 
-        $this->expectException(MetaException::class);
+    expect($post->meta)->toHaveCount(2);
+    expect($post->publishedMeta)->toHaveCount(4);
+    expect($post->allMeta)->toHaveCount(5);
+});
 
-        $post->saveMeta('meta', 'Meta Value');
-    }
+it('will not store clean meta', function () {
+    $model = Post::factory()->create();
 
-    /** @test */
-    public function it_refreshes_relations_after_save(): void
-    {
-        $post = Post::factory()->create();
+    expect($model->saveMeta('foo', 'bar'))->toBeInstanceOf(Meta::class);
+    expect($model->saveMeta('foo', 'bar'))->toBeFalse();
+    expect($model->saveMeta('foo', 'bar'))->toBeFalse();
+    expect($model->saveMeta('foo', 'changed'))->toBeInstanceOf(Meta::class);
 
-        $post->saveMeta([
-            'foo' => 'bar',
-            'bar' => true,
-        ]);
+    $this->assertDatabaseCount('meta', 2);
+});
 
-        $post->saveMetaAt('foo', 'old', '-1 day');
-        $post->saveMetaAt('bar', false, '+1 day');
+it('can assign meta when creating by array', function () {
+    $this->assertDatabaseCount('meta', 0);
 
-        $post = Post::first();
+    Post::unguard();
 
-        $this->assertCount(2, $post->meta);
-        $this->assertCount(3, $post->publishedMeta);
-        $this->assertCount(4, $post->allMeta);
+    Post::create([
+        'foo' => 'bar',
+        'title' => 'Title',
+    ]);
 
-        $post->foo = 'changed';
-        $post->saveMeta();
+    $this->assertDatabaseCount('meta', 1);
+    $this->assertDatabaseHas('sample_posts', ['title' => 'Title']);
 
-        $this->assertCount(2, $post->meta);
-        $this->assertCount(4, $post->publishedMeta);
-        $this->assertCount(5, $post->allMeta);
-    }
+    expect(Post::first()->title)->toBe('Title');
+    expect(Post::first()->foo)->toBe('bar');
+});
 
-    /** @test */
-    public function it_will_not_store_clean_meta(): void
-    {
-        $model = Post::factory()->create();
+it('can get meta when selecting with id', function () {
+    Post::factory(2)->has(Meta::factory()->state(['key' => 'foo']))->create();
 
-        $this->assertInstanceOf(Meta::class, $model->saveMeta('foo', 'bar'));
-        $this->assertFalse($model->saveMeta('foo', 'bar'));
-        $this->assertFalse($model->saveMeta('foo', 'bar'));
-        $this->assertInstanceOf(Meta::class, $model->saveMeta('foo', 'changed'));
+    $this->assertDatabaseCount('sample_posts', 2);
 
-        $this->assertDatabaseCount('meta', 2);
-    }
+    expect(Post::select('id', 'title')->get()->filter(function ($model) {
+        return $model->foo;
+    })->count())->toEqual(2);
+});
 
-    /** @test */
-    public function it_can_assign_meta_when_creating_by_array(): void
-    {
-        $this->assertDatabaseCount('meta', 0);
+it('cannot get meta when selecting without id', function () {
+    Post::factory(2)->has(Meta::factory()->state(['key' => 'foo']))->create();
 
-        Post::unguard();
+    $this->assertDatabaseCount('sample_posts', 2);
 
-        Post::create([
-            'foo' => 'bar',
-            'title' => 'Title',
-        ]);
+    expect(Post::select('title')->get()->filter(function ($model) {
+        return $model->foo;
+    })->count())->toEqual(0);
+});
 
-        $this->assertDatabaseCount('meta', 1);
-        $this->assertDatabaseHas('sample_posts', ['title' => 'Title']);
+it('can pluck meta values', function () {
+    $a = Post::factory()->create();
+    $b = PostWithExistingColumn::factory()->create();
 
-        $this->assertSame('Title', Post::first()->title);
-        $this->assertSame('bar', Post::first()->foo);
-    }
+    $a->metaKeys([
+        'foo',
+        'bar',
+    ]);
 
-    /** @test */
-    public function it_can_get_meta_when_selecting_with_id(): void
-    {
-        Post::factory(2)->has(Meta::factory()->state(['key' => 'foo']))->create();
+    $a->saveMeta('foo', 'bar');
 
-        $this->assertDatabaseCount('sample_posts', 2);
+    $b->title = 'Title';
+    $b->another = 123;
+    $b->save();
 
-        $this->assertEquals(2, Post::select('id', 'title')->get()->filter(function ($model) {
-            return $model->foo;
-        })->count());
-    }
+    expect($a->pluckMeta()->toArray())->toEqual([
+        'appendable_foo' => null,
+        'foo' => 'bar',
+        'bar' => null,
+    ]);
 
-    /** @test */
-    public function it_cannot_get_meta_when_selecting_without_id(): void
-    {
-        Post::factory(2)->has(Meta::factory()->state(['key' => 'foo']))->create();
+    expect($b->pluckMeta()->toArray())->toEqual([
+        'title' => 'Title',
+        'body' => null,
+        'another' => 123,
+        'boolean_field' => null,
+        'float_field' => null,
+        'integer_field' => null,
+    ]);
+});
 
-        $this->assertDatabaseCount('sample_posts', 2);
+it('does not load meta if relation is null', function () {
+    $post = Post::factory()->create();
 
-        $this->assertEquals(0, Post::select('title')->get()->filter(function ($model) {
-            return $model->foo;
-        })->count());
-    }
+    expect($post->user)->toBeNull();
+    expect($post->relationLoaded('meta'))->toBeFalse();
+});
 
-    /** @test */
-    public function it_can_pluck_meta_values(): void
-    {
-        $a = Post::factory()->create();
-        $b = PostWithExistingColumn::factory()->create();
+it('does not load meta if relation is not null', function () {
+    $post = Post::factory()->for(User::factory())->create();
 
-        $a->metaKeys([
-            'foo',
-            'bar',
-        ]);
-
-        $a->saveMeta('foo', 'bar');
-
-        $b->title = 'Title';
-        $b->another = 123;
-        $b->save();
-
-        $this->assertEquals([
-            'appendable_foo' => null,
-            'foo' => 'bar',
-            'bar' => null,
-        ], $a->pluckMeta()->toArray());
-
-        $this->assertEquals([
-            'title' => 'Title',
-            'body' => null,
-            'another' => 123,
-            'boolean_field' => null,
-            'float_field' => null,
-            'integer_field' => null,
-        ], $b->pluckMeta()->toArray());
-    }
-
-    /** @test */
-    public function it_does_not_load_meta_if_relation_is_null(): void
-    {
-        $post = Post::factory()->create();
-
-        $this->assertNull($post->user);
-        $this->assertFalse($post->relationLoaded('meta'));
-    }
-
-    /** @test */
-    public function it_does_not_load_meta_if_relation_is_not_null(): void
-    {
-        $post = Post::factory()->for(User::factory())->create();
-
-        $this->assertInstanceOf(User::class, $post->user);
-        $this->assertFalse($post->relationLoaded('meta'));
-    }
-}
+    expect($post->user)->toBeInstanceOf(User::class);
+    expect($post->relationLoaded('meta'))->toBeFalse();
+});

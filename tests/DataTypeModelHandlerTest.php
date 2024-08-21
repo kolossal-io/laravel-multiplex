@@ -1,50 +1,37 @@
 <?php
 
-namespace Kolossal\Multiplex\Tests;
-
 use Kolossal\Multiplex\DataType;
 use Kolossal\Multiplex\Tests\Mocks\Post;
-use PHPUnit\Framework\Attributes\Test;
-use stdClass;
 
-final class DataTypeModelHandlerTest extends TestCase
-{
-    /** @test */
-    public function it_can_handle_non_existing_models(): void
-    {
-        $model = Post::factory()->make();
-        $handler = new DataType\ModelHandler;
+it('can handle non existing models', function () {
+    $model = Post::factory()->make();
+    $handler = new DataType\ModelHandler;
 
-        $this->assertFalse($handler->canHandleValue(new stdClass));
-        $this->assertTrue($handler->canHandleValue($model));
+    expect($handler->canHandleValue(new stdClass))->toBeFalse();
+    expect($handler->canHandleValue($model))->toBeTrue();
 
-        $serialized = $handler->serializeValue($model);
-        $unserialized = $handler->unserializeValue($serialized);
+    $serialized = $handler->serializeValue($model);
+    $unserialized = $handler->unserializeValue($serialized);
 
-        $this->assertEquals('Kolossal\Multiplex\Tests\Mocks\Post', $serialized);
-        $this->assertInstanceOf(Post::class, $unserialized);
-    }
+    expect($serialized)->toEqual('Kolossal\Multiplex\Tests\Mocks\Post');
+    expect($unserialized)->toBeInstanceOf(Post::class);
+});
 
-    /** @test */
-    public function it_can_handle_existing_models(): void
-    {
-        $model = Post::factory()->create();
-        $handler = new DataType\ModelHandler;
+it('can handle existing models', function () {
+    $model = Post::factory()->create();
+    $handler = new DataType\ModelHandler;
 
-        $this->assertTrue($handler->canHandleValue($model));
+    expect($handler->canHandleValue($model))->toBeTrue();
 
-        $serialized = $handler->serializeValue($model);
-        $unserialized = $handler->unserializeValue($serialized);
+    $serialized = $handler->serializeValue($model);
+    $unserialized = $handler->unserializeValue($serialized);
 
-        $this->assertEquals('Kolossal\Multiplex\Tests\Mocks\Post#1', $serialized);
-        $this->assertTrue($unserialized->is($model));
-    }
+    expect($serialized)->toEqual('Kolossal\Multiplex\Tests\Mocks\Post#1');
+    expect($unserialized->is($model))->toBeTrue();
+});
 
-    /** @test */
-    public function it_will_resolve_null_as_null(): void
-    {
-        $handler = new DataType\ModelHandler;
+it('will resolve null as null', function () {
+    $handler = new DataType\ModelHandler;
 
-        $this->assertNull($handler->unserializeValue(null));
-    }
-}
+    expect($handler->unserializeValue(null))->toBeNull();
+});

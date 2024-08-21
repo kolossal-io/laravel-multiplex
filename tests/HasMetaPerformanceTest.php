@@ -1,120 +1,103 @@
 <?php
 
-namespace Kolossal\Multiplex\Tests;
-
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Mattiasgeniar\PhpunitQueryCountAssertions\AssertsQueryCounts;
-use PHPUnit\Framework\Attributes\Test;
 
-final class HasMetaPerformanceTest extends TestCase
+uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(Mattiasgeniar\PhpunitQueryCountAssertions\AssertsQueryCounts::class);
+
+function getRawQueriesExecuted(): array
 {
-    use AssertsQueryCounts;
-    use RefreshDatabase;
+    return collect(AssertsQueryCounts::getQueriesExecuted())
+        ->map(function ($item) {
+            return Str::replaceArray('?', $item['bindings'], $item['query']);
+        })
+        ->toArray();
+}
 
-    protected function getRawQueriesExecuted(): array
-    {
-        return collect(AssertsQueryCounts::getQueriesExecuted())
-            ->map(function ($item) {
-                return Str::replaceArray('?', $item['bindings'], $item['query']);
-            })
-            ->toArray();
-    }
+it('will not load meta relations by default', function () {
+    Post::factory()
+        ->has(Meta::factory()->state(['key' => 'foo']))
+        ->create();
 
-    /** @test */
-    public function it_will_not_load_meta_relations_by_default(): void
-    {
-        Post::factory()
-            ->has(Meta::factory()->state(['key' => 'foo']))
-            ->create();
+    $this->assertQueryCountMatches(1, function () {
+        Post::first();
+    });
+});
 
-        $this->assertQueryCountMatches(1, function () {
-            Post::first();
+it('will load meta relation if meta value is used', function () {
+    Post::factory()
+        ->has(Meta::factory()->state(['key' => 'foo']))
+        ->create();
+
+    $this->assertQueryCountMatches(2, function () {
+        Post::first()->foo;
+    });
+});
+
+it('will used cache meta on subsequent meta calls', function () {
+    Post::factory()
+        ->has(Meta::factory()->state(['key' => 'foo']))
+        ->has(Meta::factory()->state(['key' => 'bar']))
+        ->has(Meta::factory()->state(['key' => 'another']))
+        ->create();
+
+    $this->assertQueryCountMatches(2, function () {
+        $post = Post::first();
+
+        $post->foo;
+        $post->getMeta('bar');
+        $post->getMeta('undefined');
+        $post->another;
+    });
+});
+
+it('will lazy load meta relations by default', function () {
+    Post::factory(20)
+        ->has(Meta::factory(3))
+        ->create();
+
+    $this->assertDatabaseCount('sample_posts', 20);
+    $this->assertDatabaseCount('meta', 60);
+
+    $this->assertQueryCountMatches(1, function () {
+        Post::get()->each(function ($post) {
+            $post->title;
         });
-    }
+    });
 
-    /** @test */
-    public function it_will_load_meta_relation_if_meta_value_is_used(): void
-    {
-        Post::factory()
-            ->has(Meta::factory()->state(['key' => 'foo']))
-            ->create();
-
-        $this->assertQueryCountMatches(2, function () {
-            Post::first()->foo;
-        });
-    }
-
-    /** @test */
-    public function it_will_used_cache_meta_on_subsequent_meta_calls(): void
-    {
-        Post::factory()
-            ->has(Meta::factory()->state(['key' => 'foo']))
-            ->has(Meta::factory()->state(['key' => 'bar']))
-            ->has(Meta::factory()->state(['key' => 'another']))
-            ->create();
-
-        $this->assertQueryCountMatches(2, function () {
-            $post = Post::first();
-
+    $this->assertQueryCountMatches(21, function () {
+        Post::get()->each(function ($post) {
             $post->foo;
             $post->getMeta('bar');
             $post->getMeta('undefined');
             $post->another;
         });
-    }
+    });
+});
 
-    /** @test */
-    public function it_will_lazy_load_meta_relations_by_default(): void
-    {
-        Post::factory(20)
-            ->has(Meta::factory(3))
-            ->create();
+it('can eager load meta relations', function () {
+    Post::factory(20)
+        ->has(Meta::factory(3))
+        ->create();
 
-        $this->assertDatabaseCount('sample_posts', 20);
-        $this->assertDatabaseCount('meta', 60);
+    $this->assertDatabaseCount('sample_posts', 20);
+    $this->assertDatabaseCount('meta', 60);
 
-        $this->assertQueryCountMatches(1, function () {
-            Post::get()->each(function ($post) {
-                $post->title;
-            });
+    $this->assertQueryCountMatches(2, function () {
+        Post::with('meta')->get()->each(function ($post) {
+            $post->title;
         });
+    });
 
-        $this->assertQueryCountMatches(21, function () {
-            Post::get()->each(function ($post) {
-                $post->foo;
-                $post->getMeta('bar');
-                $post->getMeta('undefined');
-                $post->another;
-            });
+    $this->assertQueryCountMatches(2, function () {
+        Post::with('meta')->get()->each(function ($post) {
+            $post->foo;
+            $post->getMeta('bar');
+            $post->getMeta('undefined');
+            $post->another;
         });
-    }
-
-    /** @test */
-    public function it_can_eager_load_meta_relations(): void
-    {
-        Post::factory(20)
-            ->has(Meta::factory(3))
-            ->create();
-
-        $this->assertDatabaseCount('sample_posts', 20);
-        $this->assertDatabaseCount('meta', 60);
-
-        $this->assertQueryCountMatches(2, function () {
-            Post::with('meta')->get()->each(function ($post) {
-                $post->title;
-            });
-        });
-
-        $this->assertQueryCountMatches(2, function () {
-            Post::with('meta')->get()->each(function ($post) {
-                $post->foo;
-                $post->getMeta('bar');
-                $post->getMeta('undefined');
-                $post->another;
-            });
-        });
-    }
-}
+    });
+});

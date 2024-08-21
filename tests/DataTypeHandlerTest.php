@@ -1,161 +1,133 @@
 <?php
 
-namespace Kolossal\Multiplex\Tests;
-
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Kolossal\Multiplex\DataType;
 use Kolossal\Multiplex\DataType\HandlerInterface;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
 use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
-use stdClass;
 
-/**
- * Data handler tests.
- *
- * @copyright Plank Multimedia Inc.
- *
- * @link https://github.com/plank/laravel-metable
- */
-final class DataTypeHandlerTest extends TestCase
-{
-    public static function handlerProvider(): array
-    {
-        $timestamp = '2017-01-01 00:00:00.000000+0000';
-        $datetime = Carbon::createFromFormat('Y-m-d H:i:s.uO', $timestamp);
+dataset('handlerProvider', function () {
+    $timestamp = '2017-01-01 00:00:00.000000+0000';
+    $datetime = Carbon::createFromFormat('Y-m-d H:i:s.uO', $timestamp);
 
-        $object = new stdClass;
-        $object->foo = 'bar';
-        $object->baz = 3;
+    $object = new stdClass;
+    $object->foo = 'bar';
+    $object->baz = 3;
 
-        return [
-            'array' => [
-                new DataType\ArrayHandler,
-                'array',
-                ['foo' => ['bar'], 'baz'],
-                [new stdClass],
-            ],
-            'boolean' => [
-                new DataType\BooleanHandler,
-                'boolean',
-                true,
-                [1, 0, '', [], null],
-            ],
-            'date' => [
-                new DataType\DateHandler,
-                'date',
-                '2017-01-01',
-                [2017, Carbon::parse('2017-01-01')],
-                fn (Carbon $value) => $value->isSameDay('2017-01-01'),
-            ],
-            'datetime' => [
-                new DataType\DateTimeHandler,
-                'datetime',
-                $datetime,
-                [2017, '2017-01-01'],
-            ],
-            'float' => [
-                new DataType\FloatHandler,
-                'float',
-                1.1,
-                ['1.1', 1],
-            ],
-            'integer' => [
-                new DataType\IntegerHandler,
-                'integer',
-                3,
-                [1.1, '1'],
-            ],
-            'model' => [
-                new DataType\ModelHandler,
-                'model',
-                new Dummy,
-                [new stdClass],
-            ],
-            'model collection' => [
-                new DataType\ModelCollectionHandler,
-                'collection',
-                new Collection([new Dummy]),
-                [collect()],
-            ],
-            'null' => [
-                new DataType\NullHandler,
-                'null',
-                null,
-                [0, '', 'null', [], false],
-            ],
-            'object' => [
-                new DataType\ObjectHandler,
-                'object',
-                $object,
-                [[]],
-            ],
-            'serializable' => [
-                new DataType\SerializableHandler,
-                'serializable',
-                new SampleSerializable(['foo' => 'bar']),
-                [],
-            ],
-            'string' => [
-                new DataType\StringHandler,
-                'string',
-                'foo',
-                [1, 1.1],
-            ],
-        ];
+    return [
+        'array' => [
+            new DataType\ArrayHandler,
+            'array',
+            ['foo' => ['bar'], 'baz'],
+            [new stdClass],
+            null,
+        ],
+        'boolean' => [
+            new DataType\BooleanHandler,
+            'boolean',
+            true,
+            [1, 0, '', [], null],
+            null,
+        ],
+        'date' => [
+            new DataType\DateHandler,
+            'date',
+            '2017-01-01',
+            [2017, Carbon::parse('2017-01-01')],
+            fn () => fn (Carbon $value) => $value->isSameDay('2017-01-01'),
+        ],
+        'datetime' => [
+            new DataType\DateTimeHandler,
+            'datetime',
+            $datetime,
+            [2017, '2017-01-01'],
+            null,
+        ],
+        'float' => [
+            new DataType\FloatHandler,
+            'float',
+            1.1,
+            ['1.1', 1],
+            null,
+        ],
+        'integer' => [
+            new DataType\IntegerHandler,
+            'integer',
+            3,
+            [1.1, '1'],
+            null,
+        ],
+        'model' => [
+            new DataType\ModelHandler,
+            'model',
+            new Dummy,
+            [new stdClass],
+            null,
+        ],
+        'model collection' => [
+            new DataType\ModelCollectionHandler,
+            'collection',
+            new Collection([new Dummy]),
+            [collect()],
+            null,
+        ],
+        'null' => [
+            new DataType\NullHandler,
+            'null',
+            null,
+            [0, '', 'null', [], false],
+            null,
+        ],
+        'object' => [
+            new DataType\ObjectHandler,
+            'object',
+            $object,
+            [[]],
+            null,
+        ],
+        'serializable' => [
+            new DataType\SerializableHandler,
+            'serializable',
+            new SampleSerializable(['foo' => 'bar']),
+            [],
+            null,
+        ],
+        'string' => [
+            new DataType\StringHandler,
+            'string',
+            'foo',
+            [1, 1.1],
+            null,
+        ],
+    ];
+});
+
+it('specifies a datatype identifier', function (HandlerInterface $handler, $type, $value, $incompatible, mixed $closure = null) {
+    expect($handler->getDataType())->toEqual($type);
+})->with('handlerProvider');
+
+it('can verify compatibility', function (HandlerInterface $handler, $type, $value, $incompatible, mixed $closure) {
+    expect($handler->canHandleValue($value))->toBeTrue();
+
+    foreach ($incompatible as $value) {
+        expect($handler->canHandleValue($value))->toBeFalse();
     }
+})->with('handlerProvider');
 
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
-    public function it_specifies_a_datatype_identifier(HandlerInterface $handler, $type): void
-    {
-        $this->assertEquals($type, $handler->getDataType());
+it('can serialize and unserialize values', function (HandlerInterface $handler, $type, $value, $incompatible, mixed $closure = null) {
+    $serialized = $handler->serializeValue($value);
+    $unserialized = $handler->unserializeValue($serialized);
+
+    if ($closure) {
+        $result = call_user_func($closure, $unserialized);
+        expect(is_callable($result) ? call_user_func($result, $unserialized) : $result)->toBeTrue();
+    } else {
+        expect($unserialized)->toEqual($value);
     }
+})->with('handlerProvider');
 
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
-    public function it_can_verify_compatibility(HandlerInterface $handler, $type, $value, $incompatible): void
-    {
-        $this->assertTrue($handler->canHandleValue($value));
-
-        foreach ($incompatible as $value) {
-            $this->assertFalse($handler->canHandleValue($value));
-        }
-    }
-
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
-    public function it_can_serialize_and_unserialize_values(HandlerInterface $handler, $type, $value, $incompatible, ?callable $closure = null): void
-    {
-        $serialized = $handler->serializeValue($value);
-        $unserialized = $handler->unserializeValue($serialized);
-
-        if ($closure) {
-            $this->assertTrue(call_user_func($closure, $unserialized));
-        } else {
-            $this->assertEquals($value, $unserialized);
-        }
-    }
-
-    /**
-     * @test
-     *
-     * @dataProvider handlerProvider
-     */
-    public function it_can_handle_null_values(HandlerInterface $handler): void
-    {
-        $unserialized = $handler->unserializeValue(null);
-        $this->assertNull($unserialized);
-    }
-}
+it('can handle null values', function (HandlerInterface $handler, $type, $value, $incompatible, mixed $closure = null) {
+    $unserialized = $handler->unserializeValue(null);
+    expect($unserialized)->toBeNull();
+})->with('handlerProvider');
