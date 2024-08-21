@@ -28,4 +28,13 @@ class TestCase extends Orchestra
     {
         $this->loadMigrationsFrom(__DIR__ . '/migrations');
     }
+
+    public function refreshDatabaseWithType($type): void
+    {
+        config()->set('multiplex.morph_type', $type);
+
+        $this->artisan('migrate:fresh');
+
+        $this->defineDatabaseMigrations();
+    }
 }

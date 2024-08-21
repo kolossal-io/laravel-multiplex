@@ -1,60 +1,41 @@
 <?php
 
-namespace Kolossal\Multiplex\Tests;
-
 use Kolossal\Multiplex\DataType\ArrayHandler;
-use PHPUnit\Framework\Attributes\Test;
 
-final class DataTypeArrayHandlerTest extends TestCase
-{
-    /** @test */
-    public function it_will_resolve_null_as_null(): void
-    {
-        $handler = new ArrayHandler;
+it('will resolve null as null', function () {
+    $handler = new ArrayHandler;
 
-        $this->assertInstanceOf(ArrayHandler::class, $handler);
+    expect($handler)->toBeInstanceOf(ArrayHandler::class);
 
-        $this->assertNull($handler->unserializeValue(null));
-    }
+    expect($handler->unserializeValue(null))->toBeNull();
+});
 
-    /** @test */
-    public function it_can_handle_arrays(): void
-    {
-        $handler = new ArrayHandler;
+it('can handle arrays', function () {
+    $handler = new ArrayHandler;
 
-        $this->assertTrue($handler->canHandleValue(['id' => 123]));
-    }
+    expect($handler->canHandleValue(['id' => 123]))->toBeTrue();
+});
 
-    /** @test */
-    public function it_cannot_handle_other_values(): void
-    {
-        $handler = new ArrayHandler;
+it('cannot handle other values', function () {
+    $handler = new ArrayHandler;
 
-        $this->assertFalse($handler->canHandleValue((object) ['id' => 123]));
-        $this->assertFalse($handler->canHandleValue(123));
-        $this->assertFalse($handler->canHandleValue(false));
-    }
+    expect($handler->canHandleValue((object) ['id' => 123]))->toBeFalse();
+    expect($handler->canHandleValue(123))->toBeFalse();
+    expect($handler->canHandleValue(false))->toBeFalse();
+});
 
-    /** @test */
-    public function it_serializes_value(): void
-    {
-        $handler = new ArrayHandler;
+it('serializes value', function () {
+    $handler = new ArrayHandler;
 
-        $this->assertSame(
-            '{"id":123}',
-            $handler->serializeValue(['id' => 123])
-        );
-    }
+    expect($handler->serializeValue(['id' => 123]))->toBe('{"id":123}');
+});
 
-    /** @test */
-    public function it_unserializes_value(): void
-    {
-        $handler = new ArrayHandler;
+it('unserializes value', function () {
+    $handler = new ArrayHandler;
 
-        $value = $handler->unserializeValue('{"id":123}');
+    $value = $handler->unserializeValue('{"id":123}');
 
-        $this->assertIsArray($value);
+    expect($value)->toBeArray();
 
-        $this->assertSame(123, $value['id']);
-    }
-}
+    expect($value['id'])->toBe(123);
+});

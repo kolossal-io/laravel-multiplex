@@ -1,175 +1,102 @@
 <?php
 
-namespace Kolossal\Multiplex\Tests;
-
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Kolossal\Multiplex\DataType\EnumHandler;
 use Kolossal\Multiplex\Tests\Mocks\BackedEnum;
 use Kolossal\Multiplex\Tests\Mocks\Enum;
 use Kolossal\Multiplex\Tests\Mocks\Post;
-use PHPUnit\Framework\Attributes\Test;
 
-final class DataTypeEnumHandlerTest extends TestCase
-{
-    use RefreshDatabase;
+uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-    /**
-     * @test
-     *
-     * @requires PHP 8.1
-     * */
-    public function it_can_serialize_backed_enums(): void
-    {
-        $handler = new EnumHandler;
+it('can serialize backed enums', function () {
+    $handler = new EnumHandler;
 
-        $this->assertTrue($handler->canHandleValue(BackedEnum::One));
+    expect($handler->canHandleValue(BackedEnum::One))->toBeTrue();
 
-        $this->assertEquals('Kolossal\Multiplex\Tests\Mocks\BackedEnum::one', $handler->serializeValue(BackedEnum::One));
-        $this->assertEquals('Kolossal\Multiplex\Tests\Mocks\BackedEnum::two', $handler->serializeValue(BackedEnum::Two));
-        $this->assertEquals('Kolossal\Multiplex\Tests\Mocks\BackedEnum::three', $handler->serializeValue(BackedEnum::Three));
-    }
+    expect($handler->serializeValue(BackedEnum::One))->toEqual('Kolossal\Multiplex\Tests\Mocks\BackedEnum::one');
+    expect($handler->serializeValue(BackedEnum::Two))->toEqual('Kolossal\Multiplex\Tests\Mocks\BackedEnum::two');
+    expect($handler->serializeValue(BackedEnum::Three))->toEqual('Kolossal\Multiplex\Tests\Mocks\BackedEnum::three');
+});
 
-    /**
-     * @test
-     *
-     * @requires PHP 8.1
-     * */
-    public function it_cannot_serialize_basic_enums(): void
-    {
-        $handler = new EnumHandler;
+it('cannot serialize basic enums', function () {
+    $handler = new EnumHandler;
 
-        $this->assertFalse($handler->canHandleValue(Enum::One));
-        $this->assertSame('', $handler->serializeValue(Enum::One));
-    }
+    expect($handler->canHandleValue(Enum::One))->toBeFalse();
+    expect($handler->serializeValue(Enum::One))->toBe('');
+});
 
-    /**
-     * @test
-     *
-     * @requires PHP 8.1
-     * */
-    public function it_cannot_unserialize_null(): void
-    {
-        $handler = new EnumHandler;
+it('cannot unserialize null', function () {
+    $handler = new EnumHandler;
 
-        $this->assertNull($handler->unserializeValue(null));
-    }
+    expect($handler->unserializeValue(null))->toBeNull();
+});
 
-    /**
-     * @test
-     *
-     * @requires PHP 8.1
-     * */
-    public function it_cannot_unserialize_invalid_value(): void
-    {
-        $handler = new EnumHandler;
+it('cannot unserialize invalid value', function () {
+    $handler = new EnumHandler;
 
-        $this->assertNull($handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\BackedEnum'));
-    }
+    expect($handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\BackedEnum'))->toBeNull();
+});
 
-    /**
-     * @test
-     *
-     * @requires PHP 8.1
-     * */
-    public function it_cannot_unserialize_not_existing_enums(): void
-    {
-        $handler = new EnumHandler;
+it('cannot unserialize not existing enums', function () {
+    $handler = new EnumHandler;
 
-        $this->assertNull($handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\InvalidEnum::one'));
-    }
+    expect($handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\InvalidEnum::one'))->toBeNull();
+});
 
-    /**
-     * @test
-     *
-     * @requires PHP 8.1
-     * */
-    public function it_cannot_unserialize_non_enum_classes(): void
-    {
-        $handler = new EnumHandler;
+it('cannot unserialize non enum classes', function () {
+    $handler = new EnumHandler;
 
-        $this->assertNull($handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\Dummy::one'));
-    }
+    expect($handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\Dummy::one'))->toBeNull();
+});
 
-    /**
-     * @test
-     *
-     * @requires PHP 8.1
-     * */
-    public function it_can_unserialize_backed_enums(): void
-    {
-        $handler = new EnumHandler;
+it('can unserialize backed enums', function () {
+    $handler = new EnumHandler;
 
-        $enum = $handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\BackedEnum::three');
+    $enum = $handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\BackedEnum::three');
 
-        $this->assertSame(BackedEnum::Three, $enum);
-        $this->assertNotSame(BackedEnum::One, $enum);
-    }
+    expect($enum)->toBe(BackedEnum::Three);
+    $this->assertNotSame(BackedEnum::One, $enum);
+});
 
-    /**
-     * @test
-     *
-     * @requires PHP 8.1
-     * */
-    public function it_cannot_unserialize_invalid_values(): void
-    {
-        $handler = new EnumHandler;
+it('cannot unserialize invalid values', function () {
+    $handler = new EnumHandler;
 
-        $enum = $handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\BackedEnum::four');
+    $enum = $handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\BackedEnum::four');
 
-        $this->assertNull($enum);
-    }
+    expect($enum)->toBeNull();
+});
 
-    /**
-     * @test
-     *
-     * @requires PHP 8.1
-     * */
-    public function it_cannot_unserialize_basic_enums(): void
-    {
-        $handler = new EnumHandler;
+it('cannot unserialize basic enums', function () {
+    $handler = new EnumHandler;
 
-        $enum = $handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\Enum::three');
+    $enum = $handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\Enum::three');
 
-        $this->assertNull($enum);
-    }
+    expect($enum)->toBeNull();
+});
 
-    /**
-     * @test
-     *
-     * @requires PHP 8.1
-     * */
-    public function it_will_handle_backed_enum_value(): void
-    {
-        $model = Post::factory()->create();
+it('will handle backed enum value', function () {
+    $model = Post::factory()->create();
 
-        $model->saveMeta('enum_test', BackedEnum::Two);
+    $model->saveMeta('enum_test', BackedEnum::Two);
 
-        $this->assertDatabaseHas('meta', [
-            'key' => 'enum_test',
-            'value' => 'Kolossal\Multiplex\Tests\Mocks\BackedEnum::two',
-            'type' => 'enum',
-        ]);
+    $this->assertDatabaseHas('meta', [
+        'key' => 'enum_test',
+        'value' => 'Kolossal\Multiplex\Tests\Mocks\BackedEnum::two',
+        'type' => 'enum',
+    ]);
 
-        $this->assertSame(BackedEnum::Two, Post::first()->enum_test);
-    }
+    expect(Post::first()->enum_test)->toBe(BackedEnum::Two);
+});
 
-    /**
-     * @test
-     *
-     * @requires PHP 8.1
-     * */
-    public function it_will_not_handle_basic_enum_value(): void
-    {
-        $model = Post::factory()->create();
+it('will not handle basic enum value', function () {
+    $model = Post::factory()->create();
 
-        $model->saveMeta('enum_test', Enum::Two);
+    $model->saveMeta('enum_test', Enum::Two);
 
-        $this->assertDatabaseHas('meta', [
-            'key' => 'enum_test',
-            'value' => '',
-            'type' => 'object',
-        ]);
+    $this->assertDatabaseHas('meta', [
+        'key' => 'enum_test',
+        'value' => '',
+        'type' => 'object',
+    ]);
 
-        $this->assertNull(Post::first()->enum_test);
-    }
-}
+    expect(Post::first()->enum_test)->toBeNull();
+});

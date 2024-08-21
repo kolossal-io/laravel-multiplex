@@ -1,239 +1,201 @@
 <?php
 
-namespace Kolossal\Multiplex\Tests;
-
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Kolossal\Multiplex\Events\MetaHasBeenAdded;
 use Kolossal\Multiplex\Events\MetaHasBeenRemoved;
 use Kolossal\Multiplex\Tests\Mocks\Post;
-use PHPUnit\Framework\Attributes\Test;
 
-final class EventsTest extends TestCase
-{
-    use RefreshDatabase;
+uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+beforeEach(function () {
+    Post::travelBack();
 
-        Post::travelBack();
+    Event::fake([
+        MetaHasBeenAdded::class,
+        MetaHasBeenRemoved::class,
+    ]);
+});
 
-        Event::fake([
-            MetaHasBeenAdded::class,
-            MetaHasBeenRemoved::class,
-        ]);
-    }
+it('will fire meta added event', function () {
+    $model = Post::factory()->create();
+    $model->setMeta('foo', 'bar');
 
-    /** @test */
-    public function it_will_fire_meta_added_event(): void
-    {
-        $model = Post::factory()->create();
-        $model->setMeta('foo', 'bar');
+    Event::assertNotDispatched(MetaHasBeenAdded::class);
 
-        Event::assertNotDispatched(MetaHasBeenAdded::class);
+    $model->saveMeta();
 
-        $model->saveMeta();
+    Event::assertDispatched(MetaHasBeenAdded::class);
+});
 
-        Event::assertDispatched(MetaHasBeenAdded::class);
-    }
+it('will fire meta added event when creating', function () {
+    Post::factory()->create([
+        'title' => 'Title',
+    ]);
 
-    /** @test */
-    public function it_will_fire_meta_added_event_when_creating(): void
-    {
-        Post::factory()->create([
-            'title' => 'Title',
-        ]);
+    Event::assertNotDispatched(MetaHasBeenAdded::class);
 
-        Event::assertNotDispatched(MetaHasBeenAdded::class);
+    Post::factory()->create([
+        'title' => 'Title',
+        'foo' => 'bar',
+    ]);
 
-        Post::factory()->create([
-            'title' => 'Title',
-            'foo' => 'bar',
-        ]);
+    Event::assertDispatched(MetaHasBeenAdded::class);
+});
 
-        Event::assertDispatched(MetaHasBeenAdded::class);
-    }
+it('will fire meta added event when assigning fluently', function () {
+    $model = Post::factory()->create();
+    $model->title = 'Title changed';
+    $model->save();
 
-    /** @test */
-    public function it_will_fire_meta_added_event_when_assigning_fluently(): void
-    {
-        $model = Post::factory()->create();
-        $model->title = 'Title changed';
-        $model->save();
+    Event::assertNotDispatched(MetaHasBeenAdded::class);
 
-        Event::assertNotDispatched(MetaHasBeenAdded::class);
+    $model->foo = 'bar';
 
-        $model->foo = 'bar';
+    Event::assertNotDispatched(MetaHasBeenAdded::class);
 
-        Event::assertNotDispatched(MetaHasBeenAdded::class);
+    $model->save();
 
-        $model->save();
+    Event::assertDispatched(MetaHasBeenAdded::class);
+});
 
-        Event::assertDispatched(MetaHasBeenAdded::class);
-    }
+it('will fire meta added event when saving directly', function () {
+    $model = Post::factory()->create();
+    $model->saveMeta('foo', 'bar');
 
-    /** @test */
-    public function it_will_fire_meta_added_event_when_saving_directly(): void
-    {
-        $model = Post::factory()->create();
-        $model->saveMeta('foo', 'bar');
+    Event::assertDispatched(MetaHasBeenAdded::class);
+});
 
-        Event::assertDispatched(MetaHasBeenAdded::class);
-    }
+it('will fire meta added event only for dirty meta', function () {
+    $model = Post::factory()->create();
+    $model->saveMeta('foo', 'bar');
 
-    /** @test */
-    public function it_will_fire_meta_added_event_only_for_dirty_meta(): void
-    {
-        $model = Post::factory()->create();
-        $model->saveMeta('foo', 'bar');
+    $this->assertDatabaseCount('meta', 1);
 
-        $this->assertDatabaseCount('meta', 1);
+    $model->fresh();
+    $model->saveMeta('foo', 'bar');
 
-        $model->fresh();
-        $model->saveMeta('foo', 'bar');
+    $this->assertDatabaseCount('meta', 1);
+    Event::assertDispatchedTimes(MetaHasBeenAdded::class, 1);
 
-        $this->assertDatabaseCount('meta', 1);
-        Event::assertDispatchedTimes(MetaHasBeenAdded::class, 1);
+    $model->fresh();
+    $model->saveMeta('foo', 'changed');
 
-        $model->fresh();
-        $model->saveMeta('foo', 'changed');
+    $this->assertDatabaseCount('meta', 2);
+    Event::assertDispatchedTimes(MetaHasBeenAdded::class, 2);
+});
 
-        $this->assertDatabaseCount('meta', 2);
-        Event::assertDispatchedTimes(MetaHasBeenAdded::class, 2);
-    }
+it('will fire meta added event for each meta individually', function () {
+    $model = Post::factory()->create();
 
-    /** @test */
-    public function it_will_fire_meta_added_event_for_each_meta_individually(): void
-    {
-        $model = Post::factory()->create();
+    $model->saveMeta('foo', 'bar');
+    $model->setMeta('bar', 123);
+    $model->thisthat = false;
 
-        $model->saveMeta('foo', 'bar');
-        $model->setMeta('bar', 123);
-        $model->thisthat = false;
+    Event::assertDispatchedTimes(MetaHasBeenAdded::class, 1);
 
-        Event::assertDispatchedTimes(MetaHasBeenAdded::class, 1);
+    $model->save();
+    $model->saveMeta('thisthat', false);
 
-        $model->save();
-        $model->saveMeta('thisthat', false);
+    $this->assertDatabaseCount('meta', 3);
+    Event::assertDispatchedTimes(MetaHasBeenAdded::class, 3);
+});
 
-        $this->assertDatabaseCount('meta', 3);
-        Event::assertDispatchedTimes(MetaHasBeenAdded::class, 3);
-    }
+it('will pass meta to meta added event', function () {
+    $model = Post::factory()->create();
 
-    /** @test */
-    public function it_will_pass_meta_to_meta_added_event(): void
-    {
-        $model = Post::factory()->create();
+    $model->saveMeta('foo', 'bar');
 
-        $model->saveMeta('foo', 'bar');
+    Event::assertDispatched(function (MetaHasBeenAdded $event) use ($model) {
+        return $event->meta->is($model->meta()->first());
+    });
+});
 
-        Event::assertDispatched(function (MetaHasBeenAdded $event) use ($model) {
-            return $event->meta->is($model->meta()->first());
-        });
-    }
+it('will pass metable class name to meta added event', function () {
+    $model = Post::factory()->create();
 
-    /** @test */
-    public function it_will_pass_metable_class_name_to_meta_added_event(): void
-    {
-        $model = Post::factory()->create();
+    $model->saveMeta('foo', 'bar');
 
-        $model->saveMeta('foo', 'bar');
+    Event::assertDispatched(function (MetaHasBeenAdded $event) {
+        return $event->type === Post::class;
+    });
+});
 
-        Event::assertDispatched(function (MetaHasBeenAdded $event) {
-            return $event->type === Post::class;
-        });
-    }
+it('will pass metable model to meta added event', function () {
+    $model = Post::factory()->create();
 
-    /** @test */
-    public function it_will_pass_metable_model_to_meta_added_event(): void
-    {
-        $model = Post::factory()->create();
+    $model->saveMeta('foo', 'bar');
 
-        $model->saveMeta('foo', 'bar');
+    Event::assertDispatched(function (MetaHasBeenAdded $event) use ($model) {
+        return $event->model->is($model);
+    });
+});
 
-        Event::assertDispatched(function (MetaHasBeenAdded $event) use ($model) {
-            return $event->model->is($model);
-        });
-    }
+it('will fire meta removed event', function () {
+    $model = Post::factory()->create();
+    $model->setMeta('foo', 'bar');
 
-    /** @test */
-    public function it_will_fire_meta_removed_event(): void
-    {
-        $model = Post::factory()->create();
-        $model->setMeta('foo', 'bar');
+    $model->saveMeta();
 
-        $model->saveMeta();
+    Event::assertNotDispatched(MetaHasBeenRemoved::class);
 
-        Event::assertNotDispatched(MetaHasBeenRemoved::class);
+    $model->deleteMeta('foo');
 
-        $model->deleteMeta('foo');
+    Event::assertDispatched(MetaHasBeenRemoved::class);
+});
 
-        Event::assertDispatched(MetaHasBeenRemoved::class);
-    }
+it('will fire meta removed event for meta individually', function () {
+    $model = Post::factory()->create();
+    $model->saveMeta('foo', 'bar');
+    $model->saveMeta('bar', 123);
 
-    /** @test */
-    public function it_will_fire_meta_removed_event_for_meta_individually(): void
-    {
-        $model = Post::factory()->create();
-        $model->saveMeta('foo', 'bar');
-        $model->saveMeta('bar', 123);
+    Event::assertNotDispatched(MetaHasBeenRemoved::class);
 
-        Event::assertNotDispatched(MetaHasBeenRemoved::class);
+    $model->deleteMeta(['foo', 'bar']);
 
-        $model->deleteMeta(['foo', 'bar']);
+    Event::assertDispatchedTimes(MetaHasBeenRemoved::class, 2);
+});
 
-        Event::assertDispatchedTimes(MetaHasBeenRemoved::class, 2);
-    }
+it('will not fire meta removed event when purging', function () {
+    $model = Post::factory()->create();
+    $model->saveMeta('foo', 'bar');
+    $model->saveMeta('bar', 123);
 
-    /** @test */
-    public function it_will_not_fire_meta_removed_event_when_purging(): void
-    {
-        $model = Post::factory()->create();
-        $model->saveMeta('foo', 'bar');
-        $model->saveMeta('bar', 123);
+    $model->purgeMeta();
 
-        $model->purgeMeta();
+    Event::assertNotDispatched(MetaHasBeenRemoved::class);
+});
 
-        Event::assertNotDispatched(MetaHasBeenRemoved::class);
-    }
+it('will fire meta removed only with latest meta', function () {
+    $model = Post::factory()->create();
 
-    /** @test */
-    public function it_will_fire_meta_removed_only_with_latest_meta(): void
-    {
-        $model = Post::factory()->create();
+    $model->saveMeta('foo', 'bar');
+    $model->saveMeta('foo', 123);
+    $model->saveMeta('foo', 'bar');
 
-        $model->saveMeta('foo', 'bar');
-        $model->saveMeta('foo', 123);
-        $model->saveMeta('foo', 'bar');
+    $this->assertDatabaseCount('meta', 3);
 
-        $this->assertDatabaseCount('meta', 3);
+    Event::assertNotDispatched(MetaHasBeenRemoved::class);
 
-        Event::assertNotDispatched(MetaHasBeenRemoved::class);
+    $latest = $model->meta()->orderByDesc('id')->first();
 
-        $latest = $model->meta()->orderByDesc('id')->first();
+    $model->deleteMeta('foo');
 
-        $model->deleteMeta('foo');
+    Event::assertDispatchedTimes(MetaHasBeenRemoved::class, 1);
 
-        Event::assertDispatchedTimes(MetaHasBeenRemoved::class, 1);
+    Event::assertDispatched(MetaHasBeenRemoved::class, function ($event) use ($latest) {
+        expect($latest->value)->toBe('bar');
 
-        Event::assertDispatched(MetaHasBeenRemoved::class, function ($event) use ($latest) {
-            $this->assertSame('bar', $latest->value);
+        return $event->meta->is($latest);
+    });
+});
 
-            return $event->meta->is($latest);
-        });
-    }
+it('will not fire meta removed for nonexistent meta', function () {
+    $model = Post::factory()->create();
+    $model->saveMeta('foo', 'bar');
 
-    /** @test */
-    public function it_will_not_fire_meta_removed_for_nonexistent_meta(): void
-    {
-        $model = Post::factory()->create();
-        $model->saveMeta('foo', 'bar');
+    Event::assertNotDispatched(MetaHasBeenRemoved::class);
 
-        Event::assertNotDispatched(MetaHasBeenRemoved::class);
+    $model->deleteMeta('bar');
 
-        $model->deleteMeta('bar');
-
-        Event::assertNotDispatched(MetaHasBeenRemoved::class);
-    }
-}
+    Event::assertNotDispatched(MetaHasBeenRemoved::class);
+});

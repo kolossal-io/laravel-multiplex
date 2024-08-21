@@ -1,78 +1,61 @@
 <?php
 
-namespace Kolossal\Multiplex\Tests;
-
 use Illuminate\Database\Eloquent\Collection;
 use Kolossal\Multiplex\DataType;
 use Kolossal\Multiplex\Tests\Mocks\Post;
-use PHPUnit\Framework\Attributes\Test;
 
-final class DataTypeModelCollectionHandlerTest extends TestCase
-{
-    /** @test */
-    public function it_can_handle_non_existing_models(): void
-    {
-        $models = Post::factory(3)->make();
-        $handler = new DataType\ModelCollectionHandler;
+it('can handle non existing models', function () {
+    $models = Post::factory(3)->make();
+    $handler = new DataType\ModelCollectionHandler;
 
-        $this->assertFalse($handler->canHandleValue($models->first()));
-        $this->assertTrue($handler->canHandleValue($models));
+    expect($handler->canHandleValue($models->first()))->toBeFalse();
+    expect($handler->canHandleValue($models))->toBeTrue();
 
-        $serialized = $handler->serializeValue($models);
-        $unserialized = $handler->unserializeValue($serialized);
+    $serialized = $handler->serializeValue($models);
+    $unserialized = $handler->unserializeValue($serialized);
 
-        $this->assertInstanceOf(Collection::class, $unserialized);
-        $this->assertCount(3, $unserialized);
+    expect($unserialized)->toBeInstanceOf(Collection::class);
+    expect($unserialized)->toHaveCount(3);
 
-        $unserialized->every(fn ($item) => $this->assertInstanceOf(Post::class, $item));
-    }
+    $unserialized->every(fn ($item) => expect($item)->toBeInstanceOf(Post::class));
+});
 
-    /** @test */
-    public function it_can_handle_existing_models(): void
-    {
-        Post::factory()->create(['title' => 'a']);
-        Post::factory()->create(['title' => 'b']);
-        Post::factory()->create(['title' => 'c']);
+it('can handle existing models', function () {
+    Post::factory()->create(['title' => 'a']);
+    Post::factory()->create(['title' => 'b']);
+    Post::factory()->create(['title' => 'c']);
 
-        $handler = new DataType\ModelCollectionHandler;
+    $handler = new DataType\ModelCollectionHandler;
 
-        $this->assertFalse($handler->canHandleValue(Post::first()));
-        $this->assertTrue($handler->canHandleValue(Post::get()));
+    expect($handler->canHandleValue(Post::first()))->toBeFalse();
+    expect($handler->canHandleValue(Post::get()))->toBeTrue();
 
-        $serialized = $handler->serializeValue(Post::get());
-        $unserialized = $handler->unserializeValue($serialized);
+    $serialized = $handler->serializeValue(Post::get());
+    $unserialized = $handler->unserializeValue($serialized);
 
-        $this->assertInstanceOf(Collection::class, $unserialized);
-        $this->assertCount(3, $unserialized);
+    expect($unserialized)->toBeInstanceOf(Collection::class);
+    expect($unserialized)->toHaveCount(3);
 
-        $this->assertEquals(
-            ['a', 'b', 'c'],
-            $unserialized->pluck('title')->sort()->toArray()
-        );
-    }
+    expect($unserialized->pluck('title')->sort()->toArray())->toEqual(['a', 'b', 'c']);
+});
 
-    /** @test */
-    public function it_will_serialize_empty_value_if_no_collection_is_passed(): void
-    {
-        $model = Post::factory()->create();
+it('will serialize empty value if no collection is passed', function () {
+    $model = Post::factory()->create();
 
-        $handler = new DataType\ModelCollectionHandler;
+    $handler = new DataType\ModelCollectionHandler;
 
-        $serialized = $handler->serializeValue($model);
+    $serialized = $handler->serializeValue($model);
 
-        $this->assertSame('', $serialized);
-        $this->assertNull($handler->unserializeValue($serialized));
-    }
+    expect($serialized)->toBe('');
+    expect($handler->unserializeValue($serialized))->toBeNull();
+});
 
-    /** @test */
-    public function it_will_unserialize_to_null_for_invalid_values(): void
-    {
-        $model = Post::factory()->create();
+it('will unserialize to null for invalid values', function () {
+    $model = Post::factory()->create();
 
-        $handler = new DataType\ModelCollectionHandler;
+    $handler = new DataType\ModelCollectionHandler;
 
-        $this->assertNull($handler->unserializeValue('123'));
-        $this->assertNull($handler->unserializeValue($model));
-        $this->assertNull($handler->unserializeValue(123));
-    }
-}
+    expect($handler->unserializeValue('123'))->toBeNull();
+    expect($handler->unserializeValue($model))->toBeNull();
+    expect($handler->unserializeValue(123))->toBeNull();
+});
