@@ -295,11 +295,26 @@ trait HasMeta
             return true;
         }
 
+        if ($this->isBlacklistedMetaKey($key)) {
+            return false;
+        }
+
         if ($this->isModelAttribute($key)) {
             return false;
         }
 
         return $this->isMetaWildcardSet();
+    }
+
+    /**
+     * Determine if the given key is blacklisted from being a meta key.
+     */
+    public function isBlacklistedMetaKey(string $key): bool
+    {
+        return in_array(
+            $key,
+            $this->blacklistedMetaKeys ?? [],
+        );
     }
 
     /**
