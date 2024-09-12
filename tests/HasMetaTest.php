@@ -1286,3 +1286,14 @@ it('does not load meta if relation is not null', function () {
     expect($post->user)->toBeInstanceOf(User::class);
     expect($post->relationLoaded('meta'))->toBeFalse();
 });
+
+it('works when using loadCount', function () {
+    $user = User::factory()->create();
+    Post::factory()->for($user)->count(3)->create();
+
+    expect($user->posts_count)->toBeNull();
+
+    $user->loadCount('posts');
+
+    expect($user->posts_count)->toBe(3);
+});
