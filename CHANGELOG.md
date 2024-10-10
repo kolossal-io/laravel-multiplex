@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v1.5.1 - 2024-10-10
+
+### [1.5.1](https://github.com/kolossal-io/laravel-multiplex/compare/v1.5.0...v1.5.1) (2024-10-10)
+
+#### Bug Fixes
+
+* support pest 3 ([0ac469e](https://github.com/kolossal-io/laravel-multiplex/commit/0ac469e78089d090491f124da195eac6aa4f0d21))
+
 ## v1.5.0 - 2024-09-12
 
 ### [1.5.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.4.1...v1.5.0) (2024-09-12)
