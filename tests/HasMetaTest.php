@@ -1288,12 +1288,13 @@ it('does not load meta if relation is not null', function () {
 });
 
 it('works when using loadCount', function () {
-    $user = User::factory()->create();
-    Post::factory()->for($user)->count(3)->create();
+    Post::factory()->for(User::factory())->count(3)->create();
+
+    $user = User::latest()->first();
 
     expect($user->posts_count)->toBeNull();
 
-    $user->loadCount('posts');
+    $user->loadCount(['posts']);
 
     expect($user->posts_count)->toBe(3);
 });
