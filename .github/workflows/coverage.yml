@@ -56,7 +56,7 @@ jobs:
         run: vendor/bin/pest --coverage --coverage-clover ./coverage.xml
 
       - name: Upload coverage to CodeCov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
