@@ -5,6 +5,10 @@ namespace Kolossal\Multiplex;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 
+/**
+ * @phpstan-type MetaModel \Kolossal\Multiplex\Meta
+ * @phpstan-type EloquentModel \Illuminate\Database\Eloquent\Model
+ */
 trait HasConfigurableMorphType
 {
     /**
@@ -98,7 +102,7 @@ trait HasConfigurableMorphType
     /**
      * Retrieve the model for a bound value.
      *
-     * @param  \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation<\Illuminate\Database\Eloquent\Model>  $query
+     * @param  EloquentModel|\Illuminate\Database\Eloquent\Relations\Relation<EloquentModel, EloquentModel, MetaModel>  $query
      * @param  mixed  $value
      * @param  string|null  $field
      * @return \Illuminate\Contracts\Database\Eloquent\Builder
@@ -112,12 +116,12 @@ trait HasConfigurableMorphType
         }
 
         if ($field && is_string($value) && in_array($field, $this->uniqueIds()) && !$this->isValidUniqueMorphId($value)) {
-            /** @var \Illuminate\Database\Eloquent\Model $this */
+            /** @var EloquentModel $this */
             throw (new ModelNotFoundException)->setModel(get_class($this), $value);
         }
 
         if (!$field && is_string($value) && in_array($this->getRouteKeyName(), $this->uniqueIds()) && !$this->isValidUniqueMorphId($value)) {
-            /** @var \Illuminate\Database\Eloquent\Model $this */
+            /** @var EloquentModel $this */
             throw (new ModelNotFoundException)->setModel(get_class($this), $value);
         }
 

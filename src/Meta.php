@@ -107,7 +107,7 @@ class Meta extends Model
     /**
      * Metable Relation.
      *
-     * @return MorphTo<Model, Meta>
+     * @return MorphTo<Model, $this>
      */
     public function metable(): MorphTo
     {
