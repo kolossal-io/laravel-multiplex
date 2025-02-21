@@ -2,6 +2,18 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v1.6.0 - 2025-02-21
+
+### [1.6.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.5.2...v1.6.0) (2025-02-21)
+
+##### Bug Fixes
+
+* remove laravel/framework and testbench from testing ([3c7f722](https://github.com/kolossal-io/laravel-multiplex/commit/3c7f7222d9b18e52d1f1c2ca42d32496bf6683ab))
+
+##### Features
+
+* support Laravel 12 ([18863f9](https://github.com/kolossal-io/laravel-multiplex/commit/18863f9065f4bec985842105c3f3cb3f5eb75c82))
+
 ## v1.5.2 - 2024-11-18
 
 ### [1.5.2](https://github.com/kolossal-io/laravel-multiplex/compare/v1.5.1...v1.5.2) (2024-11-18)
