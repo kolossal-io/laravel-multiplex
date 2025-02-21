@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v1.6.1 - 2025-02-21
+
+### [1.6.1](https://github.com/kolossal-io/laravel-multiplex/compare/v1.6.0...v1.6.1) (2025-02-21)
+
+#### Bug Fixes
+
+* re-add `testbench` to dev dependencies ([27b3c14](https://github.com/kolossal-io/laravel-multiplex/commit/27b3c14d9efef0c68c51d57955501a29b8fa3596))
+
 ## v1.6.0 - 2025-02-21
 
 ### [1.6.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.5.2...v1.6.0) (2025-02-21)
