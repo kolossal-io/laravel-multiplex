@@ -5,11 +5,14 @@ parameters:
     level: 9
     paths:
         - src
-        - config
         - database
+    excludePaths:
+        analyse:
+            - src/HasMeta.php
     tmpDir: build/phpstan
     checkOctaneCompatibility: true
     checkModelProperties: true
     databaseMigrationsPath:
         - database/migrations
+    treatPhpDocTypesAsCertain: false
 

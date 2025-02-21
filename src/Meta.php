@@ -47,7 +47,7 @@ use Kolossal\Multiplex\DataType\Registry;
  * @method static Builder|Meta whereUpdatedAt($value)
  * @method static Builder|Meta whereValue($value)
  * @method static Builder|Meta whereValueEmpty()
- * @method static Builder|Meta whereValueIn(array $values, ?string $type = null)
+ * @method static Builder|Meta whereValueIn(array<mixed> $values, ?string $type = null)
  * @method static Builder|Meta whereValueNotEmpty()
  * @method static Builder|Meta withoutCurrent($now = null)
  * @method static Builder|Meta withoutHistory($now = null)
@@ -73,7 +73,7 @@ class Meta extends Model
     /**
      * Hide the aggregate columns from our custom join scope `scopeJoinLatest()`.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'id_aggregate',
@@ -144,9 +144,15 @@ class Meta extends Model
             return null;
         }
 
+        /** @var string $type */
+        $type = $this->attributes['type'];
+
+        /** @var string $value */
+        $value = $this->attributes['value'];
+
         return $this->cachedValue = $this->getDataTypeRegistry()
-            ->getHandlerForType($this->attributes['type'])
-            ->unserializeValue($this->attributes['value']);
+            ->getHandlerForType($type)
+            ->unserializeValue($value);
     }
 
     /**
@@ -177,9 +183,9 @@ class Meta extends Model
     public function getIsCurrentAttribute(): bool
     {
         /**
-         * @phpstan-ignore-next-line
-         *
          * @disregard P1014
+         *
+         * @phpstan-ignore property.notFound,nullsafe.neverNull
          * */
         return $this->metable?->meta
             ?->first(fn (Meta $meta) => $meta->key === $this->key)
@@ -197,7 +203,7 @@ class Meta extends Model
     /**
      * Retrieve the underlying serialized value.
      */
-    public function getRawValueAttribute(): ?string
+    public function getRawValueAttribute(): mixed
     {
         return $this->attributes['value'] ?? null;
     }
