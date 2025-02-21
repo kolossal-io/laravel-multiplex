@@ -42,7 +42,9 @@ class EnumHandler implements HandlerInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Convert a serialized string back to its original value.
+     *
+     * @return BackedEnum|null
      */
     public function unserializeValue(?string $value): mixed
     {
@@ -71,7 +73,7 @@ class EnumHandler implements HandlerInterface
         }
 
         /**
-         * @var \BackedEnum $class
+         * @var class-string<\BackedEnum> $class
          */
         return $class::tryFrom($value);
     }
