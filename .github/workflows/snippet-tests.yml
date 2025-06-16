@@ -12,6 +12,7 @@ jobs:
       matrix:
         php: [8.3, 8.4]
         laravel: ["11.*", "12.*"]
+        testbench: ["10.*"]
         morphtype: [integer, uuid, ulid]
         stability: [prefer-lowest, prefer-stable]
         include:
@@ -25,8 +26,6 @@ jobs:
           - laravel: 11.*
             php: 8.3
             testbench: 9.*
-          - laravel: 12.*
-            testbench: 10.*
 
     name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.morphtype }}
 
