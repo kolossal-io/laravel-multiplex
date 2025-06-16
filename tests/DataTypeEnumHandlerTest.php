@@ -7,7 +7,7 @@ use Kolossal\Multiplex\Tests\Mocks\Post;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-$shouldSkip = fn() => true;
+$shouldSkip = fn() => version_compare(PHP_VERSION, '8.1.0', '<');
 
 it('can serialize backed enums', function () {
     $handler = new EnumHandler;
