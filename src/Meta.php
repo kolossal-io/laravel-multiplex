@@ -188,7 +188,7 @@ class Meta extends Model
          * @phpstan-ignore property.notFound,nullsafe.neverNull
          * */
         return $this->metable?->meta
-            ?->first(fn(Meta $meta) => $meta->key === $this->key)
+            ?->first(fn (Meta $meta) => $meta->key === $this->key)
             ?->is($this) ?? false;
     }
 
@@ -223,7 +223,7 @@ class Meta extends Model
      */
     public function scopeWhereValueEmpty(Builder $query): void
     {
-        $query->where(fn($q) => $q->whereNull('value')->orWhere('value', '=', ''));
+        $query->where(fn ($q) => $q->whereNull('value')->orWhere('value', '=', ''));
     }
 
     /**
@@ -233,7 +233,7 @@ class Meta extends Model
      */
     public function scopeWhereValueNotEmpty(Builder $query): void
     {
-        $query->where(fn($q) => $q->whereNotNull('value')->where('value', '!=', ''));
+        $query->where(fn ($q) => $q->whereNotNull('value')->where('value', '!=', ''));
     }
 
     /**
@@ -279,7 +279,7 @@ class Meta extends Model
 
         $query->where(function ($query) use ($serializedValues): void {
             $serializedValues->groupBy('type')->each(function ($values, $type) use ($query) {
-                $query->orWhere(fn($q) => $q->where('type', $type)->whereIn('value', $values->pluck('value')));
+                $query->orWhere(fn ($q) => $q->where('type', $type)->whereIn('value', $values->pluck('value')));
             });
         });
     }
