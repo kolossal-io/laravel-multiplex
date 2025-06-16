@@ -20,7 +20,7 @@ dataset('metaHandlerProvider', function () {
     $object->foo = 'bar';
     $object->baz = 3;
 
-    return [
+    $matrix = [
         'array' => [
             'array',
             ['foo' => ['bar'], 'baz'],
@@ -32,10 +32,6 @@ dataset('metaHandlerProvider', function () {
         'datetime' => [
             'datetime',
             $datetime,
-        ],
-        'enum' => [
-            'enum',
-            BackedEnum::Two,
         ],
         'float' => [
             'float',
@@ -70,6 +66,18 @@ dataset('metaHandlerProvider', function () {
             'foo',
         ],
     ];
+
+    if (version_compare(PHP_VERSION, '8.1.0', '>=')) {
+        return [
+            ...$matrix,
+            'backed enum' => [
+                'enum',
+                BackedEnum::One,
+            ],
+        ];
+    }
+
+    return $matrix;
 });
 
 it('can get and set value', function () {

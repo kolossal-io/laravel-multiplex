@@ -16,12 +16,12 @@ jobs:
         stability: [prefer-lowest, prefer-stable]
         include:
           - laravel: 9.*
-            php: 8.1
+            php: 8.0
             testbench: 7.*
             morphtype: integer
             stability: prefer-stable
           - laravel: 10.*
-            php: 8.3
+            php: 8.1
             testbench: 8.*
             morphtype: integer
             stability: prefer-stable
