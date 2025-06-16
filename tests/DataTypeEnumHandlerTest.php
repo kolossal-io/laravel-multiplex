@@ -7,7 +7,7 @@ use Kolossal\Multiplex\Tests\Mocks\Post;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-$shouldSkip = fn() => true;
+$shouldSkip = fn () => true;
 
 it('can serialize backed enums', function () {
     $handler = new EnumHandler;

@@ -907,7 +907,7 @@ it('will return column value for casted meta fields having equally named column'
 
     $model->metaKeys(['foo']);
 
-    Schema::table('sample_posts', fn($table) => $table->string('appendable_foo')->nullable());
+    Schema::table('sample_posts', fn ($table) => $table->string('appendable_foo')->nullable());
     DB::table('sample_posts')->update(['appendable_foo' => 'Fallback']);
 
     expect(Post::first()->appendable_foo)->toBe('Fallback');
