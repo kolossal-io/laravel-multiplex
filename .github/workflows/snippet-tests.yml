@@ -13,18 +13,15 @@ jobs:
         php: [8.3, 8.4]
         laravel: ["11.*", "12.*"]
         morphtype: [integer, uuid, ulid]
-        stability: [prefer-lowest, prefer-stable]
         include:
           - laravel: 9.*
             php: 8.0
             testbench: 7.*
             morphtype: integer
-            stability: prefer-stable
           - laravel: 10.*
             php: 8.1
             testbench: 8.*
             morphtype: integer
-            stability: prefer-stable
           - laravel: 11.*
             testbench: 9.*
           - laravel: 12.*
@@ -33,7 +30,7 @@ jobs:
           - laravel: 11.*
             php: 8.4
 
-    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.morphtype }}
+    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.morphtype }}
 
     steps:
       - name: Checkout code
@@ -65,14 +62,14 @@ jobs:
       - name: Install dependencies
         run: |
           composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
-          composer update --${{ matrix.stability }} --prefer-dist --no-interaction
+          composer update --prefer-stable --prefer-dist --no-interaction
 
       - name: List Installed Dependencies
         run: composer show
 
       - name: Determine if Code Coverage is needed
         id: coverage
-        run: echo "ENABLED={ matrix.php == '8.3' && matrix.stability == 'prefer-stable' && matrix.laravel == '10.*' }" >> "$GITHUB_OUTPUT"
+        run: echo "ENABLED={ matrix.php == '8.4' && matrix.laravel == '12.*' }" >> "$GITHUB_OUTPUT"
 
       - name: Output if Code Coverage is needed
         run: echo "${{ steps.coverage.ENABLED }}"
