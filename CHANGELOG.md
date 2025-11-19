@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v1.7.0 - 2025-11-19
+
+### [1.7.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.6.1...v1.7.0) (2025-11-19)
+
+##### Features
+
+* add support for pest 4 ([46af1d4](https://github.com/kolossal-io/laravel-multiplex/commit/46af1d4eac015f1b13762a5bd543d91407f12081))
+
 ## v1.6.1 - 2025-02-21
 
 ### [1.6.1](https://github.com/kolossal-io/laravel-multiplex/compare/v1.6.0...v1.6.1) (2025-02-21)
