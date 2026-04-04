@@ -371,48 +371,20 @@ class Meta extends Model
      */
     public function scopeJoinLatest(Builder $query, $now = null): void
     {
-        /**
-         * Create a subquery based on the given query and find the most recent publishing
-         * date by getting the most recent `published_at` timestamp in the past.
-         */
-        $latestPublishAt = static::query()
-            ->select(
-                DB::raw('MAX(published_at) as published_at_aggregate'),
-                'key',
-                'metable_id',
+        $subquery = static::query()
+            ->select([
                 'metable_type',
-            )
+                'metable_id',
+                'key',
+                DB::raw('MAX(id) as id_aggregate')
+            ])
             ->publishedBefore($now)
             ->groupBy('metable_type', 'metable_id', 'key');
-
-        /**
-         * There may be multiple meta data with the exact same `published_at` timestamp
-         * so let's find the record that was last saved by querying for the maximum `id` in a join.
-         */
-        $maxId = static::query()
-            ->select(
-                'key AS key_aggregate',
-                DB::raw('MAX(id) as id_aggregate'),
-                'metable_id',
-                'metable_type',
-                'published_at',
-            )
-            ->groupBy('metable_type', 'metable_id', 'key', 'published_at');
-
-        /**
-         * Now that we have subqueries to join let’s build the complete query
-         * and look for the record that matches the most recent entry for every `key`.
-         */
-        $query->joinSub($maxId, 'max_id', function ($join) use ($latestPublishAt): void {
-            $join->on('meta.id', '=', 'max_id.id_aggregate')
-                ->on('meta.metable_type', '=', 'max_id.metable_type')
-                ->on('meta.metable_id', '=', 'max_id.metable_id')
-                ->joinSub($latestPublishAt, 'max_published_at', function ($join) {
-                    $join->on('max_id.published_at', '=', 'max_published_at.published_at_aggregate')
-                        ->on('max_id.key_aggregate', '=', 'max_published_at.key')
-                        ->on('max_id.metable_type', '=', 'max_published_at.metable_type')
-                        ->on('max_id.metable_id', '=', 'max_published_at.metable_id');
-                });
+    
+        $query->joinSub($subquery, 'latest', function ($join): void {
+            $join->on('meta.id', '=', 'latest.id_aggregate')
+                ->on('meta.metable_type', '=', 'latest.metable_type')
+                ->on('meta.metable_id', '=', 'latest.metable_id');
         });
     }
 }
