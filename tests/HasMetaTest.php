@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -13,7 +14,7 @@ use Kolossal\Multiplex\Tests\Mocks\PostWithExistingColumn;
 use Kolossal\Multiplex\Tests\Mocks\PostWithoutSoftDelete;
 use Kolossal\Multiplex\Tests\Mocks\User;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
     Post::travelBack();
@@ -140,7 +141,7 @@ it('will handle allowed keys in arrays', function () {
 it('will use meta keys from property', function () {
     /** @var PostWithoutSoftDelete */
     $model = $this->partialMock(PostWithoutSoftDelete::class, function ($mock) {
-        $reflectionClass = new \ReflectionClass($mock);
+        $reflectionClass = new ReflectionClass($mock);
 
         tap($reflectionClass->getProperty('metaKeys'), function ($property) use ($mock) {
             $property->setAccessible(true);
@@ -160,7 +161,7 @@ it('will use meta keys from property', function () {
 it('will use meta keys from method', function () {
     /** @var PostWithoutSoftDelete */
     $model = $this->partialMock(PostWithoutSoftDelete::class, function ($mock) {
-        $reflectionClass = new \ReflectionClass($mock);
+        $reflectionClass = new ReflectionClass($mock);
 
         tap($reflectionClass->getProperty('metaKeys'), function ($property) use ($mock) {
             $property->setAccessible(true);

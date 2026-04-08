@@ -1,11 +1,12 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Kolossal\Multiplex\Events\MetaHasBeenAdded;
 use Kolossal\Multiplex\Events\MetaHasBeenRemoved;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
     Post::travelBack();

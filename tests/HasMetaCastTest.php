@@ -1,9 +1,10 @@
 <?php
 
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 it('can force type casts', function () {
     $model = getModel();

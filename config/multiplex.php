@@ -1,10 +1,25 @@
 <?php
 
+use Kolossal\Multiplex\DataType\ArrayHandler;
+use Kolossal\Multiplex\DataType\BooleanHandler;
+use Kolossal\Multiplex\DataType\DateHandler;
+use Kolossal\Multiplex\DataType\DateTimeHandler;
+use Kolossal\Multiplex\DataType\EnumHandler;
+use Kolossal\Multiplex\DataType\FloatHandler;
+use Kolossal\Multiplex\DataType\IntegerHandler;
+use Kolossal\Multiplex\DataType\ModelCollectionHandler;
+use Kolossal\Multiplex\DataType\ModelHandler;
+use Kolossal\Multiplex\DataType\NullHandler;
+use Kolossal\Multiplex\DataType\ObjectHandler;
+use Kolossal\Multiplex\DataType\SerializableHandler;
+use Kolossal\Multiplex\DataType\StringHandler;
+use Kolossal\Multiplex\Meta;
+
 return [
     /**
      * Model to use for Meta.
      */
-    'model' => Kolossal\Multiplex\Meta::class,
+    'model' => Meta::class,
 
     /**
      * Determine wethere packages migrations should be loaded automatically.
@@ -31,18 +46,18 @@ return [
      * @link https://github.com/plank/laravel-metable
      */
     'datatypes' => [
-        Kolossal\Multiplex\DataType\BooleanHandler::class,
-        Kolossal\Multiplex\DataType\NullHandler::class,
-        Kolossal\Multiplex\DataType\IntegerHandler::class,
-        Kolossal\Multiplex\DataType\FloatHandler::class,
-        Kolossal\Multiplex\DataType\StringHandler::class,
-        Kolossal\Multiplex\DataType\DateTimeHandler::class,
-        Kolossal\Multiplex\DataType\DateHandler::class,
-        Kolossal\Multiplex\DataType\ArrayHandler::class,
-        Kolossal\Multiplex\DataType\EnumHandler::class,
-        Kolossal\Multiplex\DataType\ModelHandler::class,
-        Kolossal\Multiplex\DataType\ModelCollectionHandler::class,
-        Kolossal\Multiplex\DataType\SerializableHandler::class,
-        Kolossal\Multiplex\DataType\ObjectHandler::class,
+        BooleanHandler::class,
+        NullHandler::class,
+        IntegerHandler::class,
+        FloatHandler::class,
+        StringHandler::class,
+        DateTimeHandler::class,
+        DateHandler::class,
+        ArrayHandler::class,
+        EnumHandler::class,
+        ModelHandler::class,
+        ModelCollectionHandler::class,
+        SerializableHandler::class,
+        ObjectHandler::class,
     ],
 ];

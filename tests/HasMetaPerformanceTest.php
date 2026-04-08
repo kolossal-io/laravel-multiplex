@@ -1,12 +1,13 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Mattiasgeniar\PhpunitQueryCountAssertions\AssertsQueryCounts;
 
-uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
-uses(Mattiasgeniar\PhpunitQueryCountAssertions\AssertsQueryCounts::class);
+uses(RefreshDatabase::class);
+uses(AssertsQueryCounts::class);
 
 function getRawQueriesExecuted(): array
 {

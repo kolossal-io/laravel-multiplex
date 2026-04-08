@@ -73,7 +73,7 @@ class EnumHandler implements HandlerInterface
         }
 
         /**
-         * @var class-string<\BackedEnum> $class
+         * @var class-string<BackedEnum> $class
          */
         return $class::tryFrom($value);
     }

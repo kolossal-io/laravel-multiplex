@@ -3,6 +3,7 @@
 namespace Kolossal\Multiplex;
 
 use Illuminate\Support\ServiceProvider;
+use Kolossal\Multiplex\DataType\HandlerInterface;
 use Kolossal\Multiplex\DataType\Registry;
 
 class MultiplexServiceProvider extends ServiceProvider
@@ -51,7 +52,7 @@ class MultiplexServiceProvider extends ServiceProvider
             $datatypes = (array) config('multiplex.datatypes', []);
 
             foreach ($datatypes as $handler) {
-                /** @var \Kolossal\Multiplex\DataType\HandlerInterface */
+                /** @var HandlerInterface */
                 $handler = new $handler;
                 $registry->addHandler($handler);
             }

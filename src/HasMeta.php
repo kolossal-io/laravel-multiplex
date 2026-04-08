@@ -983,7 +983,7 @@ trait HasMeta
      * Query records having meta with a specific key and value.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
      *
-     * @param  string|\Closure  $key
+     * @param  string|Closure  $key
      * @param  mixed  $operator
      * @param  mixed  $value
      * @param  string  $boolean
@@ -1011,7 +1011,7 @@ trait HasMeta
      * Query records having meta with a specific key and value with "or" clause.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
      *
-     * @param  string|\Closure  $key
+     * @param  string|Closure  $key
      * @param  mixed  $operator
      * @param  mixed  $value
      */

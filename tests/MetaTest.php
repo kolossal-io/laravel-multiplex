@@ -2,15 +2,17 @@
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\Tests\Mocks\BackedEnum;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
+use Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties;
 
-uses(\Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties::class);
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(AccessesProtectedProperties::class);
+uses(RefreshDatabase::class);
 
 dataset('metaHandlerProvider', function () {
     $timestamp = '2017-01-01 00:00:00.000000+0000';

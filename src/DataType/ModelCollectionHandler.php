@@ -97,7 +97,7 @@ class ModelCollectionHandler implements HandlerInterface
      * Load each model instance, grouped by class.
      *
      * @param  array<string, array<string, string|int|null>>  $items
-     * @return array<int|string, \Illuminate\Database\Eloquent\Collection<int|string, Model>>
+     * @return array<int|string, Collection<int|string, Model>>
      */
     private function loadModels(array $items): array
     {
@@ -113,7 +113,7 @@ class ModelCollectionHandler implements HandlerInterface
 
         // Iterate list of classes and load all records matching a key.
         foreach ($classes as $class => $keys) {
-            /** @var \Illuminate\Database\Eloquent\Model */
+            /** @var Model */
             $model = new $class;
 
             $results[$class] = $model
