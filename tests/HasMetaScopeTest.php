@@ -1,12 +1,13 @@
 <?php
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
     Post::travelBack();

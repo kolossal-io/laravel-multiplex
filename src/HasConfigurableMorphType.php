@@ -2,7 +2,10 @@
 
 namespace Kolossal\Multiplex;
 
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 
 trait HasConfigurableMorphType
@@ -99,12 +102,12 @@ trait HasConfigurableMorphType
     /**
      * Retrieve the model for a bound value.
      *
-     * @param  \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Relations\Relation<\Illuminate\Database\Eloquent\Model, \Illuminate\Database\Eloquent\Model, \Kolossal\Multiplex\Meta>  $query
+     * @param  Model|Relation<Model, Model, Meta>  $query
      * @param  mixed  $value
      * @param  string|null  $field
-     * @return \Illuminate\Contracts\Database\Eloquent\Builder
+     * @return Builder
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws ModelNotFoundException
      */
     public function resolveRouteBindingQuery($query, $value, $field = null)
     {
@@ -113,13 +116,13 @@ trait HasConfigurableMorphType
         }
 
         if ($field && is_string($value) && in_array($field, $this->uniqueIds()) && !$this->isValidUniqueMorphId($value)) {
-            /** @var class-string<\Illuminate\Database\Eloquent\Model> $class */
+            /** @var class-string<Model> $class */
             $class = get_class($this);
             throw (new ModelNotFoundException)->setModel($class, $value);
         }
 
         if (!$field && is_string($value) && in_array($this->getRouteKeyName(), $this->uniqueIds()) && !$this->isValidUniqueMorphId($value)) {
-            /** @var class-string<\Illuminate\Database\Eloquent\Model> $class */
+            /** @var class-string<Model> $class */
             $class = get_class($this);
             throw (new ModelNotFoundException)->setModel($class, $value);
         }

@@ -3,6 +3,7 @@
 namespace Kolossal\Multiplex;
 
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @implements CastsAttributes<mixed, mixed>
@@ -12,7 +13,7 @@ class MetaAttribute implements CastsAttributes
     /**
      * Transform the attribute from the underlying model values.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  Model  $model
      * @param  string  $key
      * @param  mixed  $value
      * @param  array<mixed>  $attributes
@@ -30,7 +31,7 @@ class MetaAttribute implements CastsAttributes
     /**
      * Transform the attribute to its underlying model values.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  Model  $model
      * @param  string  $key
      * @param  mixed  $value
      * @param  array<mixed>  $attributes

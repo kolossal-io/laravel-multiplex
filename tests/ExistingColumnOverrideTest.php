@@ -1,15 +1,17 @@
 <?php
 
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Kolossal\Multiplex\Exceptions\MetaException;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\PostWithExistingColumn;
+use Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties;
 
-uses(\Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties::class);
+uses(AccessesProtectedProperties::class);
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 it('will throw for key equal to existing column name', function () {
     $this->assertDatabaseCount('meta', 0);

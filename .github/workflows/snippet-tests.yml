@@ -11,7 +11,7 @@ jobs:
       fail-fast: true
       matrix:
         php: [8.3, 8.4]
-        laravel: ["11.*", "12.*"]
+        laravel: ["12.*", "13.*"]
         morphtype: [integer, uuid, ulid]
         include:
           - laravel: 9.*
@@ -23,12 +23,16 @@ jobs:
             testbench: 8.*
             morphtype: integer
           - laravel: 11.*
+            php: 8.3
             testbench: 9.*
+            morphtype: integer
           - laravel: 12.*
             testbench: 10.*
+          - laravel: 13.*
+            testbench: 11.*
         exclude:
-          - laravel: 11.*
-            php: 8.4
+          - laravel: 13.*
+            php: 8.3
 
     name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.morphtype }}
 

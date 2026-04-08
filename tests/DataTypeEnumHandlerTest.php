@@ -1,11 +1,12 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Kolossal\Multiplex\DataType\EnumHandler;
 use Kolossal\Multiplex\Tests\Mocks\BackedEnum;
 use Kolossal\Multiplex\Tests\Mocks\Enum;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 $shouldSkip = fn () => version_compare(PHP_VERSION, '8.1.0', '<');
 

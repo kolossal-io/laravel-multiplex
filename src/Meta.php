@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Kolossal\Multiplex\DataType\Registry;
+use Kolossal\Multiplex\Tests\Factories\MetaFactory;
 
 /**
  * Kolossal\Multiplex\Meta
@@ -26,7 +27,7 @@ use Kolossal\Multiplex\DataType\Registry;
  * @property-read bool $is_current
  * @property-read bool $is_planned
  * @property-read ?string $raw_value
- * @property-read MorphTo<\Illuminate\Database\Eloquent\Model,\Kolossal\Multiplex\Meta> $metable
+ * @property-read MorphTo<Model,Meta> $metable
  *
  * @method static Builder|Meta joinLatest($now = null)
  * @method static Builder|Meta newModelQuery()
@@ -58,7 +59,7 @@ class Meta extends Model
 {
     use HasConfigurableMorphType;
 
-    /** @use HasFactory<\Kolossal\Multiplex\Tests\Factories\MetaFactory> */
+    /** @use HasFactory<MetaFactory> */
     use HasFactory;
 
     use HasTimestamps;
