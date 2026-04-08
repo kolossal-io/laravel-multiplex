@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v1.8.0 - 2026-04-08
+
+### [1.8.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.7.0...v1.8.0) (2026-04-08)
+
+##### Features
+
+* add support for Laravel 13 ([af26e8f](https://github.com/kolossal-io/laravel-multiplex/commit/af26e8f0c3b3b12e313bdfef0495203da47ab98e))
+
 ## v1.7.0 - 2025-11-19
 
 ### [1.7.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.6.1...v1.7.0) (2025-11-19)
