@@ -2,6 +2,18 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v2.0.0 - 2026-04-15
+
+### [2.0.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.8.0...v2.0.0) (2026-04-15)
+
+* feat!: use window functions instead of aggregates ([9ba7c34](https://github.com/kolossal-io/laravel-multiplex/commit/9ba7c34620891943a8b4309e3b9889a6206d7b57))
+
+##### BREAKING CHANGES
+
+* This commit replaces aggregate
+  functions with Window Functions. Your database
+  must support Window Functions for this to work.
+
 ## v1.8.0 - 2026-04-08
 
 ### [1.8.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.7.0...v1.8.0) (2026-04-08)
