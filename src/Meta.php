@@ -335,7 +335,25 @@ class Meta extends Model
      */
     public function scopeWithoutCurrent(Builder $query, $now = null): void
     {
-        $query->whereNotIn('id', static::query()->joinLatest($now)->select('meta.id'));
+        $windowQuery = static::query()
+            ->select([
+                'id',
+                'metable_type',
+                'metable_id',
+                'key',
+                'published_at',
+                DB::raw('ROW_NUMBER() OVER (
+                    PARTITION BY metable_type, metable_id, `key`
+                    ORDER BY published_at DESC, id DESC
+                ) as row_num'),
+            ])
+            ->publishedBefore($now);
+
+        $query->whereNotIn('id', function ($sub) use ($windowQuery) {
+            $sub->fromSub($windowQuery, 'latest_meta')
+                ->select('latest_meta.id')
+                ->where('latest_meta.row_num', 1);
+        });
     }
 
     /**
@@ -346,9 +364,27 @@ class Meta extends Model
      */
     public function scopeWithoutHistory(Builder $query, $now = null): void
     {
-        $query->where(function ($query) use ($now) {
+        $windowQuery = static::query()
+            ->select([
+                'id',
+                'metable_type',
+                'metable_id',
+                'key',
+                'published_at',
+                DB::raw('ROW_NUMBER() OVER (
+                    PARTITION BY metable_type, metable_id, `key`
+                    ORDER BY published_at DESC, id DESC
+                ) as row_num'),
+            ])
+            ->publishedBefore($now);
+
+        $query->where(function ($query) use ($now, $windowQuery) {
             $query->publishedAfter($now)
-                ->orWhereIn('id', static::query()->joinLatest($now)->select('meta.id'));
+                ->orWhereIn('id', function ($sub) use ($windowQuery) {
+                    $sub->fromSub($windowQuery, 'latest_meta')
+                        ->select('latest_meta.id')
+                        ->where('latest_meta.row_num', 1);
+                });
         });
     }
 
@@ -372,48 +408,23 @@ class Meta extends Model
      */
     public function scopeJoinLatest(Builder $query, $now = null): void
     {
-        /**
-         * Create a subquery based on the given query and find the most recent publishing
-         * date by getting the most recent `published_at` timestamp in the past.
-         */
-        $latestPublishAt = static::query()
-            ->select(
-                DB::raw('MAX(published_at) as published_at_aggregate'),
+        $windowQuery = static::query()
+            ->select([
+                'id',
+                'metable_type',
+                'metable_id',
                 'key',
-                'metable_id',
-                'metable_type',
-            )
-            ->publishedBefore($now)
-            ->groupBy('metable_type', 'metable_id', 'key');
-
-        /**
-         * There may be multiple meta data with the exact same `published_at` timestamp
-         * so let's find the record that was last saved by querying for the maximum `id` in a join.
-         */
-        $maxId = static::query()
-            ->select(
-                'key AS key_aggregate',
-                DB::raw('MAX(id) as id_aggregate'),
-                'metable_id',
-                'metable_type',
                 'published_at',
-            )
-            ->groupBy('metable_type', 'metable_id', 'key', 'published_at');
+                DB::raw('ROW_NUMBER() OVER (
+                    PARTITION BY metable_type, metable_id, `key`
+                    ORDER BY published_at DESC, id DESC
+                ) as row_num'),
+            ])
+            ->publishedBefore($now);
 
-        /**
-         * Now that we have subqueries to join let’s build the complete query
-         * and look for the record that matches the most recent entry for every `key`.
-         */
-        $query->joinSub($maxId, 'max_id', function ($join) use ($latestPublishAt): void {
-            $join->on('meta.id', '=', 'max_id.id_aggregate')
-                ->on('meta.metable_type', '=', 'max_id.metable_type')
-                ->on('meta.metable_id', '=', 'max_id.metable_id')
-                ->joinSub($latestPublishAt, 'max_published_at', function ($join) {
-                    $join->on('max_id.published_at', '=', 'max_published_at.published_at_aggregate')
-                        ->on('max_id.key_aggregate', '=', 'max_published_at.key')
-                        ->on('max_id.metable_type', '=', 'max_published_at.metable_type')
-                        ->on('max_id.metable_id', '=', 'max_published_at.metable_id');
-                });
+        $query->joinSub($windowQuery, 'latest_meta', function ($join) {
+            $join->on('meta.id', '=', 'latest_meta.id')
+                ->where('latest_meta.row_num', '=', 1);
         });
     }
 }
