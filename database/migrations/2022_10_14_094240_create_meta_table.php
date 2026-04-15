@@ -45,8 +45,7 @@ return new class extends Migration
 
                 $table->timestamps();
 
-                $table->index(['metable_id', 'metable_type', 'published_at']);
-                $table->index(['metable_id', 'metable_type', 'key', 'published_at']);
+                $table->index(['metable_type', 'metable_id', 'key', 'published_at', 'id']);
             });
         }
     }
