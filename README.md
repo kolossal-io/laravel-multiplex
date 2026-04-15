@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-    <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/badge/Laravel-^9.0|^10.0|^11.0-green.svg?style=flat-square" alt="Laravel"></a>
+    <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/badge/Laravel-9.0+-green.svg?style=flat-square" alt="Laravel"></a>
     <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/packagist/v/kolossal-io/laravel-multiplex.svg?style=flat-square" alt="Latest Version on Packagist"></a>
     <a href="https://codecov.io/gh/kolossal-io/laravel-multiplex" > 
     <img src="https://codecov.io/gh/kolossal-io/laravel-multiplex/branch/main/graph/badge.svg?token=330354GI30"/> 
@@ -47,11 +47,11 @@ $post->setMetaAt('likes', 6000, '+2 years');
 
 ## Features
 
--   Metadata is saved in versions: Schedule changes to metadata, change history or retrieve metadata for a specific point in time.
--   Supports fluent syntax: Use your model’s metadata as if they were properties.
--   Polymorphic relationship allows adding metadata to any Eloquent model without worrying about the database schema.
--   Easy to try: Extend existing database columns of your model with versionable metadata without touching or deleting your original columns.
--   Type conversion system heavily based on [Laravel-Metable](https://github.com/plank/laravel-metable) allows data of numerous different scalar and object types to be stored and retrieved.
+- Metadata is saved in versions: Schedule changes to metadata, change history or retrieve metadata for a specific point in time.
+- Supports fluent syntax: Use your model’s metadata as if they were properties.
+- Polymorphic relationship allows adding metadata to any Eloquent model without worrying about the database schema.
+- Easy to try: Extend existing database columns of your model with versionable metadata without touching or deleting your original columns.
+- Type conversion system heavily based on [Laravel-Metable](https://github.com/plank/laravel-metable) allows data of numerous different scalar and object types to be stored and retrieved.
 
 ## Why another Metadata Package?
 
@@ -63,19 +63,30 @@ And it’s low profile: If you don't like it, just [remove the `HasMeta` Trait](
 
 ## Table of Contents
 
--   [Installation](#installation)
--   [Attaching Metadata](#attaching-metadata)
--   [Retrieving Metadata](#retrieving-metadata)
--   [Query by Metadata](#query-by-metadata)
--   [Events](#events)
--   [Time Traveling](#time-traveling)
--   [Limit Meta Keys](#limit-meta-keys)
--   [Extending Database Columns](#extending-database-columns)
--   [Deleting Metadata](#deleting-metadata)
--   [Performance](#performance)
--   [Configuration](#configuration)
--   [Enum Support](#enum-support)
--   [UUID and ULID Support](#uuid-and-ulid-support)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Attaching Metadata](#attaching-metadata)
+- [Retrieving Metadata](#retrieving-metadata)
+- [Query by Metadata](#query-by-metadata)
+- [Events](#events)
+- [Time Traveling](#time-traveling)
+- [Limit Meta Keys](#limit-meta-keys)
+- [Extending Database Columns](#extending-database-columns)
+- [Deleting Metadata](#deleting-metadata)
+- [Performance](#performance)
+- [Configuration](#configuration)
+- [Enum Support](#enum-support)
+- [UUID and ULID Support](#uuid-and-ulid-support)
+
+## Requirements
+
+Since Version 2 **Multiplex** uses **SQL Window Functions** (such as `ROW_NUMBER() OVER (...)`) for efficient and scalable queries on meta data (e.g., to determine the latest or current meta per key). This enables much better performance for large datasets compared to classic subqueries or group-by/aggregate approaches. Your database must support SQL Window Functions. This includes:
+
+- MySQL **8.0+**
+- MariaDB **10.2+** (with limitations), best **10.4+**
+- PostgreSQL **9.0+**
+- SQLite **3.25+**
+- SQL Server **2012+**
 
 ## Installation
 
