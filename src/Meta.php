@@ -2,13 +2,12 @@
 
 namespace Kolossal\Multiplex;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
+use Kolossal\Multiplex\Database\Eloquent\MetaBuilder;
 use Kolossal\Multiplex\DataType\Registry;
 use Kolossal\Multiplex\Tests\Factories\MetaFactory;
 
@@ -24,34 +23,7 @@ use Kolossal\Multiplex\Tests\Factories\MetaFactory;
  * @property Carbon|null $published_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read bool $is_current
- * @property-read bool $is_planned
- * @property-read ?string $raw_value
- * @property-read MorphTo<Model,Meta> $metable
- *
- * @method static Builder|Meta joinLatest($now = null)
- * @method static Builder|Meta newModelQuery()
- * @method static Builder|Meta newQuery()
- * @method static Builder|Meta onlyCurrent($now = null)
- * @method static Builder|Meta published()
- * @method static Builder|Meta planned()
- * @method static Builder|Meta publishedBefore($time = null)
- * @method static Builder|Meta publishedAfter($time = null)
- * @method static Builder|Meta query()
- * @method static Builder|Meta whereCreatedAt($value)
- * @method static Builder|Meta whereId($value)
- * @method static Builder|Meta whereKey($value)
- * @method static Builder|Meta whereMetableId($value)
- * @method static Builder|Meta whereMetableType($value)
- * @method static Builder|Meta wherePublishedAt($value)
- * @method static Builder|Meta whereType($value)
- * @method static Builder|Meta whereUpdatedAt($value)
- * @method static Builder|Meta whereValue($value)
- * @method static Builder|Meta whereValueEmpty()
- * @method static Builder|Meta whereValueIn(array<mixed> $values, ?string $type = null)
- * @method static Builder|Meta whereValueNotEmpty()
- * @method static Builder|Meta withoutCurrent($now = null)
- * @method static Builder|Meta withoutHistory($now = null)
+ * @property-read int $meta_row_num
  *
  * @mixin \Eloquent
  */
@@ -64,22 +36,13 @@ class Meta extends Model
 
     use HasTimestamps;
 
+    protected static string $builder = MetaBuilder::class;
+
     protected $guarded = [
         'id',
         'metable_type',
         'metable_id',
         'type',
-    ];
-
-    /**
-     * Hide the aggregate columns from our custom join scope `scopeJoinLatest()`.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'id_aggregate',
-        'published_at_aggregate',
-        'key_aggregate',
     ];
 
     /**
@@ -183,11 +146,7 @@ class Meta extends Model
      */
     public function getIsCurrentAttribute(): bool
     {
-        /**
-         * @disregard P1014
-         *
-         * @phpstan-ignore property.notFound,nullsafe.neverNull
-         * */
+        // @phpstan-ignore-next-line
         return $this->metable?->meta
             ?->first(fn(Meta $meta) => $meta->key === $this->key)
             ?->is($this) ?? false;
@@ -220,9 +179,9 @@ class Meta extends Model
     /**
      * Query records where value is considered empty.
      *
-     * @param  Builder<Meta>  $query
+     * @param  MetaBuilder<Meta>  $query
      */
-    public function scopeWhereValueEmpty(Builder $query): void
+    public function scopeWhereValueEmpty(MetaBuilder $query): void
     {
         $query->where(fn($q) => $q->whereNull('value')->orWhere('value', '=', ''));
     }
@@ -230,9 +189,9 @@ class Meta extends Model
     /**
      * Query records where value is considered not empty.
      *
-     * @param  Builder<Meta>  $query
+     * @param  MetaBuilder<Meta>  $query
      */
-    public function scopeWhereValueNotEmpty(Builder $query): void
+    public function scopeWhereValueNotEmpty(MetaBuilder $query): void
     {
         $query->where(fn($q) => $q->whereNotNull('value')->where('value', '!=', ''));
     }
@@ -241,11 +200,11 @@ class Meta extends Model
      * Query records where value equals the serialized version of the given value.
      * If `$type` is omited the type will be taken from the data type registry.
      *
-     * @param  Builder<Meta>  $query
+     * @param  MetaBuilder<Meta>  $query
      * @param  mixed  $value
      * @param  mixed  $operator
      */
-    public function scopeWhereValue(Builder $query, $value, $operator = '=', ?string $type = null): void
+    public function scopeWhereValue(MetaBuilder $query, $value, $operator = '=', ?string $type = null): void
     {
         $registry = $this->getDataTypeRegistry();
 
@@ -262,10 +221,10 @@ class Meta extends Model
      * Query records where value equals the serialized version of one of the given values.
      * If `$type` is omited the type will be taken from the data type registry.
      *
-     * @param  Builder<Meta>  $query
+     * @param  MetaBuilder<Meta>  $query
      * @param  array<mixed>  $values
      */
-    public function scopeWhereValueIn(Builder $query, array $values, ?string $type = null): void
+    public function scopeWhereValueIn(MetaBuilder $query, array $values, ?string $type = null): void
     {
         $registry = $this->getDataTypeRegistry();
 
@@ -288,9 +247,9 @@ class Meta extends Model
     /**
      * Query published meta only.
      *
-     * @param  Builder<Meta>  $query
+     * @param  MetaBuilder<Meta>  $query
      */
-    public function scopePublished(Builder $query): void
+    public function scopePublished(MetaBuilder $query): void
     {
         $query->publishedBefore();
     }
@@ -298,20 +257,24 @@ class Meta extends Model
     /**
      * Query meta published before given timestamp.
      *
-     * @param  Builder<Meta>  $query
+     * @param  MetaBuilder<Meta>  $query
      * @param  string|\DateTimeInterface|null  $time
      */
-    public function scopePublishedBefore(Builder $query, $time = null): void
+    public function scopePublishedBefore(MetaBuilder $query, $time = null): void
     {
-        $query->where('meta.published_at', '<=', $time ? Carbon::parse($time) : Carbon::now());
+        $query->where(
+            'meta.published_at',
+            '<=',
+            $time ? Carbon::parse($time) : Carbon::now()
+        );
     }
 
     /**
      * Query planned meta only.
      *
-     * @param  Builder<Meta>  $query
+     * @param  MetaBuilder<Meta>  $query
      */
-    public function scopePlanned(Builder $query): void
+    public function scopePlanned(MetaBuilder $query): void
     {
         $query->publishedAfter();
     }
@@ -319,112 +282,91 @@ class Meta extends Model
     /**
      * Query meta published after given timestamp.
      *
-     * @param  Builder<Meta>  $query
+     * @param  MetaBuilder<Meta>  $query
      * @param  string|\DateTimeInterface|null  $time
      */
-    public function scopePublishedAfter(Builder $query, $time = null): void
+    public function scopePublishedAfter(MetaBuilder $query, $time = null): void
     {
-        $query->where('meta.published_at', '>', $time ? Carbon::parse($time) : Carbon::now());
+        $query->where(
+            'meta.published_at',
+            '>',
+            $time ? Carbon::parse($time) : Carbon::now()
+        );
     }
 
     /**
-     * Query records not being the latest meta for any key.
+     * Query only historical meta for any key.
      *
-     * @param  Builder<Meta>  $query
+     * @param  MetaBuilder<Meta>  $query
      * @param  string|\DateTimeInterface|null  $now
      */
-    public function scopeWithoutCurrent(Builder $query, $now = null): void
+    public function scopeHistory(MetaBuilder $query, $now = null): void
     {
-        $windowQuery = static::query()
-            ->select([
-                'id',
-                'metable_type',
-                'metable_id',
-                'key',
-                'published_at',
-                DB::raw('ROW_NUMBER() OVER (
-                    PARTITION BY metable_type, metable_id, `key`
-                    ORDER BY published_at DESC, id DESC
-                ) as row_num'),
-            ])
-            ->publishedBefore($now);
+        if ($query->isRelationQuery()) {
+            trigger_error(
+                'Warning: Using the history() scope on of the meta relations is not supported. Please use the historicMeta() relation instead.',
+                E_USER_WARNING
+            );
 
-        $query->whereNotIn('id', function ($sub) use ($windowQuery) {
-            $sub->fromSub($windowQuery, 'latest_meta')
-                ->select('latest_meta.id')
-                ->where('latest_meta.row_num', 1);
-        });
+            return;
+        }
+
+        /** @var MetaBuilder<Meta> $window */
+        $window = static::query();
+
+        $window->withRowNumber();
+
+        $query->fromSub($window, 'meta')
+            ->publishedBefore($now)
+            ->where('meta_row_num', '>', 1);
     }
 
     /**
-     * Query records not being the latest meta for any key.
+     * Query only historical meta for any key.
      *
-     * @param  Builder<Meta>  $query
+     * @param  MetaBuilder<Meta>  $query
      * @param  string|\DateTimeInterface|null  $now
      */
-    public function scopeWithoutHistory(Builder $query, $now = null): void
+    public function scopeOnlyHistory(MetaBuilder $query, $now = null): void
     {
-        $windowQuery = static::query()
-            ->select([
-                'id',
-                'metable_type',
-                'metable_id',
-                'key',
-                'published_at',
-                DB::raw('ROW_NUMBER() OVER (
-                    PARTITION BY metable_type, metable_id, `key`
-                    ORDER BY published_at DESC, id DESC
-                ) as row_num'),
-            ])
-            ->publishedBefore($now);
-
-        $query->where(function ($query) use ($now, $windowQuery) {
-            $query->publishedAfter($now)
-                ->orWhereIn('id', function ($sub) use ($windowQuery) {
-                    $sub->fromSub($windowQuery, 'latest_meta')
-                        ->select('latest_meta.id')
-                        ->where('latest_meta.row_num', 1);
-                });
-        });
+        $query->history($now);
     }
 
     /**
      * Query only the latest meta for any key.
      *
-     * @param  Builder<Meta>  $query
+     * @param  MetaBuilder<Meta>  $query
      * @param  string|\DateTimeInterface|null  $now
      */
-    public function scopeOnlyCurrent(Builder $query, $now = null): void
+    public function scopeCurrent(MetaBuilder $query, $now = null): void
     {
-        $query->joinLatest($now);
+        if ($query->isRelationQuery()) {
+            trigger_error(
+                'Warning: Using the current() scope on of the meta relations is not supported. Please use the meta() relation instead.',
+                E_USER_WARNING
+            );
+
+            return;
+        }
+
+        /** @var MetaBuilder<Meta> $window */
+        $window = static::query();
+
+        $window->withRowNumber()
+            ->publishedBefore($now);
+
+        $query->fromSub($window, 'meta')
+            ->where('meta_row_num', 1);
     }
 
     /**
-     * Add a join to find only records matching or not matching the latest published record per key.
-     * Will only query for meta records from the past by default.
+     * Query only the latest meta for any key.
      *
-     * @param  Builder<Meta>  $query
+     * @param  MetaBuilder<Meta>  $query
      * @param  string|\DateTimeInterface|null  $now
      */
-    public function scopeJoinLatest(Builder $query, $now = null): void
+    public function scopeOnlyCurrent(MetaBuilder $query, $now = null): void
     {
-        $windowQuery = static::query()
-            ->select([
-                'id',
-                'metable_type',
-                'metable_id',
-                'key',
-                'published_at',
-                DB::raw('ROW_NUMBER() OVER (
-                    PARTITION BY metable_type, metable_id, `key`
-                    ORDER BY published_at DESC, id DESC
-                ) as row_num'),
-            ])
-            ->publishedBefore($now);
-
-        $query->joinSub($windowQuery, 'latest_meta', function ($join) {
-            $join->on('meta.id', '=', 'latest_meta.id')
-                ->where('latest_meta.row_num', '=', 1);
-        });
+        $query->current($now);
     }
 }

@@ -10,6 +10,7 @@ use Kolossal\Multiplex\MetaAttribute;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\PostWithAccessor;
+use Kolossal\Multiplex\Tests\Mocks\PostWithEagerLoading;
 use Kolossal\Multiplex\Tests\Mocks\PostWithExistingColumn;
 use Kolossal\Multiplex\Tests\Mocks\PostWithoutSoftDelete;
 use Kolossal\Multiplex\Tests\Mocks\User;
@@ -1298,4 +1299,27 @@ it('works when using loadCount', function () {
     $user->loadCount(['posts']);
 
     expect($user->posts_count)->toEqual(3);
+});
+
+it('works when using eager loading', function () {
+    Post::factory(5)->has(Meta::factory(5))->create();
+
+    $post = Post::factory()
+        ->has(Meta::factory(10))
+        ->create();
+
+    $post = Post::find($post->id);
+
+    expect($post->relationLoaded('meta'))->toBeFalse();
+    expect($post->toArray())->not()->toHaveKeys(['meta']);
+
+    $eagerPost = PostWithEagerLoading::factory()
+        ->has(Meta::factory(10))
+        ->create();
+
+    $eagerPost = PostWithEagerLoading::find($eagerPost->id);
+
+    expect($eagerPost->relationLoaded('meta'))->toBeTrue();
+    expect($eagerPost->toArray())->toHaveKeys(['meta']);
+    expect($eagerPost->toArray()['meta'])->toHaveCount(10);
 });

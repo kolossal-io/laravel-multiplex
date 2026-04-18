@@ -5,13 +5,13 @@ namespace Kolossal\Multiplex;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Kolossal\Multiplex\Database\Eloquent\Relations\LatestMetaRelation;
 use Kolossal\Multiplex\Events\MetaHasBeenAdded;
 use Kolossal\Multiplex\Events\MetaHasBeenRemoved;
 use Kolossal\Multiplex\Exceptions\MetaException;
@@ -345,29 +345,67 @@ trait HasMeta
         return static::$staticMetaTimestamp ?? Carbon::now();
     }
 
+    protected function morphMeta(?Closure $where = null): LatestMetaRelation
+    {
+        $instance = $this->newRelatedInstance($this->getMetaClassName());
+
+        return new LatestMetaRelation(
+            $instance->newQuery(),
+            $this,
+            $instance->qualifyColumn('metable_type'),
+            $instance->qualifyColumn('metable_id'),
+            $this->getKeyName(),
+            $where,
+        );
+    }
+
     /**
      * Relationship to all `Meta` models associated with this model.
      */
-    public function allMeta(): MorphMany
+    public function allMeta(): LatestMetaRelation
     {
-        return $this->morphMany($this->getMetaClassName(), 'metable');
+        return $this->morphMeta();
     }
 
     /**
      * Relationship to only published `Meta` models associated with this model.
      */
-    public function publishedMeta(): MorphMany
+    public function publishedMeta(): LatestMetaRelation
     {
-        return $this->allMeta()->publishedBefore($this->getMetaTimestamp());
+        return $this->morphMeta(function (Builder $query) {
+            $query->where('published_at', '<=', $this->getMetaTimestamp());
+        });
+    }
+
+    /**
+     * Relationship to only `Meta` models that are not yet published.
+     */
+    public function plannedMeta(): LatestMetaRelation
+    {
+        return $this->morphMeta(function (Builder $query) {
+            $query->where('published_at', '>', $this->getMetaTimestamp());
+        });
+    }
+
+    /**
+     * Relationship to only `Meta` models that were published in the past.
+     */
+    public function historicMeta(): LatestMetaRelation
+    {
+        return $this->morphMeta(function (Builder $query) {
+            $query->where('published_at', '<=', $this->getMetaTimestamp());
+        })->where('meta_row_num', '>', 1);
     }
 
     /**
      * Relationship to the `Meta` model.
      * Groups by `key` and only shows the latest item that is published yet.
      */
-    public function meta(): MorphMany
+    public function meta(): LatestMetaRelation
     {
-        return $this->allMeta()->onlyCurrent($this->getMetaTimestamp());
+        return $this->morphMeta(function (Builder $query) {
+            $query->where('published_at', '<=', $this->getMetaTimestamp());
+        })->where('meta_row_num', 1);
     }
 
     /**
@@ -683,7 +721,7 @@ trait HasMeta
                 $latest = $this->findMeta($key);
 
                 return tap(
-                    $this->allMeta()->where('key', $key)->delete(),
+                    $this->allMeta()->where('meta.key', $key)->delete(),
                     fn ($deleted) => $deleted && $latest && event(new MetaHasBeenRemoved($latest))
                 );
             });
@@ -998,7 +1036,7 @@ trait HasMeta
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
         $query->{$method}('allMeta', function (Builder $query) use ($key, $operator, $value) {
-            $query->onlyCurrent($this->getMetaTimestamp())
+            $query->current($this->getMetaTimestamp())
                 ->where(
                     $key instanceof Closure
                         ? $key
@@ -1039,7 +1077,7 @@ trait HasMeta
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
         $query->{$method}('allMeta', function (Builder $query) use ($key, $operator, $value) {
-            $query->onlyCurrent($this->getMetaTimestamp())
+            $query->current($this->getMetaTimestamp())
                 ->where('meta.key', $key)->where('value', $operator, $value);
         });
     }
@@ -1077,7 +1115,7 @@ trait HasMeta
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
         $query->{$method}('allMeta', function (Builder $query) use ($type, $key, $operator, $value) {
-            $query->onlyCurrent($this->getMetaTimestamp())
+            $query->current($this->getMetaTimestamp())
                 ->where('meta.key', $key)->whereValue($value, $operator, $type);
         });
     }
@@ -1106,7 +1144,7 @@ trait HasMeta
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
         $query->{$method}('allMeta', function (Builder $query) use ($key, $values) {
-            $query->onlyCurrent($this->getMetaTimestamp())
+            $query->current($this->getMetaTimestamp())
                 ->where('meta.key', $key)->whereValueIn($values);
         });
     }
@@ -1156,7 +1194,7 @@ trait HasMeta
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
         $query->{$method}('allMeta', function (Builder $query) use ($keys) {
-            $query->onlyCurrent($this->getMetaTimestamp())
+            $query->current($this->getMetaTimestamp())
                 ->whereIn('meta.key', $keys)
                 ->whereValueNotEmpty();
         }, '=', count($keys));

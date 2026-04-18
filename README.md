@@ -301,7 +301,7 @@ $post->pluckMeta();
  */
 ```
 
-If you instead want to retrieve all meta that was published yet, use the `publishedMeta` relation.
+If you instead want to retrieve all meta that was published yet, so also include historic meta, use the `publishedMeta` relation.
 
 ```php
 // This array will also include `Jimi Hendrix´.
@@ -314,6 +314,18 @@ If you want to inspect _all_ metadata including unpublished records, use the `al
 $post->allMeta->toArray();
 ```
 
+If you want to inspect _historic_ metadata including only records that are not valid anymore, use the `historicMeta` relation.
+
+```php
+$post->historicMeta->toArray();
+```
+
+There is also a `plannedMeta` relation that can be used to inspect meta not yet published.
+
+```php
+$post->plannedMeta->toArray();
+```
+
 You can determine if a `Meta` instance is the most recent published record for the related model or if it is not yet released.
 
 ```php
@@ -322,6 +334,8 @@ $meta = $post->allMeta->first();
 $meta->is_current; // (bool)
 $meta->is_planned; // (bool)
 ```
+
+Please note that the `is_current` attribute is quite heavy, since it will first have to load the most recent meta of the corresponding model to check against.
 
 ### Querying `Meta` Model
 
@@ -336,21 +350,28 @@ Meta::publishedBefore('+1 week')->get(); // Only meta published by next week.
 
 Meta::publishedAfter('+1 week')->get(); // Only meta still unpublished in a week.
 
-Meta::onlyCurrent()->get(); // Only current meta without planned or historic data.
+Meta::current()->get(); // Only current meta without planned or historic data.
 
-Meta::withoutHistory()->get(); // Query without stale records.
-
-Meta::withoutCurrent()->get(); // Query without current records.
+Meta::history()->get(); // Only historic meta that is not valid anymore.
 ```
 
 By default these functions will use `Carbon::now()` to determine what metadata is considered the most recent, but you can also pass a datetime to look from.
 
 ```php
 // Get records that have been current a month ago.
-Meta::onlyCurrent('-1 month')->get();
+Meta::current('-1 month')->get();
+```
 
-// Get records that will not be history by tommorow.
-Meta::withoutHistory(Carbon::now()->addDay())->get();
+The `current` and `history` scopes are not available on any of the `meta` relations. Use the `meta` and `historicMeta` relations instead.
+
+```php
+// This will NOT work.
+$model->allMeta()->current()->get();
+$model->allMeta()->history()->get();
+
+// Use the specific relations instead.
+$model->meta()->get();
+$model->historicMeta()->get();
 ```
 
 ## Query by Metadata
