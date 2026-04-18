@@ -2,6 +2,10 @@
 
 ## 2.x to 3.x
 
+### Laravel 11+
+
+Version 3.x requires Laravel 11 or higher. If you are using an older version of Laravel, you should continue using version 2.x of `laravel-multiplex`.
+
 ### Removed `withoutCurrent`, `withoutHistory` and `joinLatest` scopes
 
 The `withoutCurrent`, `withoutHistory` and `joinLatest` scopes have been removed in favor of `current` (or `onlyCurrent`) and `history` (or `onlyHistory`) scopes. Also the `onlyCurrent` scope can no longer be used on any of the `meta` relations, but you can still use it on the `Meta` model directly, like `Meta::onlyCurrent()` which is the same as using `Meta::current()`.

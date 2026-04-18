@@ -14,16 +14,8 @@ jobs:
         laravel: ["12.*", "13.*"]
         morphtype: [integer, uuid, ulid]
         include:
-          - laravel: 9.*
-            php: 8.0
-            testbench: 7.*
-            morphtype: integer
-          - laravel: 10.*
-            php: 8.1
-            testbench: 8.*
-            morphtype: integer
           - laravel: 11.*
-            php: 8.3
+            php: 8.2
             testbench: 9.*
             morphtype: integer
           - laravel: 12.*
