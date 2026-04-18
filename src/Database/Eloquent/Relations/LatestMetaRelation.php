@@ -102,6 +102,7 @@ class LatestMetaRelation extends MorphMany
         $relationQuery = $this->getRelationQuery();
 
         $relationQuery
+            ->select('meta.*')
             ->asRelationQuery()
             ->joinSub(
                 $windowQuery,

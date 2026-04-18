@@ -340,3 +340,42 @@ it('will reset cache when setting value', function () {
     expect($meta->value)->toBe(123);
     expect($this->getProtectedProperty($meta, 'cachedValue'))->toBe(123);
 });
+
+it('can be replicated', function () {
+    Post::factory()->has(Meta::factory())->create();
+
+    $meta = Meta::first();
+
+    $copy = $meta->replicate();
+    $copy->save();
+
+    expect($copy->is($meta))->toBeFalse();
+    expect($copy->key)->toEqual($meta->key);
+    expect($copy->value)->toEqual($meta->value);
+});
+
+it('can be replicated from parent model', function () {
+    $post = Post::factory()->has(Meta::factory())->create();
+
+    $meta = $post->meta()->first();
+    $post->meta()->dumpRawSql();
+    $copy = $meta->replicate();
+    $copy->save();
+
+    expect($copy->is($meta))->toBeFalse();
+    expect($copy->key)->toEqual($meta->key);
+    expect($copy->value)->toEqual($meta->value);
+});
+
+it('can be replicated from current scope', function () {
+    Post::factory()->has(Meta::factory())->create();
+
+    $meta = Meta::current()->first();
+
+    $copy = $meta->replicate();
+    $copy->save();
+
+    expect($copy->is($meta))->toBeFalse();
+    expect($copy->key)->toEqual($meta->key);
+    expect($copy->value)->toEqual($meta->value);
+});

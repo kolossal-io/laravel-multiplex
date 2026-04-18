@@ -23,7 +23,34 @@ use Kolossal\Multiplex\Tests\Factories\MetaFactory;
  * @property Carbon|null $published_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read int $meta_row_num
+ * @property-read bool $is_current
+ * @property-read bool $is_planned
+ * @property-read ?string $raw_value
+ * @property-read MorphTo<Model,Meta> $metable
+ *
+ * @method static MetaBuilder|Meta newModelQuery()
+ * @method static MetaBuilder|Meta newQuery()
+ * @method static MetaBuilder|Meta current($now = null)
+ * @method static MetaBuilder|Meta onlyCurrent($now = null)
+ * @method static MetaBuilder|Meta history($now = null)
+ * @method static MetaBuilder|Meta onlyHistory($now = null)
+ * @method static MetaBuilder|Meta published()
+ * @method static MetaBuilder|Meta planned()
+ * @method static MetaBuilder|Meta publishedBefore($time = null)
+ * @method static MetaBuilder|Meta publishedAfter($time = null)
+ * @method static MetaBuilder|Meta query()
+ * @method static MetaBuilder|Meta whereCreatedAt($value)
+ * @method static MetaBuilder|Meta whereId($value)
+ * @method static MetaBuilder|Meta whereKey($value)
+ * @method static MetaBuilder|Meta whereMetableId($value)
+ * @method static MetaBuilder|Meta whereMetableType($value)
+ * @method static MetaBuilder|Meta wherePublishedAt($value)
+ * @method static MetaBuilder|Meta whereType($value)
+ * @method static MetaBuilder|Meta whereUpdatedAt($value)
+ * @method static MetaBuilder|Meta whereValue($value)
+ * @method static MetaBuilder|Meta whereValueEmpty()
+ * @method static MetaBuilder|Meta whereValueIn(array<mixed> $values, ?string $type = null)
+ * @method static MetaBuilder|Meta whereValueNotEmpty()
  *
  * @mixin \Eloquent
  */
@@ -46,6 +73,13 @@ class Meta extends Model
     ];
 
     /**
+     * @var list<string>
+     */
+    protected $hidden = [
+        'meta_row_num',
+    ];
+
+    /**
      * @var array<string, string>
      */
     protected $casts = [
@@ -65,6 +99,13 @@ class Meta extends Model
         static::saving(function ($model): void {
             /** @var Meta $model */
             $model->attributes['published_at'] ??= Carbon::now();
+        });
+
+        static::retrieved(function ($model): void {
+            /** @var Meta $model */
+            if (isset($model->attributes['meta_row_num'])) {
+                unset($model->attributes['meta_row_num']);
+            }
         });
     }
 
@@ -146,7 +187,11 @@ class Meta extends Model
      */
     public function getIsCurrentAttribute(): bool
     {
-        // @phpstan-ignore-next-line
+        /**
+         * @disregard P1014
+         *
+         * @phpstan-ignore property.notFound,nullsafe.neverNull
+         * */
         return $this->metable?->meta
             ?->first(fn(Meta $meta) => $meta->key === $this->key)
             ?->is($this) ?? false;
@@ -318,6 +363,7 @@ class Meta extends Model
 
         $query->fromSub($window, 'meta')
             ->publishedBefore($now)
+            /** @phpstan-ignore argument.type */
             ->where('meta_row_num', '>', 1);
     }
 
@@ -356,6 +402,7 @@ class Meta extends Model
             ->publishedBefore($now);
 
         $query->fromSub($window, 'meta')
+            /** @phpstan-ignore argument.type */
             ->where('meta_row_num', 1);
     }
 
