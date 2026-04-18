@@ -314,7 +314,7 @@ class Meta extends Model
         /** @var MetaBuilder<Meta> $window */
         $window = static::query();
 
-        $window->withRowNumber();
+        $window->withRowNumber(true);
 
         $query->fromSub($window, 'meta')
             ->publishedBefore($now)
@@ -352,7 +352,7 @@ class Meta extends Model
         /** @var MetaBuilder<Meta> $window */
         $window = static::query();
 
-        $window->withRowNumber()
+        $window->withRowNumber(true)
             ->publishedBefore($now);
 
         $query->fromSub($window, 'meta')

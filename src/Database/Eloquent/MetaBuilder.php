@@ -17,10 +17,10 @@ class MetaBuilder extends Builder
     /**
      * @return MetaBuilder<TModel>
      */
-    public function withRowNumber(): self
+    public function withRowNumber(bool $fullSelect = false): self
     {
         $this->addSelect(
-            '*',
+            $fullSelect ? '*' : 'id',
             DB::raw('ROW_NUMBER() OVER (
                 PARTITION BY meta.metable_type, meta.metable_id, meta.`key`
                 ORDER BY meta.published_at DESC, meta.id DESC
