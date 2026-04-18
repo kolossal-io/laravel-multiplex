@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-multiplex` will be documented in this file.
 
+## v2.0.1 - 2026-04-15
+
+### [2.0.1](https://github.com/kolossal-io/laravel-multiplex/compare/v2.0.0...v2.0.1) (2026-04-15)
+
+#### Bug Fixes
+
+* change index ([94a702f](https://github.com/kolossal-io/laravel-multiplex/commit/94a702f52419974ee5fb88d532dad64601df2474))
+
 ## v2.0.0 - 2026-04-15
 
 ### [2.0.0](https://github.com/kolossal-io/laravel-multiplex/compare/v1.8.0...v2.0.0) (2026-04-15)
