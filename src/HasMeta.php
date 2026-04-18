@@ -190,7 +190,7 @@ trait HasMeta
     public function getMetaKeys(): array
     {
         return collect($this->getMetaKeysProperty())->map(
-            fn ($value, $key) => is_string($key) ? $key : $value
+            fn($value, $key) => is_string($key) ? $key : $value
         )->toArray();
     }
 
@@ -202,7 +202,7 @@ trait HasMeta
         /** @var ?string $cast */
         $cast = with(
             $this->getMetaKeysProperty(),
-            fn ($metaKeys) => isset($metaKeys[$key]) ? $metaKeys[$key] : null
+            fn($metaKeys) => isset($metaKeys[$key]) ? $metaKeys[$key] : null
         );
 
         return $cast;
@@ -266,10 +266,10 @@ trait HasMeta
         }
 
         return $this->explicitlyAllowedMetaKeys = collect($this->getCasts())
-            ->filter(fn ($cast) => $cast === MetaAttribute::class)
+            ->filter(fn($cast) => $cast === MetaAttribute::class)
             ->keys()
             ->concat($this->getMetaKeys())
-            ->filter(fn ($key) => $key !== '*')
+            ->filter(fn($key) => $key !== '*')
             ->unique()
             ->toArray();
     }
@@ -316,7 +316,7 @@ trait HasMeta
                 $this->getConnection()
                     ->getSchemaBuilder()
                     ->getColumnListing($this->getTable()) ?? []
-            )->map(fn ($item) => strtolower($item))->toArray();
+            )->map(fn($item) => strtolower($item))->toArray();
         }
 
         return in_array(strtolower($column), static::$metaSchemaColumnsCache[$class]);
@@ -433,7 +433,7 @@ trait HasMeta
     public function pluckMeta(bool $withFallbackValues = false): Collection
     {
         return collect($this->getExplicitlyAllowedMetaKeys())
-            ->mapWithKeys(fn ($key) => [$key => $withFallbackValues ? $this->getFallbackValue($key) : null])
+            ->mapWithKeys(fn($key) => [$key => $withFallbackValues ? $this->getFallbackValue($key) : null])
             ->merge($this->meta->pluck('value', 'key'));
     }
 
@@ -490,7 +490,7 @@ trait HasMeta
          * Finally delegate back to `parent::getAttribute()` if no meta exists.
          */
         return $value ?? value(
-            fn () => !$this->hasMeta($key) ? parent::getAttribute($key) : null
+            fn() => !$this->hasMeta($key) ? parent::getAttribute($key) : null
         );
     }
 
@@ -513,7 +513,7 @@ trait HasMeta
             return null;
         }
 
-        return $this->meta?->first(fn ($meta) => $meta->key === $key);
+        return $this->meta?->first(fn($meta) => $meta->key === $key);
     }
 
     /**
@@ -531,7 +531,7 @@ trait HasMeta
     {
         return (bool) with(
             $this->getMetaChanges(),
-            fn ($meta) => $key ? $meta->has($key) : $meta->isNotEmpty()
+            fn($meta) => $key ? $meta->has($key) : $meta->isNotEmpty()
         );
     }
 
@@ -722,7 +722,7 @@ trait HasMeta
 
                 return tap(
                     $this->allMeta()->where('meta.key', $key)->delete(),
-                    fn ($deleted) => $deleted && $latest && event(new MetaHasBeenRemoved($latest))
+                    fn($deleted) => $deleted && $latest && event(new MetaHasBeenRemoved($latest))
                 );
             });
 
@@ -737,7 +737,7 @@ trait HasMeta
          * and refresh the meta relations to prevent having stale data.
          */
         if ($deleted) {
-            $deleted->each(fn ($key) => $this->resetMetaChanges($key));
+            $deleted->each(fn($key) => $this->resetMetaChanges($key));
             $this->refreshMetaRelations();
         }
 
@@ -815,7 +815,7 @@ trait HasMeta
 
         return tap(
             $this->allMeta()->save($meta),
-            fn ($model) => $model && event(new MetaHasBeenAdded($model))
+            fn($model) => $model && event(new MetaHasBeenAdded($model))
         );
     }
 
@@ -851,8 +851,8 @@ trait HasMeta
          */
         if (func_num_args() === 0) {
             return tap($changes->every(function (Meta $meta, $key) use ($changes) {
-                return tap($this->storeMeta($meta), fn ($saved) => $saved && $changes->forget($key));
-            }), fn () => $this->refreshMetaRelations());
+                return tap($this->storeMeta($meta), fn($saved) => $saved && $changes->forget($key));
+            }), fn() => $this->refreshMetaRelations());
         }
 
         /**
@@ -860,7 +860,7 @@ trait HasMeta
          * is a key => value pair that should be stored.
          */
         if (is_array($key)) {
-            return collect($key)->every(fn ($value, $name) => $this->saveMeta($name, $value));
+            return collect($key)->every(fn($value, $name) => $this->saveMeta($name, $value));
         }
 
         /**
@@ -900,7 +900,7 @@ trait HasMeta
 
         return tap(
             $this->saveMeta(...$args),
-            fn () => $this->setMetaTimestamp($previousTimestamp)
+            fn() => $this->setMetaTimestamp($previousTimestamp)
         );
     }
 
@@ -913,7 +913,7 @@ trait HasMeta
 
         $this->autosaveMeta = false;
 
-        return tap($this->save(), fn () => $this->autosaveMeta = $previousSetting);
+        return tap($this->save(), fn() => $this->autosaveMeta = $previousSetting);
     }
 
     /**
@@ -1040,7 +1040,7 @@ trait HasMeta
                 ->where(
                     $key instanceof Closure
                         ? $key
-                        : fn ($q) => $q->where('meta.key', $key)->whereValue($value, $operator)
+                        : fn($q) => $q->where('meta.key', $key)->whereValue($value, $operator)
                 );
         });
     }
@@ -1168,7 +1168,7 @@ trait HasMeta
 
         $query->where(function (Builder $query) use ($keys) {
             $query->whereDoesntHaveMeta($keys)->orWhereMeta(
-                fn (Builder $q) => $q->whereIn('meta.key', $keys)->whereValueEmpty()
+                fn(Builder $q) => $q->whereIn('meta.key', $keys)->whereValueEmpty()
             );
         }, null, null, $boolean);
     }
