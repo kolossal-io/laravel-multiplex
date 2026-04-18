@@ -14,16 +14,14 @@ class MetaFactory extends Factory
         return $this->faker->randomElement([
             $this->faker->word(),
             $this->faker->numberBetween(),
-            $this->faker->boolean(),
             $this->faker->dateTime(),
-            null,
         ]);
     }
 
     public function definition()
     {
         return [
-            'key' => $this->faker->domainWord(),
+            'key' => $this->faker->unique()->domainWord(),
             'value' => $this->getValue(),
         ];
     }
