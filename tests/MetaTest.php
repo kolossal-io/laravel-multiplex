@@ -379,3 +379,39 @@ it('can be replicated from current scope', function () {
     expect($copy->key)->toEqual($meta->key);
     expect($copy->value)->toEqual($meta->value);
 });
+
+it('can scope current meta', function () {
+    $post = Post::factory()->create();
+
+    $post->saveMetaAt('foo', 'very old value', '-365 days');
+    $post->saveMetaAt('foo', 'current value', '-1 day');
+    $post->saveMetaAt('foo', 'old value', '-2 days');
+    $post->saveMetaAt('foo', 'future value', '+2 minutes');
+    $post->saveMetaAt('bar', 'let me see this', '-2 days');
+
+    foreach (['current', 'onlyCurrent'] as $scope) {
+        $meta = Meta::query()->{$scope}()->get()->pluck('value');
+
+        $this->assertCount(2, $meta);
+        $this->assertContains('current value', $meta);
+        $this->assertContains('let me see this', $meta);
+    }
+});
+
+it('can scope historic meta', function () {
+    $post = Post::factory()->create();
+
+    $post->saveMetaAt('foo', 'very old value', '-365 days');
+    $post->saveMetaAt('foo', 'current value', '-1 day');
+    $post->saveMetaAt('foo', 'old value', '-2 days');
+    $post->saveMetaAt('foo', 'future value', '+2 minutes');
+    $post->saveMetaAt('bar', 'let me see this', '-2 days');
+
+    foreach (['history', 'onlyHistory'] as $scope) {
+        $meta = Meta::query()->{$scope}()->get()->pluck('value');
+
+        $this->assertCount(2, $meta);
+        $this->assertContains('very old value', $meta);
+        $this->assertContains('old value', $meta);
+    }
+});

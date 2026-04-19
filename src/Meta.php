@@ -353,16 +353,18 @@ class Meta extends Model
                 E_USER_WARNING
             );
 
+            // @codeCoverageIgnoreStart
             return;
+            // @codeCoverageIgnoreEnd
         }
 
         /** @var MetaBuilder<Meta> $window */
         $window = static::query();
 
-        $window->withRowNumber(true);
+        $window->withRowNumber(true)
+            ->publishedBefore($now);
 
         $query->fromSub($window, 'meta')
-            ->publishedBefore($now)
             /** @phpstan-ignore argument.type */
             ->where('meta_row_num', '>', 1);
     }
@@ -392,7 +394,9 @@ class Meta extends Model
                 E_USER_WARNING
             );
 
+            // @codeCoverageIgnoreStart
             return;
+            // @codeCoverageIgnoreEnd
         }
 
         /** @var MetaBuilder<Meta> $window */

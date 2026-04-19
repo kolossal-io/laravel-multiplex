@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -1323,3 +1324,77 @@ it('works when using eager loading', function () {
     expect($eagerPost->toArray())->toHaveKeys(['meta']);
     expect($eagerPost->toArray()['meta'])->toHaveCount(10);
 });
+
+it('can add where clauses to relation', function () {
+    $post = Post::factory()->create();
+
+    $post->saveMetaAt('foo', 'current value', '-1 day');
+    $post->saveMetaAt('foo', 'old value', '-2 days');
+    $post->saveMetaAt('foo', 'future value', '+2 minutes');
+    $post->saveMetaAt('bar', 'let me see this', '-2 days');
+    $post->saveMetaAt('another', 'filter this', '-1 day');
+
+    $this->assertCount(5, $post->morphMeta()->get());
+
+    // exclude future meta
+
+    $meta = $post->morphMeta(function (Builder $query) {
+        $query->where('published_at', '<=', now());
+    })->get();
+
+    $this->assertCount(4, $meta);
+    $this->assertCount(4, $meta->where('value', '!=', 'future value'));
+
+    // exclude future meta and key
+
+    $meta = $post->morphMeta(function (Builder $query) {
+        $query->where('published_at', '<=', now())
+            ->where('key', '!=', 'another');
+    })->where('meta_row_num', 1)->get();
+
+    $this->assertCount(2, $meta);
+    $this->assertTrue($meta->pluck('value')->contains('current value'));
+    $this->assertTrue($meta->pluck('value')->contains('let me see this'));
+});
+
+it('can query planned meta', function () {
+    $post = Post::factory()->create();
+
+    $post->saveMetaAt('foo', 'current value', '-1 day');
+    $post->saveMetaAt('foo', 'old value', '-2 days');
+    $post->saveMetaAt('foo', 'future value', '+2 minutes');
+    $post->saveMetaAt('bar', 'let me see this', '-2 days');
+
+    $this->assertCount(1, $post->plannedMeta);
+    $this->assertTrue($post->plannedMeta->pluck('value')->contains('future value'));
+
+    $this->assertEquals(1, $post->plannedMeta()->count());
+    $this->assertTrue($post->plannedMeta()->get()->pluck('value')->contains('future value'));
+});
+
+it('can query historic meta', function () {
+    $post = Post::factory()->create();
+
+    $post->saveMetaAt('foo', 'current value', '-1 day');
+    $post->saveMetaAt('foo', 'old value', '-2 days');
+    $post->saveMetaAt('foo', 'future value', '+2 minutes');
+    $post->saveMetaAt('bar', 'let me see this', '-2 days');
+
+    $this->assertCount(1, $post->historicMeta);
+    $this->assertTrue($post->historicMeta->pluck('value')->contains('old value'));
+
+    $this->assertEquals(1, $post->historicMeta()->count());
+    $this->assertTrue($post->historicMeta()->get()->pluck('value')->contains('old value'));
+});
+
+it('throws a warning if current scope is used on meta relation', function () {
+    $post = Post::factory()->has(Meta::factory(5))->create();
+
+    $this->assertCount(5, $post->allMeta()->current()->get());
+})->throws(Exception::class, 'Using the current() scope on of the meta relations is not supported.');
+
+it('throws a warning if history scope is used on meta relation', function () {
+    $post = Post::factory()->has(Meta::factory(5))->create();
+
+    $this->assertCount(5, $post->allMeta()->history()->get());
+})->throws(Exception::class, 'Using the history() scope on of the meta relations is not supported.');

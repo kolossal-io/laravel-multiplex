@@ -86,17 +86,17 @@ class LatestMetaRelation extends MorphMany
                 function ($query) use ($model) {
                     $query->where($this->foreignKey, $model->{$this->localKey});
                 }
-            )
-            ->when(
-                $this->metaWindowConditionCallback,
-                function ($query) {
-                    $callback = $this->metaWindowConditionCallback;
-
-                    if (is_callable($callback)) {
-                        $callback($query);
-                    }
-                }
             );
+
+        if ($this->metaWindowConditionCallback) {
+            $windowQuery->where(function ($query) {
+                $callback = $this->metaWindowConditionCallback;
+
+                if (is_callable($callback)) {
+                    $callback($query);
+                }
+            });
+        }
 
         /** @var MetaBuilder<TRelatedModel> $relationQuery */
         $relationQuery = $this->getRelationQuery();

@@ -5,7 +5,6 @@ namespace Kolossal\Multiplex;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
@@ -346,7 +345,7 @@ trait HasMeta
         return static::$staticMetaTimestamp ?? Carbon::now();
     }
 
-    protected function morphMeta(?Closure $where = null): LatestMetaRelation
+    public function morphMeta(?Closure $where = null): LatestMetaRelation
     {
         $instance = $this->newRelatedInstance($this->getMetaClassName());
 
@@ -358,11 +357,6 @@ trait HasMeta
             $this->getKeyName(),
             $where,
         );
-    }
-
-    protected function rawMeta(): MorphMany
-    {
-        return $this->morphMany($this->getMetaClassName(), 'metable');
     }
 
     /**
