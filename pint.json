@@ -3,6 +3,8 @@
     "rules": {
         "not_operator_with_successor_space": false,
         "concat_space": false,
-        "function_declaration": false
+        "function_declaration": {
+            "closure_fn_spacing": "none"
+        }
     }
 }

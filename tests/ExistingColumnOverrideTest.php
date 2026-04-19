@@ -86,7 +86,7 @@ it('will prefer meta over existing column if defined explicitly', function () {
 it('will fallback to existing column for explicitly defined meta keys', function () {
     $model = with(
         DB::table('sample_posts')->insertGetId(['title' => 'Initial title']),
-        fn ($id) => PostWithExistingColumn::findOrFail($id)
+        fn($id) => PostWithExistingColumn::findOrFail($id)
     );
 
     $this->assertDatabaseCount('meta', 0);
@@ -130,7 +130,7 @@ it('will fallback to existing column for dynamically defined meta keys', functio
 it('will fallback to existing column for unpublished meta', function () {
     $model = with(
         DB::table('sample_posts')->insertGetId(['title' => 'Initial title']),
-        fn ($id) => PostWithExistingColumn::findOrFail($id)
+        fn($id) => PostWithExistingColumn::findOrFail($id)
     );
 
     $this->assertDatabaseCount('meta', 0);
@@ -148,7 +148,7 @@ it('will fallback to existing column for unpublished meta', function () {
 it('will fallback to null for unpublished meta', function () {
     $model = with(
         DB::table('sample_posts')->insertGetId(['title' => null]),
-        fn ($id) => PostWithExistingColumn::findOrFail($id)
+        fn($id) => PostWithExistingColumn::findOrFail($id)
     );
 
     expect($model->title)->toBeNull();
@@ -163,12 +163,12 @@ it('will fallback to null for unpublished meta', function () {
 it('will not touch database for explicitly defined keys', function () {
     $a = with(
         DB::table('sample_posts')->insertGetId(['title' => 'Initial title']),
-        fn ($id) => PostWithExistingColumn::findOrFail($id)
+        fn($id) => PostWithExistingColumn::findOrFail($id)
     );
 
     $b = with(
         DB::table('sample_posts')->insertGetId(['title' => null]),
-        fn ($id) => PostWithExistingColumn::findOrFail($id)
+        fn($id) => PostWithExistingColumn::findOrFail($id)
     );
 
     $c = PostWithExistingColumn::make()->fillable(['title']);
@@ -204,12 +204,12 @@ it('will not touch database for explicitly defined keys', function () {
 it('will remove database attributes equals to explicit keys when retrieving', function () {
     $modelA = with(
         DB::table('sample_posts')->insertGetId(['title' => 'Title A']),
-        fn ($id) => PostWithExistingColumn::findOrFail($id)
+        fn($id) => PostWithExistingColumn::findOrFail($id)
     );
 
     $modelB = with(
         DB::table('sample_posts')->insertGetId(['title' => 'Title B']),
-        fn ($id) => Post::findOrFail($id)
+        fn($id) => Post::findOrFail($id)
     );
 
     expect($modelA->getOriginal('title'))->toBe('Title A');

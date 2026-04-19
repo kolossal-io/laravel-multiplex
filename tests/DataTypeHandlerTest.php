@@ -35,7 +35,7 @@ dataset('handlerProvider', function () {
             'date',
             '2017-01-01',
             [2017, Carbon::parse('2017-01-01')],
-            fn () => fn (Carbon $value) => $value->isSameDay('2017-01-01'),
+            fn() => fn(Carbon $value) => $value->isSameDay('2017-01-01'),
         ],
         'datetime' => [
             new DataType\DateTimeHandler,
