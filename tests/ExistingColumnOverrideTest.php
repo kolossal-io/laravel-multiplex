@@ -16,10 +16,9 @@ uses(RefreshDatabase::class);
 function insertPost(array $data = [])
 {
     return with(Post::make()->newUniqueId(), function ($id) use ($data) {
-        $insertId = DB::table('sample_posts')->insertGetId([
+        $insertId = DB::table('sample_posts')->insertGetId(array_merge([
             'id' => $id,
-            ...$data,
-        ]);
+        ], $data));
 
         return Post::find($id ?? $insertId);
     });
@@ -28,10 +27,9 @@ function insertPost(array $data = [])
 function insertPostWithExistingColumn(array $data = [])
 {
     return with(PostWithExistingColumn::make()->newUniqueId(), function ($id) use ($data) {
-        $insertId = DB::table('sample_posts_existing_column')->insertGetId([
+        $insertId = DB::table('sample_posts_existing_column')->insertGetId(array_merge([
             'id' => $id,
-            ...$data,
-        ]);
+        ], $data));
 
         return PostWithExistingColumn::find($id ?? $insertId);
     });
