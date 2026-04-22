@@ -13,7 +13,7 @@ jobs:
         php: [ 8.3, 8.4 ]
         laravel: [ "12.*", "13.*" ]
         morphtype: [ integer, uuid, ulid ]
-        db: [ sqlite ]
+        db: [ sqlite, mysql, pgsql ]
         include:
           - laravel: 9.*
             php: 8.0
@@ -24,22 +24,16 @@ jobs:
             php: 8.1
             testbench: 8.*
             morphtype: integer
+            db: sqlite
           - laravel: 11.*
             php: 8.3
             testbench: 9.*
             morphtype: integer
+            db: sqlite
           - laravel: 12.*
             testbench: 10.*
           - laravel: 13.*
             testbench: 11.*
-          - laravel: 13.*
-            testbench: 11.*
-            php: 8.4
-            db: mysql
-          - laravel: 13.*
-            testbench: 11.*
-            php: 8.4
-            db: pgsql
         exclude:
           - laravel: 13.*
             php: 8.3
