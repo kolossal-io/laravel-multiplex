@@ -13,6 +13,30 @@ uses(AccessesProtectedProperties::class);
 
 uses(RefreshDatabase::class);
 
+function insertPost(array $data = [])
+{
+    return with(Post::make()->newUniqueId(), function ($id) use ($data) {
+        DB::table('sample_posts')->insertGetId([
+            'id' => $id,
+            ...$data,
+        ]);
+
+        return Post::findOrFail($id);
+    });
+}
+
+function insertPostWithExistingColumn(array $data = [])
+{
+    return with(Post::make()->newUniqueId(), function ($id) use ($data) {
+        DB::table('sample_posts_existing_column')->insertGetId([
+            'id' => $id,
+            ...$data,
+        ]);
+
+        return PostWithExistingColumn::findOrFail($id);
+    });
+}
+
 it('will throw for key equal to existing column name', function () {
     $this->assertDatabaseCount('meta', 0);
 
@@ -84,13 +108,9 @@ it('will prefer meta over existing column if defined explicitly', function () {
 });
 
 it('will fallback to existing column for explicitly defined meta keys', function () {
-    $model = with(
-        DB::table('sample_posts_existing_column')->insertGetId([
-            'id' => Post::make()->newUniqueId(),
-            'title' => 'Initial title',
-        ]),
-        fn($id) => PostWithExistingColumn::findOrFail($id)
-    );
+    $model = insertPostWithExistingColumn([
+        'title' => 'Initial title',
+    ]);
 
     $this->assertDatabaseCount('meta', 0);
     $this->assertDatabaseHas('sample_posts_existing_column', ['title' => 'Initial title']);
@@ -131,13 +151,9 @@ it('will fallback to existing column for dynamically defined meta keys', functio
 });
 
 it('will fallback to existing column for unpublished meta', function () {
-    $model = with(
-        DB::table('sample_posts_existing_column')->insertGetId([
-            'id' => Post::make()->newUniqueId(),
-            'title' => 'Initial title',
-        ]),
-        fn($id) => PostWithExistingColumn::findOrFail($id)
-    );
+    $model = insertPostWithExistingColumn([
+        'title' => 'Initial title',
+    ]);
 
     $this->assertDatabaseCount('meta', 0);
     $this->assertDatabaseHas('sample_posts_existing_column', ['title' => 'Initial title']);
@@ -152,13 +168,9 @@ it('will fallback to existing column for unpublished meta', function () {
 });
 
 it('will fallback to null for unpublished meta', function () {
-    $model = with(
-        DB::table('sample_posts_existing_column')->insertGetId([
-            'id' => Post::make()->newUniqueId(),
-            'title' => null,
-        ]),
-        fn($id) => PostWithExistingColumn::findOrFail($id)
-    );
+    $model = insertPostWithExistingColumn([
+        'title' => null,
+    ]);
 
     expect($model->title)->toBeNull();
 
@@ -170,21 +182,13 @@ it('will fallback to null for unpublished meta', function () {
 });
 
 it('will not touch database for explicitly defined keys', function () {
-    $a = with(
-        DB::table('sample_posts_existing_column')->insertGetId([
-            'id' => Post::make()->newUniqueId(),
-            'title' => 'Initial title',
-        ]),
-        fn($id) => PostWithExistingColumn::findOrFail($id)
-    );
+    $a = insertPostWithExistingColumn([
+        'title' => 'Initial title',
+    ]);
 
-    $b = with(
-        DB::table('sample_posts_existing_column')->insertGetId([
-            'id' => Post::make()->newUniqueId(),
-            'title' => null,
-        ]),
-        fn($id) => PostWithExistingColumn::findOrFail($id)
-    );
+    $b = insertPostWithExistingColumn([
+        'title' => null,
+    ]);
 
     $c = PostWithExistingColumn::make()->fillable(['title']);
     $c->fill(['title' => 'Cee title'])->save();
@@ -217,21 +221,13 @@ it('will not touch database for explicitly defined keys', function () {
 });
 
 it('will remove database attributes equals to explicit keys when retrieving', function () {
-    $modelA = with(
-        DB::table('sample_posts_existing_column')->insertGetId([
-            'id' => Post::make()->newUniqueId(),
-            'title' => 'Title A',
-        ]),
-        fn($id) => PostWithExistingColumn::findOrFail($id)
-    );
+    $modelA = insertPostWithExistingColumn([
+        'title' => 'Title A',
+    ]);
 
-    $modelB = with(
-        DB::table('sample_posts')->insertGetId([
-            'id' => Post::make()->newUniqueId(),
-            'title' => 'Title B',
-        ]),
-        fn($id) => Post::findOrFail($id)
-    );
+    $modelB = insertPost([
+        'title' => 'Title B',
+    ]);
 
     expect($modelA->getOriginal('title'))->toBe('Title A');
     $this->assertArrayNotHasKey('title', $this->getProtectedProperty($modelA, 'attributes'));

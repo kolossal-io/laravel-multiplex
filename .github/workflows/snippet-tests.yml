@@ -19,6 +19,7 @@ jobs:
             php: 8.0
             testbench: 7.*
             morphtype: integer
+            db: sqlite
           - laravel: 10.*
             php: 8.1
             testbench: 8.*
