@@ -1,3 +1,10 @@
+## [2.0.2](https://github.com/kolossal-io/laravel-multiplex/compare/v2.0.1...v2.0.2) (2026-04-22)
+
+
+### Bug Fixes
+
+* use database grammar to wrap column names ([084f30a](https://github.com/kolossal-io/laravel-multiplex/commit/084f30a0d51d067641fa13eff97c9549b893113b)), closes [#82](https://github.com/kolossal-io/laravel-multiplex/issues/82)
+
 # Changelog
 
 All notable changes to `laravel-multiplex` will be documented in this file.
