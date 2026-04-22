@@ -17,11 +17,34 @@
     },
     "homepage": "https://github.com/kolossal-io/laravel-multiplex#readme",
     "devDependencies": {
+        "@semantic-release/changelog": "^6.0.3",
+        "@semantic-release/git": "^10.0.1",
         "semantic-release": "^25.0"
     },
     "release": {
         "branches": [
-            "main"
+            "main",
+            "+([0-9]).x"
+        ],
+        "plugins": [
+            "@semantic-release/commit-analyzer",
+            "@semantic-release/release-notes-generator",
+            [
+                "@semantic-release/changelog",
+                {
+                    "changelogFile": "CHANGELOG.md"
+                }
+            ],
+            [
+                "@semantic-release/git",
+                {
+                    "assets": [
+                        "CHANGELOG.md"
+                    ],
+                    "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+                }
+            ],
+            "@semantic-release/github"
         ]
     },
     "publishConfig": {
