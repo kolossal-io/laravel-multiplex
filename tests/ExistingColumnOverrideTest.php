@@ -16,9 +16,9 @@ uses(RefreshDatabase::class);
 function insertPost(array $data = [])
 {
     return with(Post::make()->newUniqueId(), function ($id) use ($data) {
-        $insertId = DB::table('sample_posts')->insertGetId(array_merge([
-            'id' => $id,
-        ], $data));
+        $insertId = DB::table('sample_posts')->insertGetId(
+            $id ? array_merge(['id' => $id], $data) : $data
+        );
 
         return Post::find($id ?? $insertId);
     });
@@ -27,9 +27,9 @@ function insertPost(array $data = [])
 function insertPostWithExistingColumn(array $data = [])
 {
     return with(PostWithExistingColumn::make()->newUniqueId(), function ($id) use ($data) {
-        $insertId = DB::table('sample_posts_existing_column')->insertGetId(array_merge([
-            'id' => $id,
-        ], $data));
+        $insertId = DB::table('sample_posts_existing_column')->insertGetId(
+            $id ? array_merge(['id' => $id], $data) : $data
+        );
 
         return PostWithExistingColumn::find($id ?? $insertId);
     });
@@ -252,8 +252,7 @@ it('will remove database attributes equals to explicit keys when retrieving', fu
 });
 
 it('will not change meta when using update method', function () {
-    DB::table('sample_posts_existing_column')->insertGetId([
-        'id' => Post::make()->newUniqueId(),
+    insertPostWithExistingColumn([
         'title' => 'Title',
     ]);
 
@@ -272,8 +271,7 @@ it('will not change meta when using update method', function () {
 
 it('will include meta value in collection if overriding column', function () {
     Collection::times(10, function ($num) {
-        DB::table('sample_posts_existing_column')->insertGetId([
-            'id' => Post::make()->newUniqueId(),
+        insertPostWithExistingColumn([
             'title' => "Title {$num}",
         ]);
     });
@@ -309,8 +307,7 @@ it('will include meta value in collection if overriding column', function () {
 
 it('will include column values in collection if not overriding column', function () {
     Collection::times(10, function ($num) {
-        DB::table('sample_posts_existing_column')->insertGetId([
-            'id' => Post::make()->newUniqueId(),
+        insertPostWithExistingColumn([
             'title' => "Title {$num}",
         ]);
     });
@@ -334,8 +331,7 @@ it('will include column values in collection if not overriding column', function
 });
 
 it('can append overwriting meta values in array', function () {
-    DB::table('sample_posts_existing_column')->insertGetId([
-        'id' => Post::make()->newUniqueId(),
+    insertPostWithExistingColumn([
         'title' => 'Title',
     ]);
 
@@ -358,8 +354,7 @@ it('can append overwriting meta values in array', function () {
 
 it('can append overwriting meta values in collection array', function () {
     Collection::times(10, function ($num) {
-        DB::table('sample_posts_existing_column')->insertGetId([
-            'id' => Post::make()->newUniqueId(),
+        insertPostWithExistingColumn([
             'title' => "Title {$num}",
         ]);
     });
@@ -402,8 +397,7 @@ it('can assign meta when creating by array', function () {
 it('will cast fallback fields as expected', function () {
     $this->assertDatabaseCount('meta', 0);
 
-    DB::table('sample_posts_existing_column')->insert([
-        'id' => Post::make()->newUniqueId(),
+    insertPostWithExistingColumn([
         'title' => 'Title',
         'boolean_field' => 1,
         'float_field' => 120,

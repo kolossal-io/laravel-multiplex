@@ -11,7 +11,7 @@ jobs:
       fail-fast: true
       matrix:
         php: [ 8.3, 8.4 ]
-        laravel: [ "12.*", "13.*" ]
+        laravel: [ "13.*" ]
         morphtype: [ integer, uuid, ulid ]
         db: [ sqlite, mysql, pgsql ]
         include:
@@ -31,7 +31,10 @@ jobs:
             morphtype: integer
             db: sqlite
           - laravel: 12.*
+            php: 8.4
             testbench: 10.*
+            morphtype: integer
+            db: sqlite
           - laravel: 13.*
             testbench: 11.*
         exclude:
