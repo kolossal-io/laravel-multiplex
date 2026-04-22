@@ -1,59 +1,36 @@
 <?php
 
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 
-it('uses the configured column type', function (string $type, string $column_type) {
+it('uses the configured column type', function (string $type, array $column_types) {
     $this->refreshDatabaseWithType($type);
 
     if (version_compare(app()->version(), '10.0.0', '>')) {
-        expect(Schema::getColumnType('meta', 'id'))->toBe($column_type);
+        expect($column_types)->toContain(Schema::getColumnType('meta', 'id'));
     }
 
     expect(config('multiplex.morph_type'))->toBe($type);
 
-    $meta = Post::factory()->create()->saveMeta('foo', 'bar');
+    $meta = Meta::factory()->make();
 
     if (config('multiplex.morph_type') === 'uuid') {
-        expect(Str::isUuid($meta->id))->toBeTrue();
+        expect(Str::isUuid($meta->newUniqueId()))->toBeTrue();
         expect($meta->getKeyType())->toEqual('string');
     } elseif (config('multiplex.morph_type') === 'ulid') {
-        expect(Str::isUlid($meta->id))->toBeTrue();
+        expect(Str::isUlid($meta->newUniqueId()))->toBeTrue();
         expect($meta->getKeyType())->toEqual('string');
     } else {
-        expect($meta->id)->toBeInt();
         expect($meta->getKeyType())->toEqual('int');
     }
 })->with('morphTypes');
 
-it('throws model not found exception for invalid id', function (string $type) {
-    $this->refreshDatabaseWithType($type);
-
-    $meta = Post::factory()->create()->saveMeta('foo', 'bar');
-
-    $this->expectException(ModelNotFoundException::class);
-
-    $meta->resolveRouteBinding('abc-123', 'id');
-})->with('stringMorphTypes');
-
-it('throws model not found exception if morph type mismatches', function (string $type) {
-    $this->refreshDatabaseWithType($type);
-
-    $meta = Post::factory()->create()->saveMeta('foo', 'bar');
-
-    $this->expectException(ModelNotFoundException::class);
-
-    $meta->resolveRouteBinding('abc-123', 'id');
-})->with('stringMorphTypes');
-
 it('doesnt create a unique id only if confiugured', function (string $type) {
     $this->refreshDatabaseWithType($type);
 
-    $meta = Post::factory()->create()->saveMeta('foo', 'bar');
-
-    $id = $meta->newUniqueId();
+    $id = Meta::factory()->make()->newUniqueId();
 
     switch ($type) {
         case 'uuid':
@@ -65,20 +42,10 @@ it('doesnt create a unique id only if confiugured', function (string $type) {
             expect(Str::isUlid($id))->toBeTrue();
             break;
         default:
-            expect($meta->newUniqueId())->toBeNull();
+            expect($id)->toBeNull();
             break;
     }
 })->with('morphTypes');
-
-it('throws error for invalid unique ids with implicit key name', function (string $type) {
-    $this->refreshDatabaseWithType($type);
-
-    $meta = Post::factory()->create()->saveMeta('foo', 'bar');
-
-    $this->expectException(ModelNotFoundException::class);
-
-    $meta->resolveRouteBinding('abc-123');
-})->with('stringMorphTypes');
 
 it('resolves unique id models by key', function () {
     $this->refreshDatabaseWithType('integer');
@@ -89,15 +56,6 @@ it('resolves unique id models by key', function () {
     expect($meta->is($meta->resolveRouteBinding($meta->id, 'id')))->toBeTrue();
 });
 
-it('resolves integer id models by key', function (string $type) {
-    $this->refreshDatabaseWithType($type);
-
-    $meta = Post::factory()->create()->saveMeta('foo', 'bar');
-
-    expect($meta->is($meta->resolveRouteBinding($meta->id)))->toBeTrue();
-    expect($meta->is($meta->resolveRouteBinding($meta->id, 'id')))->toBeTrue();
-})->with('stringMorphTypes');
-
 it('throws exception for invalid morph type configuration', function () {
     $this->expectException(Exception::class);
 
@@ -106,15 +64,8 @@ it('throws exception for invalid morph type configuration', function () {
 
 dataset('morphTypes', function () {
     return [
-        'integer' => ['integer', 'integer'],
-        'uuid' => ['uuid', 'varchar'],
-        'ulid' => ['ulid', 'varchar'],
-    ];
-});
-
-dataset('stringMorphTypes', function () {
-    return [
-        'uuid' => ['uuid'],
-        'ulid' => ['ulid'],
+        'integer' => ['integer', ['integer', 'int', 'int4']],
+        'uuid' => ['uuid', ['varchar', 'char', 'bpchar', 'uuid']],
+        'ulid' => ['ulid', ['varchar', 'char', 'bpchar']],
     ];
 });

@@ -153,7 +153,7 @@ it('scopes where raw meta', function () {
     testScope(Post::whereRawMeta('foo', '!=', 4), 'b,c');
     testScope(Post::whereRawMeta('foo', '<', '2021-09-01 00:00:00'), 'c');
     testScope(Post::whereRawMeta('foo', '<', '2022-02-01 00:00:00'), 'b,c');
-    testScope(Post::whereRawMeta('foo', '>=', 4), 'a');
+    testScope(Post::whereRawMeta('foo', 4), 'a');
     testScope(Post::whereRawMeta('foo', '<=', 0), 'c');
     testScope(Post::whereRawMeta('bar', '<=', 0), 'b,d');
     testScope(Post::whereRawMeta('bar', '<', 0), 'd');
