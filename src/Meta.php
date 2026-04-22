@@ -339,7 +339,7 @@ class Meta extends Model
 
         $query->whereNotIn('id', function ($sub) use ($windowQuery) {
             $sub->fromSub($windowQuery, 'latest_meta')
-                ->select('latest_meta.id')
+                ->select('latest_meta.id_aggregate')
                 ->where('latest_meta.row_num', 1);
         });
     }
@@ -358,7 +358,7 @@ class Meta extends Model
             $query->publishedAfter($now)
                 ->orWhereIn('id', function ($sub) use ($windowQuery) {
                     $sub->fromSub($windowQuery, 'latest_meta')
-                        ->select('latest_meta.id')
+                        ->select('latest_meta.id_aggregate')
                         ->where('latest_meta.row_num', 1);
                 });
         });
@@ -387,7 +387,7 @@ class Meta extends Model
         $windowQuery = static::windowQuery()->publishedBefore($now);
 
         $query->joinSub($windowQuery, 'latest_meta', function ($join) {
-            $join->on('meta.id', '=', 'latest_meta.id')
+            $join->on('meta.id', '=', 'latest_meta.id_aggregate')
                 ->where('latest_meta.row_num', '=', 1);
         });
     }
@@ -407,16 +407,12 @@ class Meta extends Model
         $id = $grammar->wrap('id');
 
         $windowQuery->select([
-            'id',
-            'metable_type',
-            'metable_id',
-            'key',
-            'published_at',
+            'id AS id_aggregate',
             // @phpstan-ignore-next-line argument.type
             DB::raw("ROW_NUMBER() OVER (
                 PARTITION BY {$metableType}, {$metableId}, {$key}
                 ORDER BY {$publishedAt} DESC, {$id} DESC
-            ) as row_num"),
+            ) AS row_num"),
         ]);
 
         return $windowQuery;
