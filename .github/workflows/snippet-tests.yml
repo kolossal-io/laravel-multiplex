@@ -13,7 +13,6 @@ jobs:
         php: [ 8.3, 8.4 ]
         laravel: [ "12.*", "13.*" ]
         morphtype: [ integer, uuid, ulid ]
-        db: [ sqlite ]
         include:
           - laravel: 9.*
             php: 8.0
@@ -31,18 +30,20 @@ jobs:
             testbench: 10.*
           - laravel: 13.*
             testbench: 11.*
-            db: sqlite
           - laravel: 13.*
             testbench: 11.*
+            php: 8.4
             db: mysql
           - laravel: 13.*
             testbench: 11.*
+            php: 8.4
             db: pgsql
         exclude:
           - laravel: 13.*
             php: 8.3
 
-    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.morphtype }}
+    name: P${{ matrix.php }} | L${{ matrix.laravel }} | ${{ matrix.morphtype }} |
+      ${{ matrix.db }}
 
     services:
       mysql:
@@ -108,7 +109,7 @@ jobs:
       - name: List Installed Dependencies
         run: composer show
 
-      - if: matrix.db == 'sqlite'
+      - if: matrix.db == null
         name: Execute tests
         run: vendor/bin/pest
         env:
@@ -125,6 +126,7 @@ jobs:
           DB_USERNAME: laravel
           DB_PASSWORD: secret
           MULTIPLEX_MORPH_TYPE: ${{ matrix.morphtype }}
+
       - if: matrix.db == 'pgsql'
         name: Execute tests (PostgreSQL)
         run: vendor/bin/pest
