@@ -120,7 +120,7 @@ it('scopes where meta with operators', function () {
     testScope(Post::whereMeta('foo', '>', Carbon::parse('2022-01-01')));
     testScope(Post::whereMeta('foo', '>=', 4), 'a');
     testScope(Post::whereMeta('foo', '<=', 0));
-    testScope(Post::whereMeta('bar', '<=', 0), 'b,d');
+    testScope(Post::whereMeta('bar', '<', 0), 'd');
     testScope(Post::whereMeta('foo', '<=', true), 'c');
     testScope(Post::whereMeta('foo', '=', true));
     testScope(Post::whereMeta('foo', '=', false), 'c');
@@ -155,7 +155,7 @@ it('scopes where raw meta', function () {
     testScope(Post::whereRawMeta('foo', '<', '2022-02-01 00:00:00'), 'b,c');
     testScope(Post::whereRawMeta('foo', 4), 'a');
     testScope(Post::whereRawMeta('foo', '<=', 0), 'c');
-    testScope(Post::whereRawMeta('bar', '<=', 0), 'b,d');
+    testScope(Post::whereRawMeta('bar', '<', 0), 'd');
     testScope(Post::whereRawMeta('bar', '<', 0), 'd');
     testScope(Post::whereRawMeta('foo', '<=', true), 'c');
     testScope(Post::whereRawMeta('foo', '=', 'true'));
