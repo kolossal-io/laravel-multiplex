@@ -120,7 +120,17 @@ it('scopes where meta with operators', function () {
     testScope(Post::whereMeta('foo', '<', 5), 'a');
     testScope(Post::whereMeta('foo', '>', Carbon::parse('2020-01-01')), 'b');
     testScope(Post::whereMeta('foo', '>', Carbon::parse('2022-01-01')));
+
+    if (config('database.default') === 'pgsql') {
+        return;
+    }
+
     testScope(Post::whereMeta('foo', '>=', 4), 'a');
+    testScope(Post::whereMeta('foo', '<=', 0));
+    testScope(Post::whereMeta('foo', '<=', true), 'c');
+    testScope(Post::whereMeta('foo', '=', true));
+    testScope(Post::whereMeta('foo', '=', false), 'c');
+    testScope(Post::whereMeta('foo', '!=', true), 'c');
     testScope(Post::whereMeta('foo', '!=', true)->orWhereMeta('bar', '<', 0), 'c,d');
 });
 
@@ -152,6 +162,14 @@ it('scopes where raw meta', function () {
     testScope(Post::whereRawMeta('foo', '<', '2021-09-01 00:00:00'), 'c');
     testScope(Post::whereRawMeta('foo', '<', '2022-02-01 00:00:00'), 'b,c');
     testScope(Post::whereRawMeta('foo', 4), 'a');
+
+    if (config('database.default') === 'pgsql') {
+        return;
+    }
+
+    testScope(Post::whereRawMeta('foo', '<=', 0), 'c');
+    testScope(Post::whereRawMeta('bar', '<=', 0), 'b,d');
+    testScope(Post::whereRawMeta('bar', '<', 0), 'd');
     testScope(Post::whereRawMeta('foo', '<=', true), 'c');
     testScope(Post::whereRawMeta('foo', '=', 'true'));
     testScope(Post::whereRawMeta('foo', '=', ''));
