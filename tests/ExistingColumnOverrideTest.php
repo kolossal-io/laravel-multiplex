@@ -13,6 +13,28 @@ uses(AccessesProtectedProperties::class);
 
 uses(RefreshDatabase::class);
 
+function insertPost(array $data = [])
+{
+    return with(Post::make()->newUniqueId(), function ($id) use ($data) {
+        $insertId = DB::table('sample_posts')->insertGetId(
+            $id ? array_merge(['id' => $id], $data) : $data
+        );
+
+        return Post::find($id ?? $insertId);
+    });
+}
+
+function insertPostWithExistingColumn(array $data = [])
+{
+    return with(PostWithExistingColumn::make()->newUniqueId(), function ($id) use ($data) {
+        $insertId = DB::table('sample_posts_existing_column')->insertGetId(
+            $id ? array_merge(['id' => $id], $data) : $data
+        );
+
+        return PostWithExistingColumn::find($id ?? $insertId);
+    });
+}
+
 it('will throw for key equal to existing column name', function () {
     $this->assertDatabaseCount('meta', 0);
 
@@ -84,13 +106,12 @@ it('will prefer meta over existing column if defined explicitly', function () {
 });
 
 it('will fallback to existing column for explicitly defined meta keys', function () {
-    $model = with(
-        DB::table('sample_posts')->insertGetId(['title' => 'Initial title']),
-        fn($id) => PostWithExistingColumn::findOrFail($id)
-    );
+    $model = insertPostWithExistingColumn([
+        'title' => 'Initial title',
+    ]);
 
     $this->assertDatabaseCount('meta', 0);
-    $this->assertDatabaseHas('sample_posts', ['title' => 'Initial title']);
+    $this->assertDatabaseHas('sample_posts_existing_column', ['title' => 'Initial title']);
 
     expect($model->title)->toBe('Initial title');
 
@@ -128,13 +149,12 @@ it('will fallback to existing column for dynamically defined meta keys', functio
 });
 
 it('will fallback to existing column for unpublished meta', function () {
-    $model = with(
-        DB::table('sample_posts')->insertGetId(['title' => 'Initial title']),
-        fn($id) => PostWithExistingColumn::findOrFail($id)
-    );
+    $model = insertPostWithExistingColumn([
+        'title' => 'Initial title',
+    ]);
 
     $this->assertDatabaseCount('meta', 0);
-    $this->assertDatabaseHas('sample_posts', ['title' => 'Initial title']);
+    $this->assertDatabaseHas('sample_posts_existing_column', ['title' => 'Initial title']);
 
     expect($model->title)->toBe('Initial title');
 
@@ -146,10 +166,9 @@ it('will fallback to existing column for unpublished meta', function () {
 });
 
 it('will fallback to null for unpublished meta', function () {
-    $model = with(
-        DB::table('sample_posts')->insertGetId(['title' => null]),
-        fn($id) => PostWithExistingColumn::findOrFail($id)
-    );
+    $model = insertPostWithExistingColumn([
+        'title' => null,
+    ]);
 
     expect($model->title)->toBeNull();
 
@@ -161,25 +180,23 @@ it('will fallback to null for unpublished meta', function () {
 });
 
 it('will not touch database for explicitly defined keys', function () {
-    $a = with(
-        DB::table('sample_posts')->insertGetId(['title' => 'Initial title']),
-        fn($id) => PostWithExistingColumn::findOrFail($id)
-    );
+    $a = insertPostWithExistingColumn([
+        'title' => 'Initial title',
+    ]);
 
-    $b = with(
-        DB::table('sample_posts')->insertGetId(['title' => null]),
-        fn($id) => PostWithExistingColumn::findOrFail($id)
-    );
+    $b = insertPostWithExistingColumn([
+        'title' => null,
+    ]);
 
     $c = PostWithExistingColumn::make()->fillable(['title']);
     $c->fill(['title' => 'Cee title'])->save();
 
-    $this->assertDatabaseCount('sample_posts', 3);
+    $this->assertDatabaseCount('sample_posts_existing_column', 3);
     $this->assertDatabaseCount('meta', 1);
 
-    $this->assertDatabaseHas('sample_posts', ['id' => 1, 'title' => 'Initial title']);
-    $this->assertDatabaseHas('sample_posts', ['id' => 2, 'title' => null]);
-    $this->assertDatabaseHas('sample_posts', ['id' => 3, 'title' => null]);
+    $this->assertDatabaseHas('sample_posts_existing_column', ['id' => $a->id, 'title' => 'Initial title']);
+    $this->assertDatabaseHas('sample_posts_existing_column', ['id' => $b->id, 'title' => null]);
+    $this->assertDatabaseHas('sample_posts_existing_column', ['id' => $c->id, 'title' => null]);
 
     expect($a->title)->toBe('Initial title');
     expect($b->title)->toBeNull();
@@ -192,9 +209,9 @@ it('will not touch database for explicitly defined keys', function () {
 
     $c->deleteMeta('title');
 
-    $this->assertDatabaseHas('sample_posts', ['id' => 1, 'title' => 'Initial title']);
-    $this->assertDatabaseHas('sample_posts', ['id' => 2, 'title' => null]);
-    $this->assertDatabaseHas('sample_posts', ['id' => 3, 'title' => null]);
+    $this->assertDatabaseHas('sample_posts_existing_column', ['id' => $a->id, 'title' => 'Initial title']);
+    $this->assertDatabaseHas('sample_posts_existing_column', ['id' => $b->id, 'title' => null]);
+    $this->assertDatabaseHas('sample_posts_existing_column', ['id' => $c->id, 'title' => null]);
 
     expect($a->title)->toBe('New title');
     expect($b->title)->toBe('A title');
@@ -202,15 +219,13 @@ it('will not touch database for explicitly defined keys', function () {
 });
 
 it('will remove database attributes equals to explicit keys when retrieving', function () {
-    $modelA = with(
-        DB::table('sample_posts')->insertGetId(['title' => 'Title A']),
-        fn($id) => PostWithExistingColumn::findOrFail($id)
-    );
+    $modelA = insertPostWithExistingColumn([
+        'title' => 'Title A',
+    ]);
 
-    $modelB = with(
-        DB::table('sample_posts')->insertGetId(['title' => 'Title B']),
-        fn($id) => Post::findOrFail($id)
-    );
+    $modelB = insertPost([
+        'title' => 'Title B',
+    ]);
 
     expect($modelA->getOriginal('title'))->toBe('Title A');
     $this->assertArrayNotHasKey('title', $this->getProtectedProperty($modelA, 'attributes'));
@@ -237,16 +252,18 @@ it('will remove database attributes equals to explicit keys when retrieving', fu
 });
 
 it('will not change meta when using update method', function () {
-    DB::table('sample_posts')->insertGetId(['title' => 'Title']);
+    insertPostWithExistingColumn([
+        'title' => 'Title',
+    ]);
 
-    $this->assertDatabaseCount('sample_posts', 1);
+    $this->assertDatabaseCount('sample_posts_existing_column', 1);
     $this->assertDatabaseCount('meta', 0);
 
     PostWithExistingColumn::query()->update([
         'title' => 'Updated Title',
     ]);
 
-    $this->assertDatabaseCount('sample_posts', 1);
+    $this->assertDatabaseCount('sample_posts_existing_column', 1);
     $this->assertDatabaseCount('meta', 0);
 
     expect(PostWithExistingColumn::first()->title)->toBe('Updated Title');
@@ -254,10 +271,12 @@ it('will not change meta when using update method', function () {
 
 it('will include meta value in collection if overriding column', function () {
     Collection::times(10, function ($num) {
-        DB::table('sample_posts')->insertGetId(['title' => "Title {$num}"]);
+        insertPostWithExistingColumn([
+            'title' => "Title {$num}",
+        ]);
     });
 
-    $this->assertDatabaseCount('sample_posts', 10);
+    $this->assertDatabaseCount('sample_posts_existing_column', 10);
     $this->assertDatabaseCount('meta', 0);
 
     PostWithExistingColumn::get()->each(function ($model) {
@@ -265,7 +284,7 @@ it('will include meta value in collection if overriding column', function () {
         $model->save();
     });
 
-    $this->assertDatabaseCount('sample_posts', 10);
+    $this->assertDatabaseCount('sample_posts_existing_column', 10);
     $this->assertDatabaseCount('meta', 10);
 
     PostWithExistingColumn::orderBy('id')->get()->each(function ($model, $i) {
@@ -276,7 +295,7 @@ it('will include meta value in collection if overriding column', function () {
 
     DB::table('meta')->delete();
 
-    $this->assertDatabaseCount('sample_posts', 10);
+    $this->assertDatabaseCount('sample_posts_existing_column', 10);
     $this->assertDatabaseCount('meta', 0);
 
     PostWithExistingColumn::orderBy('id')->get()->each(function ($model, $i) {
@@ -288,10 +307,12 @@ it('will include meta value in collection if overriding column', function () {
 
 it('will include column values in collection if not overriding column', function () {
     Collection::times(10, function ($num) {
-        DB::table('sample_posts')->insertGetId(['title' => "Title {$num}"]);
+        insertPostWithExistingColumn([
+            'title' => "Title {$num}",
+        ]);
     });
 
-    $this->assertDatabaseCount('sample_posts', 10);
+    $this->assertDatabaseCount('sample_posts_existing_column', 10);
     $this->assertDatabaseCount('meta', 0);
 
     Post::get()->each(function ($model) {
@@ -299,7 +320,7 @@ it('will include column values in collection if not overriding column', function
         $model->save();
     });
 
-    $this->assertDatabaseCount('sample_posts', 10);
+    $this->assertDatabaseCount('sample_posts_existing_column', 10);
     $this->assertDatabaseCount('meta', 0);
 
     Post::orderBy('id')->get()->each(function ($model, $i) {
@@ -310,7 +331,9 @@ it('will include column values in collection if not overriding column', function
 });
 
 it('can append overwriting meta values in array', function () {
-    DB::table('sample_posts')->insertGetId(['title' => 'Title']);
+    insertPostWithExistingColumn([
+        'title' => 'Title',
+    ]);
 
     $this->assertDatabaseCount('meta', 0);
 
@@ -331,7 +354,9 @@ it('can append overwriting meta values in array', function () {
 
 it('can append overwriting meta values in collection array', function () {
     Collection::times(10, function ($num) {
-        DB::table('sample_posts')->insertGetId(['title' => "Title {$num}"]);
+        insertPostWithExistingColumn([
+            'title' => "Title {$num}",
+        ]);
     });
 
     $this->assertDatabaseCount('meta', 0);
@@ -363,7 +388,7 @@ it('can assign meta when creating by array', function () {
     ]);
 
     $this->assertDatabaseCount('meta', 2);
-    $this->assertDatabaseHas('sample_posts', ['title' => null]);
+    $this->assertDatabaseHas('sample_posts_existing_column', ['title' => null]);
 
     expect(PostWithExistingColumn::first()->title)->toBe('Title');
     expect(PostWithExistingColumn::first()->foo)->toBe('bar');
@@ -372,7 +397,7 @@ it('can assign meta when creating by array', function () {
 it('will cast fallback fields as expected', function () {
     $this->assertDatabaseCount('meta', 0);
 
-    DB::table('sample_posts')->insert([
+    insertPostWithExistingColumn([
         'title' => 'Title',
         'boolean_field' => 1,
         'float_field' => 120,

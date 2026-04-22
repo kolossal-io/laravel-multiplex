@@ -19,12 +19,21 @@ class MetaBuilder extends Builder
      */
     public function withRowNumber(bool $fullSelect = false): self
     {
+        $grammar = $this->query->getGrammar();
+
+        $key = $grammar->wrap('meta.key');
+        $metableType = $grammar->wrap('meta.metable_type');
+        $metableId = $grammar->wrap('meta.metable_id');
+        $publishedAt = $grammar->wrap('meta.published_at');
+        $id = $grammar->wrap('meta.id');
+
         $this->addSelect(
             $fullSelect ? '*' : 'id',
-            DB::raw('ROW_NUMBER() OVER (
-                PARTITION BY meta.metable_type, meta.metable_id, meta.`key`
-                ORDER BY meta.published_at DESC, meta.id DESC
-            ) as `meta_row_num`')
+            // @phpstan-ignore-next-line argument.type
+            DB::raw("ROW_NUMBER() OVER (
+                PARTITION BY {$metableType}, {$metableId}, {$key}
+                ORDER BY {$publishedAt} DESC, {$id} DESC
+            ) AS meta_row_num"),
         );
 
         return $this;

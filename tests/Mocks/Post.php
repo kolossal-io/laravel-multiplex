@@ -5,11 +5,13 @@ namespace Kolossal\Multiplex\Tests\Mocks;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Kolossal\Multiplex\HasConfigurableMorphType;
 use Kolossal\Multiplex\HasMeta;
 use Kolossal\Multiplex\MetaAttribute;
 
 class Post extends Model
 {
+    use HasConfigurableMorphType;
     use HasFactory;
     use HasMeta;
     use SoftDeletes;

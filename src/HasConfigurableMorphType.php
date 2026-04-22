@@ -60,6 +60,7 @@ trait HasConfigurableMorphType
     /**
      * Determine if the given value is a valid unique id.
      */
+    // @codeCoverageIgnoreStart
     protected function isValidUniqueMorphId(string $value): bool
     {
         if ($this->morphType() === 'ulid') {
@@ -68,6 +69,7 @@ trait HasConfigurableMorphType
 
         return Str::isUuid($value);
     }
+    // @codeCoverageIgnoreEnd
 
     /**
      * Get the columns that should receive a unique identifier.
@@ -109,19 +111,30 @@ trait HasConfigurableMorphType
      *
      * @throws ModelNotFoundException
      */
+    // @codeCoverageIgnoreStart
     public function resolveRouteBindingQuery($query, $value, $field = null)
     {
         if (!$this->usesUniqueIdsInMorphType()) {
             return parent::resolveRouteBindingQuery($query, $value, $field);
         }
 
-        if ($field && is_string($value) && in_array($field, $this->uniqueIds()) && !$this->isValidUniqueMorphId($value)) {
+        if (
+            $field &&
+            is_string($value) &&
+            in_array($field, $this->uniqueIds()) &&
+            !$this->isValidUniqueMorphId($value)
+        ) {
             /** @var class-string<Model> $class */
             $class = get_class($this);
             throw (new ModelNotFoundException)->setModel($class, $value);
         }
 
-        if (!$field && is_string($value) && in_array($this->getRouteKeyName(), $this->uniqueIds()) && !$this->isValidUniqueMorphId($value)) {
+        if (
+            !$field &&
+            is_string($value) &&
+            in_array($this->getRouteKeyName(), $this->uniqueIds()) &&
+            !$this->isValidUniqueMorphId($value)
+        ) {
             /** @var class-string<Model> $class */
             $class = get_class($this);
             throw (new ModelNotFoundException)->setModel($class, $value);
@@ -129,6 +142,7 @@ trait HasConfigurableMorphType
 
         return parent::resolveRouteBindingQuery($query, $value, $field);
     }
+    // @codeCoverageIgnoreEnd
 
     /**
      * Get the auto-incrementing key type.

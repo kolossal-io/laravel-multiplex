@@ -268,9 +268,11 @@ it('can include only current', function () {
 });
 
 it('can store and retrieve datatypes', function ($type, $input) {
+    $post = Post::factory()->create();
+
     $meta = Meta::factory()->make([
-        'metable_type' => 'Foo\Bar\Model',
-        'metable_id' => 1,
+        'metable_type' => Post::class,
+        'metable_id' => $post->id,
         'key' => 'dummy',
     ]);
 
@@ -285,9 +287,11 @@ it('can store and retrieve datatypes', function ($type, $input) {
 })->with('metaHandlerProvider');
 
 it('can query by value', function ($type, $input) {
+    $post = Post::factory()->create();
+
     $meta = Meta::factory()->make([
-        'metable_type' => 'Foo\Bar\Model',
-        'metable_id' => 1,
+        'metable_type' => Post::class,
+        'metable_id' => $post->id,
         'key' => 'dummy',
     ]);
 
@@ -358,7 +362,7 @@ it('can be replicated from parent model', function () {
     $post = Post::factory()->has(Meta::factory())->create();
 
     $meta = $post->meta()->first();
-    $post->meta()->dumpRawSql();
+
     $copy = $meta->replicate();
     $copy->save();
 

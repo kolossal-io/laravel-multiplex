@@ -497,7 +497,7 @@ it('will use meta accessors for fallback values', function () {
 
     expect($model->title)->toBeNull();
 
-    DB::table('sample_posts')->where('id', $model->id)
+    DB::table('sample_posts_accessor')->where('id', $model->id)
         ->update(['title' => 'Fallback Accessor']);
 
     $model = PostWithAccessor::first();

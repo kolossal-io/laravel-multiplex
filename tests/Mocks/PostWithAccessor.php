@@ -4,6 +4,8 @@ namespace Kolossal\Multiplex\Tests\Mocks;
 
 class PostWithAccessor extends Post
 {
+    protected $table = 'sample_posts_accessor';
+
     protected $metaKeys = [
         'title',
         'datetime_field' => 'date',
