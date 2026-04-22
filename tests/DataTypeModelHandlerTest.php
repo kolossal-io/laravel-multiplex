@@ -26,7 +26,7 @@ it('can handle existing models', function () {
     $serialized = $handler->serializeValue($model);
     $unserialized = $handler->unserializeValue($serialized);
 
-    expect($serialized)->toEqual('Kolossal\Multiplex\Tests\Mocks\Post#1');
+    expect($serialized)->toEqual(sprintf('Kolossal\Multiplex\Tests\Mocks\Post#%s', $model->id));
     expect($unserialized->is($model))->toBeTrue();
 });
 

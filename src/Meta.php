@@ -335,23 +335,11 @@ class Meta extends Model
      */
     public function scopeWithoutCurrent(Builder $query, $now = null): void
     {
-        $windowQuery = static::query()
-            ->select([
-                'id',
-                'metable_type',
-                'metable_id',
-                'key',
-                'published_at',
-                DB::raw('ROW_NUMBER() OVER (
-                    PARTITION BY metable_type, metable_id, `key`
-                    ORDER BY published_at DESC, id DESC
-                ) as row_num'),
-            ])
-            ->publishedBefore($now);
+        $windowQuery = static::windowQuery()->publishedBefore($now);
 
         $query->whereNotIn('id', function ($sub) use ($windowQuery) {
             $sub->fromSub($windowQuery, 'latest_meta')
-                ->select('latest_meta.id')
+                ->select('latest_meta.id_aggregate')
                 ->where('latest_meta.row_num', 1);
         });
     }
@@ -364,25 +352,13 @@ class Meta extends Model
      */
     public function scopeWithoutHistory(Builder $query, $now = null): void
     {
-        $windowQuery = static::query()
-            ->select([
-                'id',
-                'metable_type',
-                'metable_id',
-                'key',
-                'published_at',
-                DB::raw('ROW_NUMBER() OVER (
-                    PARTITION BY metable_type, metable_id, `key`
-                    ORDER BY published_at DESC, id DESC
-                ) as row_num'),
-            ])
-            ->publishedBefore($now);
+        $windowQuery = static::windowQuery()->publishedBefore($now);
 
         $query->where(function ($query) use ($now, $windowQuery) {
             $query->publishedAfter($now)
                 ->orWhereIn('id', function ($sub) use ($windowQuery) {
                     $sub->fromSub($windowQuery, 'latest_meta')
-                        ->select('latest_meta.id')
+                        ->select('latest_meta.id_aggregate')
                         ->where('latest_meta.row_num', 1);
                 });
         });
@@ -408,23 +384,37 @@ class Meta extends Model
      */
     public function scopeJoinLatest(Builder $query, $now = null): void
     {
-        $windowQuery = static::query()
-            ->select([
-                'id',
-                'metable_type',
-                'metable_id',
-                'key',
-                'published_at',
-                DB::raw('ROW_NUMBER() OVER (
-                    PARTITION BY metable_type, metable_id, `key`
-                    ORDER BY published_at DESC, id DESC
-                ) as row_num'),
-            ])
-            ->publishedBefore($now);
+        $windowQuery = static::windowQuery()->publishedBefore($now);
 
         $query->joinSub($windowQuery, 'latest_meta', function ($join) {
-            $join->on('meta.id', '=', 'latest_meta.id')
+            $join->on('meta.id', '=', 'latest_meta.id_aggregate')
                 ->where('latest_meta.row_num', '=', 1);
         });
+    }
+
+    /**
+     * @return Builder<Meta>
+     */
+    protected static function windowQuery(): Builder
+    {
+        $windowQuery = self::query();
+        $grammar = $windowQuery->getQuery()->getGrammar();
+
+        $key = $grammar->wrap('key');
+        $metableType = $grammar->wrap('metable_type');
+        $metableId = $grammar->wrap('metable_id');
+        $publishedAt = $grammar->wrap('published_at');
+        $id = $grammar->wrap('id');
+
+        $windowQuery->select([
+            'id AS id_aggregate',
+            // @phpstan-ignore-next-line argument.type
+            DB::raw("ROW_NUMBER() OVER (
+                PARTITION BY {$metableType}, {$metableId}, {$key}
+                ORDER BY {$publishedAt} DESC, {$id} DESC
+            ) AS row_num"),
+        ]);
+
+        return $windowQuery;
     }
 }

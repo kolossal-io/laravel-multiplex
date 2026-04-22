@@ -9,7 +9,14 @@ return new class extends Migration
     public function up()
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->increments('id');
+            if (config('multiplex.morph_type') === 'ulid') {
+                $table->ulid('id')->primary();
+            } elseif (config('multiplex.morph_type') === 'uuid') {
+                $table->uuid('id')->primary();
+            } else {
+                $table->increments('id');
+            }
+
             $table->string('name')->nullable();
             $table->timestamps();
         });
