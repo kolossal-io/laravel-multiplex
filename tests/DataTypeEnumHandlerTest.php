@@ -8,8 +8,6 @@ use Kolossal\Multiplex\Tests\Mocks\Post;
 
 uses(RefreshDatabase::class);
 
-$shouldSkip = fn() => version_compare(PHP_VERSION, '8.1.0', '<');
-
 it('can serialize backed enums', function () {
     $handler = new EnumHandler;
 
@@ -18,38 +16,38 @@ it('can serialize backed enums', function () {
     expect($handler->serializeValue(BackedEnum::One))->toEqual('Kolossal\Multiplex\Tests\Mocks\BackedEnum::one');
     expect($handler->serializeValue(BackedEnum::Two))->toEqual('Kolossal\Multiplex\Tests\Mocks\BackedEnum::two');
     expect($handler->serializeValue(BackedEnum::Three))->toEqual('Kolossal\Multiplex\Tests\Mocks\BackedEnum::three');
-})->skip($shouldSkip);
+});
 
 it('cannot serialize basic enums', function () {
     $handler = new EnumHandler;
 
     expect($handler->canHandleValue(Enum::One))->toBeFalse();
     expect($handler->serializeValue(Enum::One))->toBe('');
-})->skip($shouldSkip);
+});
 
 it('cannot unserialize null', function () {
     $handler = new EnumHandler;
 
     expect($handler->unserializeValue(null))->toBeNull();
-})->skip($shouldSkip);
+});
 
 it('cannot unserialize invalid value', function () {
     $handler = new EnumHandler;
 
     expect($handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\BackedEnum'))->toBeNull();
-})->skip($shouldSkip);
+});
 
 it('cannot unserialize not existing enums', function () {
     $handler = new EnumHandler;
 
     expect($handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\InvalidEnum::one'))->toBeNull();
-})->skip($shouldSkip);
+});
 
 it('cannot unserialize non enum classes', function () {
     $handler = new EnumHandler;
 
     expect($handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\Dummy::one'))->toBeNull();
-})->skip($shouldSkip);
+});
 
 it('can unserialize backed enums', function () {
     $handler = new EnumHandler;
@@ -58,7 +56,7 @@ it('can unserialize backed enums', function () {
 
     expect($enum)->toBe(BackedEnum::Three);
     $this->assertNotSame(BackedEnum::One, $enum);
-})->skip($shouldSkip);
+});
 
 it('cannot unserialize invalid values', function () {
     $handler = new EnumHandler;
@@ -66,7 +64,7 @@ it('cannot unserialize invalid values', function () {
     $enum = $handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\BackedEnum::four');
 
     expect($enum)->toBeNull();
-})->skip($shouldSkip);
+});
 
 it('cannot unserialize basic enums', function () {
     $handler = new EnumHandler;
@@ -74,7 +72,7 @@ it('cannot unserialize basic enums', function () {
     $enum = $handler->unserializeValue('Kolossal\Multiplex\Tests\Mocks\Enum::three');
 
     expect($enum)->toBeNull();
-})->skip($shouldSkip);
+});
 
 it('will handle backed enum value', function () {
     $model = Post::factory()->create();
@@ -88,7 +86,7 @@ it('will handle backed enum value', function () {
     ]);
 
     expect(Post::first()->enum_test)->toBe(BackedEnum::Two);
-})->skip($shouldSkip);
+});
 
 it('will not handle basic enum value', function () {
     $model = Post::factory()->create();
@@ -102,4 +100,4 @@ it('will not handle basic enum value', function () {
     ]);
 
     expect(Post::first()->enum_test)->toBeNull();
-})->skip($shouldSkip);
+});
