@@ -392,9 +392,12 @@ class Meta extends Model
         });
     }
 
+    /**
+     * @return Builder<Meta>
+     */
     protected static function windowQuery(): Builder
     {
-        $windowQuery = static::query();
+        $windowQuery = self::query();
         $grammar = $windowQuery->getQuery()->getGrammar();
 
         $key = $grammar->wrap('key');
@@ -403,18 +406,17 @@ class Meta extends Model
         $publishedAt = $grammar->wrap('published_at');
         $id = $grammar->wrap('id');
 
-        $partitionSql = "ROW_NUMBER() OVER (
-            PARTITION BY {$metableType}, {$metableId}, {$key}
-            ORDER BY {$publishedAt} DESC, {$id} DESC
-        ) as row_num";
-
         $windowQuery->select([
             'id',
             'metable_type',
             'metable_id',
             'key',
             'published_at',
-            DB::raw($partitionSql),
+            // @phpstan-ignore-next-line argument.type
+            DB::raw("ROW_NUMBER() OVER (
+                PARTITION BY {$metableType}, {$metableId}, {$key}
+                ORDER BY {$publishedAt} DESC, {$id} DESC
+            ) as row_num"),
         ]);
 
         return $windowQuery;
