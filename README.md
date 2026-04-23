@@ -83,7 +83,7 @@ And it’s low profile: If you don't like it, just [remove the `HasMeta` Trait](
 Since Version 2 **Multiplex** uses **SQL Window Functions** (such as `ROW_NUMBER() OVER (...)`) for efficient and scalable queries on meta data (e.g., to determine the latest or current meta per key). This enables much better performance for large datasets compared to classic subqueries or group-by/aggregate approaches. Your database must support SQL Window Functions. This has been tested on:
 
 - MySQL **8.0+**
-- PostgreSQL **9.0+**
+- PostgreSQL **12.0+**
 - SQLite **3.25+**
 
 ## Installation
