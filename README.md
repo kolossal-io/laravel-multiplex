@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-    <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/badge/Laravel-9.0+-green.svg?style=flat-square" alt="Laravel"></a>
+    <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/badge/Laravel-11.0+-green.svg?style=flat-square" alt="Laravel"></a>
     <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/packagist/v/kolossal-io/laravel-multiplex.svg?style=flat-square" alt="Latest Version on Packagist"></a>
     <a href="https://codecov.io/gh/kolossal-io/laravel-multiplex" > 
     <img src="https://codecov.io/gh/kolossal-io/laravel-multiplex/branch/main/graph/badge.svg?token=330354GI30"/> 
@@ -80,13 +80,11 @@ And it’s low profile: If you don't like it, just [remove the `HasMeta` Trait](
 
 ## Requirements
 
-Since Version 2 **Multiplex** uses **SQL Window Functions** (such as `ROW_NUMBER() OVER (...)`) for efficient and scalable queries on meta data (e.g., to determine the latest or current meta per key). This enables much better performance for large datasets compared to classic subqueries or group-by/aggregate approaches. Your database must support SQL Window Functions. This includes:
+Since Version 2 **Multiplex** uses **SQL Window Functions** (such as `ROW_NUMBER() OVER (...)`) for efficient and scalable queries on meta data (e.g., to determine the latest or current meta per key). This enables much better performance for large datasets compared to classic subqueries or group-by/aggregate approaches. Your database must support SQL Window Functions. This has been tested on:
 
 - MySQL **8.0+**
-- MariaDB **10.2+** (with limitations), best **10.4+**
 - PostgreSQL **9.0+**
 - SQLite **3.25+**
-- SQL Server **2012+**
 
 ## Installation
 
