@@ -15,18 +15,8 @@ jobs:
         morphtype: [ integer, uuid, ulid ]
         db: [ sqlite, mysql, pgsql ]
         include:
-          - laravel: 9.*
-            php: 8.0
-            testbench: 7.*
-            morphtype: integer
-            db: sqlite
-          - laravel: 10.*
-            php: 8.1
-            testbench: 8.*
-            morphtype: integer
-            db: sqlite
           - laravel: 11.*
-            php: 8.3
+            php: 8.2
             testbench: 9.*
             morphtype: integer
             db: sqlite
@@ -46,7 +36,7 @@ jobs:
 
     services:
       mysql:
-        image: mysql:8.4
+        image: mysql:8.0
         env:
           MYSQL_DATABASE: testbench
           MYSQL_USER: laravel
@@ -59,7 +49,7 @@ jobs:
           --health-interval=10s --health-timeout=5s --health-retries=5
 
       postgres:
-        image: postgres:16
+        image: postgres:12
         env:
           POSTGRES_DB: testbench
           POSTGRES_USER: laravel

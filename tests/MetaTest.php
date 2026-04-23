@@ -22,10 +22,14 @@ dataset('metaHandlerProvider', function () {
     $object->foo = 'bar';
     $object->baz = 3;
 
-    $matrix = [
+    return [
         'array' => [
             'array',
             ['foo' => ['bar'], 'baz'],
+        ],
+        'backed enum' => [
+            'enum',
+            BackedEnum::One,
         ],
         'boolean' => [
             'boolean',
@@ -68,18 +72,6 @@ dataset('metaHandlerProvider', function () {
             'foo',
         ],
     ];
-
-    if (version_compare(PHP_VERSION, '8.1.0', '>=')) {
-        return [
-            ...$matrix,
-            'backed enum' => [
-                'enum',
-                BackedEnum::One,
-            ],
-        ];
-    }
-
-    return $matrix;
 });
 
 it('can get and set value', function () {
@@ -225,90 +217,6 @@ it('can query published meta by date', function () {
     expect($meta)->not->toContain(3);
 });
 
-it('can exclude current', function () {
-    $model = Post::factory()->create();
-
-    Post::factory()->create()->saveMeta('foo', 'another');
-
-    $model->setMetaTimestamp(now());
-
-    $model->saveMetaAt('bar', 'old', '-3 days');
-    $model->saveMetaAt('bar', 'foo', '-2 days');
-    $model->saveMetaAt('foo', 1, '-1 day');
-    $model->saveMeta('foo', 2);
-    $model->saveMetaAt('foo', 3, '+1 day');
-
-    $meta = Meta::withoutCurrent()->whereMetableId($model->id)->get()->pluck('value');
-
-    expect($meta)->toHaveCount(3);
-    expect($meta)->toContain('old');
-    expect($meta)->not->toContain('foo');
-    expect($meta)->toContain(1);
-    expect($meta)->not->toContain(2);
-    expect($meta)->toContain(3);
-
-    $meta = Meta::withoutCurrent('-15 minutes')
-        ->whereMetableId($model->id)->get()->pluck('value');
-
-    expect($meta)->toHaveCount(3);
-    expect($meta)->toContain('old');
-    expect($meta)->not->toContain('foo');
-    expect($meta)->not->toContain(1);
-    expect($meta)->toContain(2);
-    expect($meta)->toContain(3);
-
-    $meta = Meta::withoutCurrent('-50 hours')
-        ->whereMetableId($model->id)->get()->pluck('value');
-
-    expect($meta)->toHaveCount(4);
-    expect($meta)->not->toContain('old');
-    expect($meta)->toContain('foo');
-    expect($meta)->toContain(1);
-    expect($meta)->toContain(2);
-    expect($meta)->toContain(3);
-});
-
-it('can exclude history', function () {
-    $model = Post::factory()->create();
-
-    $model->setMetaTimestamp(now());
-
-    Post::factory()->create()->saveMeta('foo', 'another');
-
-    $model->saveMetaAt('bar', 'old', '-3 days');
-    $model->saveMetaAt('bar', 'foo', '-2 days');
-    $model->saveMetaAt('foo', 1, '-1 day');
-    $model->saveMeta('foo', 2);
-    $model->saveMetaAt('foo', 3, '+1 day');
-
-    $meta = Meta::withoutHistory()
-        ->whereMetableId($model->id)->get()->pluck('value');
-
-    expect($meta)->toHaveCount(3);
-    expect($meta)->toContain('foo');
-    expect($meta)->toContain(2);
-    expect($meta)->toContain(3);
-
-    $meta = Meta::withoutHistory('-15 minutes')
-        ->whereMetableId($model->id)->get()->pluck('value');
-
-    expect($meta)->toHaveCount(4);
-    expect($meta)->toContain('foo');
-    expect($meta)->toContain(1);
-    expect($meta)->toContain(2);
-    expect($meta)->toContain(3);
-
-    $meta = Meta::withoutHistory('-50 hours')
-        ->whereMetableId($model->id)->get()->pluck('value');
-
-    expect($meta)->toHaveCount(5);
-    expect($meta)->toContain('old');
-    expect($meta)->toContain('foo');
-    expect($meta)->toContain(1);
-    expect($meta)->toContain(2);
-    expect($meta)->toContain(3);
-});
-
 it('can include only current', function () {
     $this->travelBack();
 
@@ -327,9 +235,9 @@ it('can include only current', function () {
 
     $this->travelTo(Carbon::now()->addSeconds(10));
 
-    $metaModels = Meta::onlyCurrent()->get();
+    $metaModels = Meta::current()->get();
     $meta = $metaModels->pluck('value');
-    $modelMeta = $model->allMeta()->onlyCurrent()->get()->pluck('value');
+    $modelMeta = $model->meta()->get()->pluck('value');
 
     expect($meta)->toHaveCount(3, print_r($meta, true) . ' does not match a count of 3. Values were plucked from ' . print_r($metaModels->toArray(), true));
 
@@ -341,8 +249,8 @@ it('can include only current', function () {
     expect($meta)->toContain('foo');
     expect($meta)->toContain(2);
 
-    $meta = Meta::onlyCurrent(Carbon::now()->subMinutes(15))->get()->pluck('value');
-    $modelMeta = $model->allMeta()->onlyCurrent(Carbon::now()->subMinutes(15))->get()->pluck('value');
+    $meta = Meta::current(Carbon::now()->subMinutes(15))->get()->pluck('value');
+    $modelMeta = $model->withMetaAt(Carbon::now()->subMinutes(15))->meta()->get()->pluck('value');
 
     expect($meta)->toHaveCount(1);
     expect($meta)->toContain(1);
@@ -427,4 +335,79 @@ it('will reset cache when setting value', function () {
 
     expect($meta->value)->toBe(123);
     expect($this->getProtectedProperty($meta, 'cachedValue'))->toBe(123);
+});
+
+it('can be replicated', function () {
+    Post::factory()->has(Meta::factory())->create();
+
+    $meta = Meta::first();
+
+    $copy = $meta->replicate();
+    $copy->save();
+
+    expect($copy->is($meta))->toBeFalse();
+    expect($copy->key)->toEqual($meta->key);
+    expect($copy->value)->toEqual($meta->value);
+});
+
+it('can be replicated from parent model', function () {
+    $post = Post::factory()->has(Meta::factory())->create();
+
+    $meta = $post->meta()->first();
+
+    $copy = $meta->replicate();
+    $copy->save();
+
+    expect($copy->is($meta))->toBeFalse();
+    expect($copy->key)->toEqual($meta->key);
+    expect($copy->value)->toEqual($meta->value);
+});
+
+it('can be replicated from current scope', function () {
+    Post::factory()->has(Meta::factory())->create();
+
+    $meta = Meta::current()->first();
+
+    $copy = $meta->replicate();
+    $copy->save();
+
+    expect($copy->is($meta))->toBeFalse();
+    expect($copy->key)->toEqual($meta->key);
+    expect($copy->value)->toEqual($meta->value);
+});
+
+it('can scope current meta', function () {
+    $post = Post::factory()->create();
+
+    $post->saveMetaAt('foo', 'very old value', '-365 days');
+    $post->saveMetaAt('foo', 'current value', '-1 day');
+    $post->saveMetaAt('foo', 'old value', '-2 days');
+    $post->saveMetaAt('foo', 'future value', '+2 minutes');
+    $post->saveMetaAt('bar', 'let me see this', '-2 days');
+
+    foreach (['current', 'onlyCurrent'] as $scope) {
+        $meta = Meta::query()->{$scope}()->get()->pluck('value');
+
+        $this->assertCount(2, $meta);
+        $this->assertContains('current value', $meta);
+        $this->assertContains('let me see this', $meta);
+    }
+});
+
+it('can scope historic meta', function () {
+    $post = Post::factory()->create();
+
+    $post->saveMetaAt('foo', 'very old value', '-365 days');
+    $post->saveMetaAt('foo', 'current value', '-1 day');
+    $post->saveMetaAt('foo', 'old value', '-2 days');
+    $post->saveMetaAt('foo', 'future value', '+2 minutes');
+    $post->saveMetaAt('bar', 'let me see this', '-2 days');
+
+    foreach (['history', 'onlyHistory'] as $scope) {
+        $meta = Meta::query()->{$scope}()->get()->pluck('value');
+
+        $this->assertCount(2, $meta);
+        $this->assertContains('very old value', $meta);
+        $this->assertContains('old value', $meta);
+    }
 });

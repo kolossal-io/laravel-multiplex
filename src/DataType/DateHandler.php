@@ -65,9 +65,9 @@ class DateHandler implements HandlerInterface
         }
 
         try {
-            return tap(Carbon::createFromFormat($this->format, $value), fn ($date) => $this->setTime($date));
+            return tap(Carbon::createFromFormat($this->format, $value), fn($date) => $this->setTime($date));
         } catch (\Exception $e) {
-            return tap(Carbon::parse($value), fn ($date) => $this->setTime($date));
+            return tap(Carbon::parse($value), fn($date) => $this->setTime($date));
         }
     }
 
