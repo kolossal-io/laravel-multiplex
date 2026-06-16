@@ -8,10 +8,7 @@ use Kolossal\Multiplex\Tests\Mocks\Post;
 it('uses the configured column type', function (string $type, array $column_types) {
     $this->refreshDatabaseWithType($type);
 
-    if (version_compare(app()->version(), '10.0.0', '>')) {
-        expect($column_types)->toContain(Schema::getColumnType('meta', 'id'));
-    }
-
+    expect($column_types)->toContain(Schema::getColumnType('meta', 'id'));
     expect(config('multiplex.morph_type'))->toBe($type);
 
     $meta = Meta::factory()->make();

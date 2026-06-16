@@ -42,7 +42,7 @@ class ModelCollectionHandler implements HandlerInterface
         }
 
         $items = $value->mapWithKeys(
-            fn ($model, $key) => [$key => [
+            fn($model, $key) => [$key => [
                 'class' => get_class($model),
                 'key' => $model->exists ? $model->getKey() : null,
             ]]

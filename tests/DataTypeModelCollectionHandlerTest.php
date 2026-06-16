@@ -17,7 +17,7 @@ it('can handle non existing models', function () {
     expect($unserialized)->toBeInstanceOf(Collection::class);
     expect($unserialized)->toHaveCount(3);
 
-    $unserialized->every(fn ($item) => expect($item)->toBeInstanceOf(Post::class));
+    $unserialized->every(fn($item) => expect($item)->toBeInstanceOf(Post::class));
 });
 
 it('can handle existing models', function () {

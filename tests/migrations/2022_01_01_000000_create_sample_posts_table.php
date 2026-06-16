@@ -34,6 +34,7 @@ return new class extends Migration
         Schema::create('sample_posts', $callback);
         Schema::create('sample_posts_accessor', $callback);
         Schema::create('sample_posts_existing_column', $callback);
+        Schema::create('sample_posts_with_eager_loading', $callback);
         Schema::create('sample_posts_without_soft_delete', $callback);
     }
 
@@ -42,6 +43,7 @@ return new class extends Migration
         Schema::dropIfExists('sample_posts');
         Schema::dropIfExists('sample_posts_accessor');
         Schema::dropIfExists('sample_posts_existing_column');
+        Schema::dropIfExists('sample_posts_with_eager_loading');
         Schema::dropIfExists('sample_posts_without_soft_delete');
     }
 };

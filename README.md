@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-    <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/badge/Laravel-9.0+-green.svg?style=flat-square" alt="Laravel"></a>
+    <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/badge/Laravel-11.0+-green.svg?style=flat-square" alt="Laravel"></a>
     <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/packagist/v/kolossal-io/laravel-multiplex.svg?style=flat-square" alt="Latest Version on Packagist"></a>
     <a href="https://codecov.io/gh/kolossal-io/laravel-multiplex" > 
     <img src="https://codecov.io/gh/kolossal-io/laravel-multiplex/branch/main/graph/badge.svg?token=330354GI30"/> 
@@ -80,13 +80,11 @@ And it’s low profile: If you don't like it, just [remove the `HasMeta` Trait](
 
 ## Requirements
 
-Since Version 2 **Multiplex** uses **SQL Window Functions** (such as `ROW_NUMBER() OVER (...)`) for efficient and scalable queries on meta data (e.g., to determine the latest or current meta per key). This enables much better performance for large datasets compared to classic subqueries or group-by/aggregate approaches. Your database must support SQL Window Functions. This includes:
+Since Version 2 **Multiplex** uses **SQL Window Functions** (such as `ROW_NUMBER() OVER (...)`) for efficient and scalable queries on meta data (e.g., to determine the latest or current meta per key). This enables much better performance for large datasets compared to classic subqueries or group-by/aggregate approaches. Your database must support SQL Window Functions. This has been tested on:
 
 - MySQL **8.0+**
-- MariaDB **10.2+** (with limitations), best **10.4+**
-- PostgreSQL **9.0+**
+- PostgreSQL **12.0+**
 - SQLite **3.25+**
-- SQL Server **2012+**
 
 ## Installation
 
@@ -301,7 +299,7 @@ $post->pluckMeta();
  */
 ```
 
-If you instead want to retrieve all meta that was published yet, use the `publishedMeta` relation.
+If you instead want to retrieve all meta that was published yet, so also include historic meta, use the `publishedMeta` relation.
 
 ```php
 // This array will also include `Jimi Hendrix´.
@@ -314,6 +312,18 @@ If you want to inspect _all_ metadata including unpublished records, use the `al
 $post->allMeta->toArray();
 ```
 
+If you want to inspect _historic_ metadata including only records that are not valid anymore, use the `historicMeta` relation.
+
+```php
+$post->historicMeta->toArray();
+```
+
+There is also a `plannedMeta` relation that can be used to inspect meta not yet published.
+
+```php
+$post->plannedMeta->toArray();
+```
+
 You can determine if a `Meta` instance is the most recent published record for the related model or if it is not yet released.
 
 ```php
@@ -322,6 +332,8 @@ $meta = $post->allMeta->first();
 $meta->is_current; // (bool)
 $meta->is_planned; // (bool)
 ```
+
+Please note that the `is_current` attribute is quite heavy, since it will first have to load the most recent meta of the corresponding model to check against.
 
 ### Querying `Meta` Model
 
@@ -336,21 +348,28 @@ Meta::publishedBefore('+1 week')->get(); // Only meta published by next week.
 
 Meta::publishedAfter('+1 week')->get(); // Only meta still unpublished in a week.
 
-Meta::onlyCurrent()->get(); // Only current meta without planned or historic data.
+Meta::current()->get(); // Only current meta without planned or historic data.
 
-Meta::withoutHistory()->get(); // Query without stale records.
-
-Meta::withoutCurrent()->get(); // Query without current records.
+Meta::history()->get(); // Only historic meta that is not valid anymore.
 ```
 
 By default these functions will use `Carbon::now()` to determine what metadata is considered the most recent, but you can also pass a datetime to look from.
 
 ```php
 // Get records that have been current a month ago.
-Meta::onlyCurrent('-1 month')->get();
+Meta::current('-1 month')->get();
+```
 
-// Get records that will not be history by tommorow.
-Meta::withoutHistory(Carbon::now()->addDay())->get();
+The `current` and `history` scopes are not available on any of the `meta` relations. Use the `meta` and `historicMeta` relations instead.
+
+```php
+// This will NOT work.
+$model->allMeta()->current()->get();
+$model->allMeta()->history()->get();
+
+// Use the specific relations instead.
+$model->meta()->get();
+$model->historicMeta()->get();
 ```
 
 ## Query by Metadata

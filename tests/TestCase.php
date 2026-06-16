@@ -13,7 +13,7 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Kolossal\\Multiplex\\Tests\\Factories\\' . class_basename($modelName) . 'Factory'
+            fn(string $modelName) => 'Kolossal\\Multiplex\\Tests\\Factories\\' . class_basename($modelName) . 'Factory'
         );
     }
 
