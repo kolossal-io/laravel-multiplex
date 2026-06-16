@@ -1,3 +1,51 @@
+# [3.0.0](https://github.com/kolossal-io/laravel-multiplex/compare/v2.0.2...v3.0.0) (2026-06-16)
+
+
+* feat!: change the way meta models are related ([ce62b7d](https://github.com/kolossal-io/laravel-multiplex/commit/ce62b7d8bb3f5c97839b75b46f1cc260ccdb5e91)), closes [#82](https://github.com/kolossal-io/laravel-multiplex/issues/82)
+
+
+### BREAKING CHANGES
+
+* Laravel 11+ is required now
+* Removed `withoutCurrent`, `withoutHistory` and `joinLatest` scopes in favor of `current` (or `onlyCurrent`) and `history` (or `onlyHistory`) scopes.
+* The `onlyCurrent` scope can no longer be used on any of the `meta` relations, but you can still use it on the `Meta` model directly, like `Meta::onlyCurrent()`.
+
+* feat: change the way meta models are related
+
+- Refactored meta relationship logic to use SQL Window Functions and custom Eloquent builder/relation classes for latest/historic meta queries.
+- Introduced `MetaBuilder` and `LatestMetaRelation` for advanced meta querying with window functions.
+- Changed `allMeta`, `meta`, `publishedMeta`, `plannedMeta`, and `historicMeta` relationships to use the new relation logic.
+
+* style: reformat code
+
+* docs: add upgrade note
+
+* fix: only select `id` in relation query
+
+* feat: remove support for Laravel 9 and 10
+
+* test: use random values in meta factory
+
+* test: make sure meta factory keys are unique
+
+* ci: update workflows and change changelog management
+
+* fix: use database grammer to wrap column names
+
+* ci: add tests for `mysql` and `pgsql` drivers
+
+* style: fix types
+
+* ci: update test workflow
+
+* fix: use different name for window function id aggregate
+
+* test: add compatibility fixes for unique id tests in postgresql
+
+* fix: change testing workflow
+
+* test: remove outdated test comparsions
+
 ## [2.0.2](https://github.com/kolossal-io/laravel-multiplex/compare/v2.0.1...v2.0.2) (2026-04-22)
 
 
