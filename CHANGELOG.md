@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/kolossal-io/laravel-multiplex/compare/v3.0.0...v3.0.1) (2026-09-22)
+
+
+### Bug Fixes
+
+* **deps-dev:** update pestphp/pest and pestphp/pest-plugin-laravel to support version 5.0 ([9e22dd1](https://github.com/kolossal-io/laravel-multiplex/commit/9e22dd1005406f6ad7a84545d0d1030777da051e))
+
 # [3.0.0](https://github.com/kolossal-io/laravel-multiplex/compare/v2.0.2...v3.0.0) (2026-06-16)
 
 
