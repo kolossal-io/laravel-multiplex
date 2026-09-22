@@ -190,7 +190,7 @@ class Meta extends Model
         /**
          * @disregard P1014
          *
-         * @phpstan-ignore property.notFound,nullsafe.neverNull
+         * @phpstan-ignore property.notFound
          * */
         return $this->metable?->meta
             ?->first(fn(Meta $meta) => $meta->key === $this->key)

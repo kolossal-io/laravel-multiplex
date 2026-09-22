@@ -76,7 +76,7 @@ class ModelCollectionHandler implements HandlerInterface
         /** @var Collection<string, Model> */
         $collection = new $data['class'];
 
-        /** @var array<string, array<string, string|int|null>> */
+        /** @var array<string, array{class: string, key: string|int|null}> */
         $items = $data['items'];
 
         $models = $this->loadModels($items);
@@ -85,7 +85,7 @@ class ModelCollectionHandler implements HandlerInterface
         foreach ($items as $key => $item) {
             if (is_null($item['key']) && ($model = new $item['class']) instanceof Model) {
                 $collection->put($key, $model);
-            } elseif (isset($models[$item['class']][$item['key']])) {
+            } elseif (!is_null($item['key']) && isset($models[$item['class']][$item['key']])) {
                 $collection->put($key, $models[$item['class']][$item['key']]);
             }
         }
@@ -96,7 +96,7 @@ class ModelCollectionHandler implements HandlerInterface
     /**
      * Load each model instance, grouped by class.
      *
-     * @param  array<string, array<string, string|int|null>>  $items
+     * @param  array<string, array{class: string, key: string|int|null}>  $items
      * @return array<int|string, Collection<int|string, Model>>
      */
     private function loadModels(array $items): array
