@@ -1,3 +1,11 @@
+## [3.0.2](https://github.com/kolossal-io/laravel-multiplex/compare/v3.0.1...v3.0.2) (2026-10-13)
+
+
+### Bug Fixes
+
+* ship MetaFactory so Meta::factory() works in consuming apps ([e7ef93c](https://github.com/kolossal-io/laravel-multiplex/commit/e7ef93c98502be66668fbd28e480012f015301f5))
+* validate meta timestamps and the configured meta model ([4cb9e44](https://github.com/kolossal-io/laravel-multiplex/commit/4cb9e4492c086267a4bc0dd0d9fb0a56c66bcf5e))
+
 ## [3.0.1](https://github.com/kolossal-io/laravel-multiplex/compare/v3.0.0...v3.0.1) (2026-09-22)
 
 
