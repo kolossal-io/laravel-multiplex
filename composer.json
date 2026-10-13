@@ -23,7 +23,7 @@
         "illuminate/contracts": "^11.0|^12.0|^13.0"
     },
     "require-dev": {
-        "larastan/larastan": "^2.0.1|^3.0",
+        "larastan/larastan": "^3.0",
         "laravel/pint": "^1.0",
         "mattiasgeniar/phpunit-query-count-assertions": "^1.1",
         "mockery/mockery": "^1.6",
