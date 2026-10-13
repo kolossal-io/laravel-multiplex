@@ -6,9 +6,7 @@ parameters:
     paths:
         - src
         - database
-    excludePaths:
-        analyse:
-            - src/HasMeta.php
+        - tests/PHPStan
     tmpDir: build/phpstan
     checkOctaneCompatibility: true
     checkModelProperties: true

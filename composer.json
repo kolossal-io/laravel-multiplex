@@ -9,7 +9,7 @@
         "meta",
         "metadata"
     ],
-    "homepage": "https://github.com/Kolossal-io/laravel-multiplex",
+    "homepage": "https://github.com/kolossal-io/laravel-multiplex",
     "license": "MIT",
     "authors": [
         {
@@ -23,7 +23,7 @@
         "illuminate/contracts": "^11.0|^12.0|^13.0"
     },
     "require-dev": {
-        "larastan/larastan": "^2.0.1|^3.0",
+        "larastan/larastan": "^3.0",
         "laravel/pint": "^1.0",
         "mattiasgeniar/phpunit-query-count-assertions": "^1.1",
         "mockery/mockery": "^1.6",
@@ -38,12 +38,13 @@
     "autoload": {
         "psr-4": {
             "Kolossal\\Multiplex\\": "src",
-            "Kolossal\\Multiplex\\Tests\\Factories\\": "tests/factories"
+            "Kolossal\\Multiplex\\Database\\Factories\\": "database/factories"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Kolossal\\Multiplex\\Tests\\": "tests"
+            "Kolossal\\Multiplex\\Tests\\": "tests",
+            "Kolossal\\Multiplex\\Tests\\Factories\\": "tests/factories"
         }
     },
     "scripts": {

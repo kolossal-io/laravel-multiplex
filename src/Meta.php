@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 use Kolossal\Multiplex\Database\Eloquent\MetaBuilder;
+use Kolossal\Multiplex\Database\Factories\MetaFactory;
 use Kolossal\Multiplex\DataType\Registry;
-use Kolossal\Multiplex\Tests\Factories\MetaFactory;
 
 /**
  * Kolossal\Multiplex\Meta
@@ -26,6 +26,7 @@ use Kolossal\Multiplex\Tests\Factories\MetaFactory;
  * @property-read bool $is_current
  * @property-read bool $is_planned
  * @property-read ?string $raw_value
+ * @property-read int|null $meta_row_num
  * @property-read MorphTo<Model,Meta> $metable
  *
  * @method static MetaBuilder|Meta newModelQuery()
@@ -107,6 +108,11 @@ class Meta extends Model
                 unset($model->attributes['meta_row_num']);
             }
         });
+    }
+
+    protected static function newFactory(): MetaFactory
+    {
+        return MetaFactory::new();
     }
 
     /**
@@ -365,7 +371,6 @@ class Meta extends Model
             ->publishedBefore($now);
 
         $query->fromSub($window, 'meta')
-            /** @phpstan-ignore argument.type */
             ->where('meta_row_num', '>', 1);
     }
 
@@ -406,7 +411,6 @@ class Meta extends Model
             ->publishedBefore($now);
 
         $query->fromSub($window, 'meta')
-            /** @phpstan-ignore argument.type */
             ->where('meta_row_num', 1);
     }
 

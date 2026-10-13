@@ -2,7 +2,10 @@
 
 namespace Kolossal\Multiplex;
 
+use Carbon\Month;
+use Carbon\WeekDay;
 use Closure;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,10 +14,13 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
+use Kolossal\Multiplex\Database\Eloquent\MetaBuilder;
 use Kolossal\Multiplex\Database\Eloquent\Relations\LatestMetaRelation;
 use Kolossal\Multiplex\Events\MetaHasBeenAdded;
 use Kolossal\Multiplex\Events\MetaHasBeenRemoved;
 use Kolossal\Multiplex\Exceptions\MetaException;
+use Stringable;
 
 trait HasMeta
 {
@@ -28,22 +34,28 @@ trait HasMeta
     /**
      * Cached array of explicitly allowed meta keys.
      *
-     * @var array<string>
+     * @var array<string>|null
      */
     protected ?array $explicitlyAllowedMetaKeys = null;
 
     /**
      * Collection of the changed meta data for this model.
+     *
+     * @var Collection<string, Meta>|null
      */
     protected ?Collection $metaChanges = null;
 
     /**
      * Collection database columns overridden by meta.
+     *
+     * @var Collection<string, mixed>|null
      */
     protected ?Collection $fallbackValues = null;
 
     /**
      * Cache storage for table column names.
+     *
+     * @var array<class-string, array<string>>
      */
     protected static array $metaSchemaColumnsCache = [];
 
@@ -74,7 +86,7 @@ trait HasMeta
      */
     public static function bootHasMeta(): void
     {
-        static::retrieved(function (Model $model) {
+        static::retrieved(function (self $model) {
             foreach ($model->getExplicitlyAllowedMetaKeys() as $key) {
                 if (isset($model->attributes[$key])) {
                     $model->setFallbackValue($key, Arr::pull($model->attributes, $key));
@@ -82,13 +94,13 @@ trait HasMeta
             }
         });
 
-        static::saved(function (Model $model) {
+        static::saved(function (self $model) {
             if ($model->autosaveMeta === true) {
                 $model->saveMeta();
             }
         });
 
-        static::deleted(function (Model $model) {
+        static::deleted(function (self $model) {
             if (
                 $model->autosaveMeta === true
                 && !in_array(SoftDeletes::class, class_uses($model))
@@ -98,7 +110,7 @@ trait HasMeta
         });
 
         if (method_exists(__CLASS__, 'forceDeleted')) {
-            static::forceDeleted(function (Model $model) {
+            static::registerModelEvent('forceDeleted', function (self $model) {
                 if ($model->autosaveMeta === true) {
                     $model->purgeMeta();
                 }
@@ -150,10 +162,10 @@ trait HasMeta
     public function getFallbackValue(string $key)
     {
         return with($this->fallbackValues?->get($key), function ($value) use ($key) {
-            if ($value && ($type = $this->getCastForMetaKey($key))) {
+            if ($value && is_scalar($value) && ($type = $this->getCastForMetaKey($key))) {
                 return $this->getMetaClassName()::getDataTypeRegistry()
                     ->getHandlerForType($type)
-                    ->unserializeValue($value);
+                    ->unserializeValue((string) $value);
             }
 
             return $value;
@@ -172,6 +184,8 @@ trait HasMeta
 
     /**
      * Get the value from the $metaKeys property if set or a fallback.
+     *
+     * @return array<mixed>
      */
     protected function getMetaKeysProperty(): array
     {
@@ -189,9 +203,10 @@ trait HasMeta
      */
     public function getMetaKeys(): array
     {
-        return collect($this->getMetaKeysProperty())->map(
-            fn($value, $key) => is_string($key) ? $key : $value
-        )->toArray();
+        return collect($this->getMetaKeysProperty())
+            ->map(fn($value, $key) => is_string($key) ? $key : $value)
+            ->filter(fn($key) => is_string($key))
+            ->all();
     }
 
     /**
@@ -199,20 +214,16 @@ trait HasMeta
      */
     public function getCastForMetaKey(string $key): ?string
     {
-        /** @var ?string $cast */
-        $cast = with(
-            $this->getMetaKeysProperty(),
-            fn($metaKeys) => isset($metaKeys[$key]) ? $metaKeys[$key] : null
-        );
+        $cast = $this->getMetaKeysProperty()[$key] ?? null;
 
-        return $cast;
+        return is_string($cast) ? $cast : null;
     }
 
     /**
      * Get or set the allowed meta keys for the model.
      *
-     * @param  array<string>|null  $fillable
-     * @return $this
+     * @param  array<string>|null  $metaKeys
+     * @return array<mixed>
      */
     public function metaKeys(?array $metaKeys = null): array
     {
@@ -258,6 +269,8 @@ trait HasMeta
     /**
      * Get the meta keys explicitly allowed by using `$metaKeys`
      * or by typecasting to `MetaAttribute::class`.
+     *
+     * @return array<string>
      */
     public function getExplicitlyAllowedMetaKeys(bool $fromCache = true): array
     {
@@ -271,7 +284,7 @@ trait HasMeta
             ->concat($this->getMetaKeys())
             ->filter(fn($key) => $key !== '*')
             ->unique()
-            ->toArray();
+            ->all();
     }
 
     /**
@@ -305,7 +318,7 @@ trait HasMeta
     /**
      * Determine if model table has a given column.
      *
-     * @param  [string]  $column
+     * @param  string  $column
      */
     public function hasColumn($column): bool
     {
@@ -316,7 +329,7 @@ trait HasMeta
                 $this->getConnection()
                     ->getSchemaBuilder()
                     ->getColumnListing($this->getTable()) ?? []
-            )->map(fn($item) => strtolower($item))->toArray();
+            )->map(fn($item) => strtolower($item))->all();
         }
 
         return in_array(strtolower($column), static::$metaSchemaColumnsCache[$class]);
@@ -345,6 +358,10 @@ trait HasMeta
         return static::$staticMetaTimestamp ?? Carbon::now();
     }
 
+    /**
+     * @param  (Closure(MetaBuilder<Meta>): void)|null  $where
+     * @return LatestMetaRelation<Meta, $this>
+     */
     public function morphMeta(?Closure $where = null): LatestMetaRelation
     {
         $instance = $this->newRelatedInstance($this->getMetaClassName());
@@ -361,6 +378,8 @@ trait HasMeta
 
     /**
      * Relationship to all `Meta` models associated with this model.
+     *
+     * @return LatestMetaRelation<Meta, $this>
      */
     public function allMeta(): LatestMetaRelation
     {
@@ -369,30 +388,36 @@ trait HasMeta
 
     /**
      * Relationship to only published `Meta` models associated with this model.
+     *
+     * @return LatestMetaRelation<Meta, $this>
      */
     public function publishedMeta(): LatestMetaRelation
     {
-        return $this->morphMeta(function (Builder $query) {
+        return $this->morphMeta(function ($query) {
             $query->where('published_at', '<=', $this->getMetaTimestamp());
         });
     }
 
     /**
      * Relationship to only `Meta` models that are not yet published.
+     *
+     * @return LatestMetaRelation<Meta, $this>
      */
     public function plannedMeta(): LatestMetaRelation
     {
-        return $this->morphMeta(function (Builder $query) {
+        return $this->morphMeta(function ($query) {
             $query->where('published_at', '>', $this->getMetaTimestamp());
         });
     }
 
     /**
      * Relationship to only `Meta` models that were published in the past.
+     *
+     * @return LatestMetaRelation<Meta, $this>
      */
     public function historicMeta(): LatestMetaRelation
     {
-        return $this->morphMeta(function (Builder $query) {
+        return $this->morphMeta(function ($query) {
             $query->where('published_at', '<=', $this->getMetaTimestamp());
         })->where('meta_row_num', '>', 1);
     }
@@ -400,20 +425,30 @@ trait HasMeta
     /**
      * Relationship to the `Meta` model.
      * Groups by `key` and only shows the latest item that is published yet.
+     *
+     * @return LatestMetaRelation<Meta, $this>
      */
     public function meta(): LatestMetaRelation
     {
-        return $this->morphMeta(function (Builder $query) {
+        return $this->morphMeta(function ($query) {
             $query->where('published_at', '<=', $this->getMetaTimestamp());
         })->where('meta_row_num', 1);
     }
 
     /**
      * Get Meta model class name.
+     *
+     * @return class-string<Meta>
      */
     protected function getMetaClassName(): string
     {
-        return config('multiplex.model', Meta::class);
+        $class = config('multiplex.model', Meta::class);
+
+        if (!is_string($class) || !is_a($class, Meta::class, true)) {
+            throw MetaException::invalidModel();
+        }
+
+        return $class;
     }
 
     /**
@@ -424,11 +459,13 @@ trait HasMeta
      */
     public function getMeta(string $key, $default = null)
     {
-        return $this->findMeta($key)?->value ?? $default;
+        return $this->findMeta($key)->value ?? $default;
     }
 
     /**
      * Get all meta values as a key => value collection.
+     *
+     * @return Collection<string, mixed>
      */
     public function pluckMeta(bool $withFallbackValues = false): Collection
     {
@@ -439,6 +476,10 @@ trait HasMeta
 
     /**
      * Get the attribute for the given key and run it through the meta accessor.
+     *
+     * @param  string  $key
+     * @param  mixed  $value
+     * @return mixed
      */
     protected function getAttributeFromMetaAccessor($key, $value = null)
     {
@@ -518,6 +559,8 @@ trait HasMeta
 
     /**
      * Get the dirty meta collection.
+     *
+     * @return Collection<string, Meta>
      */
     public function getDirtyMeta(): Collection
     {
@@ -538,8 +581,9 @@ trait HasMeta
     /**
      * Add or update the value of the `Meta` at a given key.
      *
-     * @param  string|array  $key
+     * @param  string|array<string, mixed>  $key
      * @param  mixed  $value
+     * @return Meta|Collection<string, Meta>
      *
      * @throws MetaException if invalid key is used.
      */
@@ -554,25 +598,32 @@ trait HasMeta
 
     /**
      * Publish the given meta data at the specified time.
+     * When passing an array of key value pairs, `$value` will be considered the publishing time.
      *
-     * @param  string|array  $key
+     * @param  string|array<string, mixed>  $key
      * @param  mixed  $value
      * @param  string|DateTimeInterface|null  $publishAt
+     * @return Meta|Collection<string, Meta>
      *
      * @throws MetaException if invalid key is used.
      */
     public function setMetaAt($key, $value = null, $publishAt = null)
     {
-        if (func_num_args() === 2 && is_array($key)) {
-            return $this->setMetaFromArray($key, Carbon::parse($value));
+        if (is_array($key)) {
+            return $this->setMetaFromArray(
+                $key,
+                $this->parseMetaTimestamp(func_num_args() === 2 ? $value : $publishAt)
+            );
         }
 
-        return $this->setMetaFromString($key, $value, Carbon::parse($publishAt));
+        return $this->setMetaFromString($key, $value, $this->parseMetaTimestamp($publishAt));
     }
 
     /**
      * Set meta values from array of $key => $value pairs.
      *
+     * @param  array<string, mixed>  $metas
+     * @return Collection<string, Meta>
      *
      * @throws MetaException if invalid keys are used.
      */
@@ -670,6 +721,8 @@ trait HasMeta
     /**
      * Reset the meta changes collection for the given key.
      * Resets the entire collection if nothing is passed.
+     *
+     * @return Collection<string, Meta>
      */
     public function resetMetaChanges(?string $key = null): Collection
     {
@@ -684,6 +737,8 @@ trait HasMeta
 
     /**
      * Reset the meta changes for the given key.
+     *
+     * @return Collection<string, Meta>
      */
     public function resetMeta(string $key): Collection
     {
@@ -717,13 +772,16 @@ trait HasMeta
                     throw MetaException::invalidKey($key);
                 }
             })
-            ->filter(function ($key) {
+            ->filter(function (string $key): bool {
                 $latest = $this->findMeta($key);
 
-                return tap(
-                    $this->allMeta()->where('meta.key', $key)->delete(),
-                    fn($deleted) => $deleted && $latest && event(new MetaHasBeenRemoved($latest))
-                );
+                $deleted = (bool) $this->allMeta()->where('meta.key', $key)->delete();
+
+                if ($deleted && $latest) {
+                    event(new MetaHasBeenRemoved($latest));
+                }
+
+                return $deleted;
             });
 
         // @codeCoverageIgnoreStart
@@ -757,6 +815,8 @@ trait HasMeta
 
     /**
      * Get the locally collected meta data.
+     *
+     * @return Collection<string, Meta>
      */
     public function getMetaChanges(): Collection
     {
@@ -809,9 +869,7 @@ trait HasMeta
         /**
          * If `$metaTimestamp` is set we probably are storing meta for the future or past.
          */
-        if ($currentTime = $this->getMetaTimestamp()) {
-            $meta->published_at ??= $currentTime;
-        }
+        $meta->published_at ??= $this->getMetaTimestamp();
 
         return tap(
             $this->allMeta()->save($meta),
@@ -824,7 +882,7 @@ trait HasMeta
      * Returns `true` if all meta was saved successfully
      * or the `Meta` model if only one key value pair was submitted.
      *
-     * @param  string|array|null  $key
+     * @param  string|array<string, mixed>|null  $key
      * @param  mixed|null  $value
      * @return bool|Meta
      *
@@ -836,6 +894,10 @@ trait HasMeta
          * If we have exactly two arguments set and save the value for the given key.
          */
         if (func_num_args() === 2) {
+            if ($key === null) {
+                throw MetaException::invalidKey('');
+            }
+
             $this->setMeta($key, $value);
 
             return $this->saveMeta($key);
@@ -850,8 +912,14 @@ trait HasMeta
          * If no arguments were passed, all changes should be persisted.
          */
         if (func_num_args() === 0) {
-            return tap($changes->every(function (Meta $meta, $key) use ($changes) {
-                return tap($this->storeMeta($meta), fn($saved) => $saved && $changes->forget($key));
+            return tap($changes->every(function (Meta $meta, string $key) use ($changes): bool {
+                $saved = (bool) $this->storeMeta($meta);
+
+                if ($saved) {
+                    $changes->forget($key);
+                }
+
+                return $saved;
             }), fn() => $this->refreshMetaRelations());
         }
 
@@ -867,7 +935,7 @@ trait HasMeta
          * Otherwise pull and delete the given key from the array of changes and
          * persist the change. Refresh the relations afterwards to prevent stale data.
          */
-        if (!$changes->has($key)) {
+        if ($key === null || !$changes->has($key)) {
             return false;
         }
 
@@ -883,8 +951,9 @@ trait HasMeta
 
     /**
      * Immediately save the given meta for a specific publishing time.
+     * The last argument passed will always be considered the publishing time.
      *
-     * @param  string|array  $key
+     * @param  string|array<string, mixed>|null  $key
      * @param  mixed  $value
      * @param  string|DateTimeInterface|null  $publishAt
      * @return bool|Meta
@@ -893,13 +962,22 @@ trait HasMeta
      */
     public function saveMetaAt($key = null, $value = null, $publishAt = null)
     {
-        $args = func_get_args();
+        $args = func_num_args();
 
         $previousTimestamp = $this->metaTimestamp;
-        $this->setMetaTimestamp(Carbon::parse(array_pop($args)));
+
+        $this->setMetaTimestamp($this->parseMetaTimestamp(match ($args) {
+            0, 1 => $key,
+            2 => $value,
+            default => $publishAt,
+        }));
 
         return tap(
-            $this->saveMeta(...$args),
+            match ($args) {
+                0, 1 => $this->saveMeta(),
+                2 => $this->saveMeta($key),
+                default => $this->saveMeta($key, $value),
+            },
             fn() => $this->setMetaTimestamp($previousTimestamp)
         );
     }
@@ -923,18 +1001,7 @@ trait HasMeta
      */
     public function withMetaAt($time = null): self
     {
-        $time = $time ? Carbon::parse($time) : null;
-
-        if (
-            gettype($this->metaTimestamp) !== gettype($time)
-            || !$this->metaTimestamp?->equalTo($time)
-        ) {
-            $this->refreshMetaRelations();
-        }
-
-        $this->setMetaTimestamp($time);
-
-        return $this;
+        return $this->setMetaTimestamp($time ? $this->parseMetaTimestamp($time) : null);
     }
 
     /**
@@ -946,17 +1013,47 @@ trait HasMeta
     }
 
     /**
+     * Parse the given time to use when storing or retrieving meta.
+     * Accepts everything `Carbon::parse()` accepts, plus stringable objects.
+     *
+     * @param  mixed  $time
+     */
+    protected function parseMetaTimestamp($time): Carbon
+    {
+        if ($time instanceof Stringable && !$time instanceof DateTimeInterface) {
+            $time = (string) $time;
+        }
+
+        if (
+            $time !== null
+            && !is_string($time)
+            && !is_int($time)
+            && !is_float($time)
+            && !$time instanceof DateTimeInterface
+            && !$time instanceof WeekDay
+            && !$time instanceof Month
+        ) {
+            throw new InvalidArgumentException('Meta timestamp must be a string, a number, a DateTimeInterface or null.');
+        }
+
+        return Carbon::parse($time);
+    }
+
+    /**
      * Travel to the specified point in time for storing or retrieving meta.
      *
+     * @param  Builder<static>  $query
      * @param  string|DateTimeInterface|null  $time
      */
     public function scopeTravelTo(Builder $query, $time = null): void
     {
-        static::$staticMetaTimestamp = $time ? Carbon::parse($time) : null;
+        static::$staticMetaTimestamp = $time ? $this->parseMetaTimestamp($time) : null;
     }
 
     /**
      * Travel to the current time for storing or retrieving meta.
+     *
+     * @param  Builder<static>  $query
      */
     public function scopeTravelBack(Builder $query): void
     {
@@ -967,14 +1064,15 @@ trait HasMeta
      * Query records having meta data for the given key.
      * Pass an array to find records having meta for at least one of the given keys.
      *
-     * @param  string|array  $key
+     * @param  Builder<static>  $query
+     * @param  string|array<string>  $key
      */
     public function scopeWhereHasMeta(Builder $query, $key, string $boolean = 'and'): void
     {
         $keys = is_array($key) ? $key : [$key];
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
-        $query->{$method}('allMeta', function (Builder $query) use ($keys) {
+        $query->{$method}('allMeta', function ($query) use ($keys) {
             $query->publishedBefore($this->getMetaTimestamp())->whereIn('key', $keys);
         });
     }
@@ -983,7 +1081,8 @@ trait HasMeta
      * Query records having meta data for the given key with "or" where clause.
      * Pass an array to find records having meta for at least one of the given keys.
      *
-     * @param  string|array  $key
+     * @param  Builder<static>  $query
+     * @param  string|array<string>  $key
      */
     public function scopeOrWhereHasMeta(Builder $query, $key): void
     {
@@ -994,23 +1093,25 @@ trait HasMeta
      * Query records not having meta data for the given key.
      * Pass an array to find records not having meta for any of the given keys.
      *
-     * @param  string|array  $key
+     * @param  Builder<static>  $query
+     * @param  string|array<string>  $key
      */
     public function scopeWhereDoesntHaveMeta(Builder $query, $key, string $boolean = 'and'): void
     {
         $keys = is_array($key) ? $key : [$key];
         $method = $boolean === 'or' ? 'orWhereDoesntHave' : 'whereDoesntHave';
 
-        $query->{$method}('allMeta', function (Builder $query) use ($keys) {
+        $query->{$method}('allMeta', function ($query) use ($keys) {
             $query->publishedBefore($this->getMetaTimestamp())->whereIn('key', $keys);
-        }, '=', count($keys));
+        });
     }
 
     /**
-     * Query records not having meta data for the given key  with "or" where clause..
+     * Query records not having meta data for the given key with "or" where clause.
      * Pass an array to find records not having meta for any of the given keys.
      *
-     * @param  string|array  $key
+     * @param  Builder<static>  $query
+     * @param  string|array<string>  $key
      */
     public function scopeOrWhereDoesntHaveMeta(Builder $query, $key): void
     {
@@ -1021,6 +1122,7 @@ trait HasMeta
      * Query records having meta with a specific key and value.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
      *
+     * @param  Builder<static>  $query
      * @param  string|Closure  $key
      * @param  mixed  $operator
      * @param  mixed  $value
@@ -1035,7 +1137,7 @@ trait HasMeta
 
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
-        $query->{$method}('allMeta', function (Builder $query) use ($key, $operator, $value) {
+        $query->{$method}('allMeta', function ($query) use ($key, $operator, $value) {
             $query->current($this->getMetaTimestamp())
                 ->where(
                     $key instanceof Closure
@@ -1049,6 +1151,7 @@ trait HasMeta
      * Query records having meta with a specific key and value with "or" clause.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
      *
+     * @param  Builder<static>  $query
      * @param  string|Closure  $key
      * @param  mixed  $operator
      * @param  mixed  $value
@@ -1063,6 +1166,7 @@ trait HasMeta
      * Make sure that the supplied $value is a string or string castable.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
      *
+     * @param  Builder<static>  $query
      * @param  mixed  $operator
      * @param  mixed  $value
      * @param  string  $boolean
@@ -1076,7 +1180,7 @@ trait HasMeta
 
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
-        $query->{$method}('allMeta', function (Builder $query) use ($key, $operator, $value) {
+        $query->{$method}('allMeta', function ($query) use ($key, $operator, $value) {
             $query->current($this->getMetaTimestamp())
                 ->where('meta.key', $key)->where('value', $operator, $value);
         });
@@ -1087,6 +1191,7 @@ trait HasMeta
      * Make sure that the supplied $value is a string or string castable.
      * If the `$value` parameter is omitted, the $operator parameter will be considered the value.
      *
+     * @param  Builder<static>  $query
      * @param  mixed  $operator
      * @param  mixed  $value
      */
@@ -1101,6 +1206,7 @@ trait HasMeta
      *
      * Available types can be found in `config('multiplex.datatypes')`.
      *
+     * @param  Builder<static>  $query
      * @param  mixed  $operator
      * @param  mixed  $value
      * @param  string  $boolean
@@ -1114,7 +1220,7 @@ trait HasMeta
 
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
-        $query->{$method}('allMeta', function (Builder $query) use ($type, $key, $operator, $value) {
+        $query->{$method}('allMeta', function ($query) use ($type, $key, $operator, $value) {
             $query->current($this->getMetaTimestamp())
                 ->where('meta.key', $key)->whereValue($value, $operator, $type);
         });
@@ -1126,6 +1232,7 @@ trait HasMeta
      *
      * Available types can be found in `config('multiplex.datatypes')`.
      *
+     * @param  Builder<static>  $query
      * @param  mixed  $operator
      * @param  mixed  $value
      */
@@ -1137,13 +1244,15 @@ trait HasMeta
     /**
      * Query records having one of the given values for the given key.
      *
+     * @param  Builder<static>  $query
+     * @param  array<mixed>  $values
      * @param  string  $boolean
      */
     public function scopeWhereMetaIn(Builder $query, string $key, array $values, $boolean = 'and'): void
     {
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
-        $query->{$method}('allMeta', function (Builder $query) use ($key, $values) {
+        $query->{$method}('allMeta', function ($query) use ($key, $values) {
             $query->current($this->getMetaTimestamp())
                 ->where('meta.key', $key)->whereValueIn($values);
         });
@@ -1151,6 +1260,9 @@ trait HasMeta
 
     /**
      * Query records having one of the given values for the given key with "or" clause.
+     *
+     * @param  Builder<static>  $query
+     * @param  array<mixed>  $values
      */
     public function scopeOrWhereMetaIn(Builder $query, string $key, array $values): void
     {
@@ -1160,7 +1272,8 @@ trait HasMeta
     /**
      * Query records where meta does not exist or is empty.
      *
-     * @param  string|array  $key
+     * @param  Builder<static>  $query
+     * @param  string|array<string>  $key
      */
     public function scopeWhereMetaEmpty(Builder $query, $key, string $boolean = 'and'): void
     {
@@ -1168,7 +1281,7 @@ trait HasMeta
 
         $query->where(function (Builder $query) use ($keys) {
             $query->whereDoesntHaveMeta($keys)->orWhereMeta(
-                fn(Builder $q) => $q->whereIn('meta.key', $keys)->whereValueEmpty()
+                fn($q) => $q->whereIn('meta.key', $keys)->whereValueEmpty()
             );
         }, null, null, $boolean);
     }
@@ -1176,7 +1289,8 @@ trait HasMeta
     /**
      * Query records where meta does not exist or is empty with "or" clause.
      *
-     * @param  string|array  $key
+     * @param  Builder<static>  $query
+     * @param  string|array<string>  $key
      */
     public function scopeOrWhereMetaEmpty(Builder $query, $key): void
     {
@@ -1186,14 +1300,15 @@ trait HasMeta
     /**
      * Query records where meta exists and is not empty.
      *
-     * @param  string|array  $key
+     * @param  Builder<static>  $query
+     * @param  string|array<string>  $key
      */
     public function scopeWhereMetaNotEmpty(Builder $query, $key, string $boolean = 'and'): void
     {
         $keys = is_array($key) ? $key : [$key];
         $method = $boolean === 'or' ? 'orWhereHas' : 'whereHas';
 
-        $query->{$method}('allMeta', function (Builder $query) use ($keys) {
+        $query->{$method}('allMeta', function ($query) use ($keys) {
             $query->current($this->getMetaTimestamp())
                 ->whereIn('meta.key', $keys)
                 ->whereValueNotEmpty();
@@ -1203,7 +1318,8 @@ trait HasMeta
     /**
      * Query records where meta exists and is not empty with "or" clause.
      *
-     * @param  string|array  $key
+     * @param  Builder<static>  $query
+     * @param  string|array<string>  $key
      */
     public function scopeOrWhereMetaNotEmpty(Builder $query, $key): void
     {
