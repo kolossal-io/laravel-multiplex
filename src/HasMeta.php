@@ -2,6 +2,8 @@
 
 namespace Kolossal\Multiplex;
 
+use Carbon\Month;
+use Carbon\WeekDay;
 use Closure;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,11 +14,13 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Kolossal\Multiplex\Database\Eloquent\MetaBuilder;
 use Kolossal\Multiplex\Database\Eloquent\Relations\LatestMetaRelation;
 use Kolossal\Multiplex\Events\MetaHasBeenAdded;
 use Kolossal\Multiplex\Events\MetaHasBeenRemoved;
 use Kolossal\Multiplex\Exceptions\MetaException;
+use Stringable;
 
 trait HasMeta
 {
@@ -438,7 +442,13 @@ trait HasMeta
      */
     protected function getMetaClassName(): string
     {
-        return config('multiplex.model', Meta::class);
+        $class = config('multiplex.model', Meta::class);
+
+        if (!is_string($class) || !is_a($class, Meta::class, true)) {
+            throw MetaException::invalidModel();
+        }
+
+        return $class;
     }
 
     /**
@@ -588,6 +598,7 @@ trait HasMeta
 
     /**
      * Publish the given meta data at the specified time.
+     * When passing an array of key value pairs, `$value` will be considered the publishing time.
      *
      * @param  string|array<string, mixed>  $key
      * @param  mixed  $value
@@ -598,11 +609,14 @@ trait HasMeta
      */
     public function setMetaAt($key, $value = null, $publishAt = null)
     {
-        if (func_num_args() === 2 && is_array($key)) {
-            return $this->setMetaFromArray($key, Carbon::parse($value));
+        if (is_array($key)) {
+            return $this->setMetaFromArray(
+                $key,
+                $this->parseMetaTimestamp(func_num_args() === 2 ? $value : $publishAt)
+            );
         }
 
-        return $this->setMetaFromString($key, $value, Carbon::parse($publishAt));
+        return $this->setMetaFromString($key, $value, $this->parseMetaTimestamp($publishAt));
     }
 
     /**
@@ -952,7 +966,7 @@ trait HasMeta
 
         $previousTimestamp = $this->metaTimestamp;
 
-        $this->setMetaTimestamp(Carbon::parse(match ($args) {
+        $this->setMetaTimestamp($this->parseMetaTimestamp(match ($args) {
             0, 1 => $key,
             2 => $value,
             default => $publishAt,
@@ -987,7 +1001,7 @@ trait HasMeta
      */
     public function withMetaAt($time = null): self
     {
-        return $this->setMetaTimestamp($time ? Carbon::parse($time) : null);
+        return $this->setMetaTimestamp($time ? $this->parseMetaTimestamp($time) : null);
     }
 
     /**
@@ -999,6 +1013,33 @@ trait HasMeta
     }
 
     /**
+     * Parse the given time to use when storing or retrieving meta.
+     * Accepts everything `Carbon::parse()` accepts, plus stringable objects.
+     *
+     * @param  mixed  $time
+     */
+    protected function parseMetaTimestamp($time): Carbon
+    {
+        if ($time instanceof Stringable && !$time instanceof DateTimeInterface) {
+            $time = (string) $time;
+        }
+
+        if (
+            $time !== null
+            && !is_string($time)
+            && !is_int($time)
+            && !is_float($time)
+            && !$time instanceof DateTimeInterface
+            && !$time instanceof WeekDay
+            && !$time instanceof Month
+        ) {
+            throw new InvalidArgumentException('Meta timestamp must be a string, a number, a DateTimeInterface or null.');
+        }
+
+        return Carbon::parse($time);
+    }
+
+    /**
      * Travel to the specified point in time for storing or retrieving meta.
      *
      * @param  Builder<static>  $query
@@ -1006,7 +1047,7 @@ trait HasMeta
      */
     public function scopeTravelTo(Builder $query, $time = null): void
     {
-        static::$staticMetaTimestamp = $time ? Carbon::parse($time) : null;
+        static::$staticMetaTimestamp = $time ? $this->parseMetaTimestamp($time) : null;
     }
 
     /**

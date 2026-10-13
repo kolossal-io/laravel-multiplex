@@ -382,10 +382,53 @@ it('can set meta for the future by array', function () {
     expect(Post::first()->bar)->toBe(true);
 });
 
+it('can set meta for the future by array with an explicit publishing time', function () {
+    $model = Post::factory()->create();
+
+    $model->setMetaAt(['foo' => 'bar'], null, '+1 hour');
+
+    $model->save();
+
+    expect(Post::first()->foo)->toBeNull();
+
+    $this->travelTo(Carbon::now()->addHour());
+
+    expect(Post::first()->foo)->toBe('bar');
+});
+
+it('accepts all timestamp types supported by carbon', function (mixed $time) {
+    $model = Post::factory()->create();
+
+    $model->saveMetaAt('foo', 'bar', $time);
+
+    expect($model->allMeta()->first()->published_at)->toBeInstanceOf(Carbon::class);
+})->with([
+    'string' => ['+1 day'],
+    'integer' => [1700000000],
+    'float' => [1700000000.5],
+    'datetime' => [new DateTimeImmutable],
+    'stringable' => [str('-1 day')],
+    'null' => [null],
+]);
+
+it('throws an exception for invalid timestamps', function () {
+    $this->expectException(InvalidArgumentException::class);
+
+    Post::factory()->create()->saveMetaAt('foo', 'bar', ['tomorrow']);
+});
+
 it('throws an exception when saving meta without a key', function () {
     $this->expectException(MetaException::class);
 
     Post::factory()->create()->saveMeta(null, 'bar');
+});
+
+it('throws an exception if the configured meta model is invalid', function () {
+    config(['multiplex.model' => Dummy::class]);
+
+    $this->expectException(MetaException::class);
+
+    Post::factory()->create()->getMeta('foo');
 });
 
 it('can save meta for the future', function () {
