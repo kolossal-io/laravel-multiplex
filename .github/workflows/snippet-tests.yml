@@ -66,8 +66,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite,
-            pdo_mysql, pdo_pgsql, bcmath, soap, intl, gd, exif, iconv, imagick,
-            fileinfo
+            pdo_mysql, pdo_pgsql, bcmath, intl, iconv, fileinfo
 
       - name: Setup problem matchers
         run: |
@@ -82,10 +81,10 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ${{ steps.composer-cache.outputs.directory }}
-          key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{
+          key: ${{ runner.os }}-php-${{ matrix.php }}-laravel-${{ matrix.laravel }}-composer-${{
             hashFiles('composer.json') }}
           restore-keys: |
-            ${{ runner.os }}-php-${{ matrix.php }}-composer-
+            ${{ runner.os }}-php-${{ matrix.php }}-laravel-${{ matrix.laravel }}-composer-
 
       - name: Install dependencies
         run: |
