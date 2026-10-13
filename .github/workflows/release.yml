@@ -19,9 +19,12 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 25
-      - name: "Install NodeJS"
-        run: npm ci
       - name: "Release semantic-version"
-        run: npm run release
+        run: >-
+          npx --yes
+          -p semantic-release@25
+          -p @semantic-release/changelog@6
+          -p @semantic-release/git@10
+          semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
