@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 use Kolossal\Multiplex\Database\Eloquent\MetaBuilder;
+use Kolossal\Multiplex\Database\Factories\MetaFactory;
 use Kolossal\Multiplex\DataType\Registry;
-use Kolossal\Multiplex\Tests\Factories\MetaFactory;
 
 /**
  * Kolossal\Multiplex\Meta
@@ -107,6 +107,11 @@ class Meta extends Model
                 unset($model->attributes['meta_row_num']);
             }
         });
+    }
+
+    protected static function newFactory(): MetaFactory
+    {
+        return MetaFactory::new();
     }
 
     /**

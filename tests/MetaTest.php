@@ -1,9 +1,11 @@
 <?php
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Kolossal\Multiplex\Database\Factories\MetaFactory;
 use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\Tests\Mocks\BackedEnum;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
@@ -72,6 +74,12 @@ dataset('metaHandlerProvider', function () {
             'foo',
         ],
     ];
+});
+
+it('resolves its factory without relying on factory name guessing', function () {
+    Factory::guessFactoryNamesUsing(fn() => 'Missing\\Factory');
+
+    expect(Meta::factory())->toBeInstanceOf(MetaFactory::class);
 });
 
 it('can get and set value', function () {

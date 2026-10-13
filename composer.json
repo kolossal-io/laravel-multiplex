@@ -38,12 +38,13 @@
     "autoload": {
         "psr-4": {
             "Kolossal\\Multiplex\\": "src",
-            "Kolossal\\Multiplex\\Tests\\Factories\\": "tests/factories"
+            "Kolossal\\Multiplex\\Database\\Factories\\": "database/factories"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Kolossal\\Multiplex\\Tests\\": "tests"
+            "Kolossal\\Multiplex\\Tests\\": "tests",
+            "Kolossal\\Multiplex\\Tests\\Factories\\": "tests/factories"
         }
     },
     "scripts": {
