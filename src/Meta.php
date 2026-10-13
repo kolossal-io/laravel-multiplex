@@ -26,6 +26,7 @@ use Kolossal\Multiplex\DataType\Registry;
  * @property-read bool $is_current
  * @property-read bool $is_planned
  * @property-read ?string $raw_value
+ * @property-read int|null $meta_row_num
  * @property-read MorphTo<Model,Meta> $metable
  *
  * @method static MetaBuilder|Meta newModelQuery()
@@ -370,7 +371,6 @@ class Meta extends Model
             ->publishedBefore($now);
 
         $query->fromSub($window, 'meta')
-            /** @phpstan-ignore argument.type */
             ->where('meta_row_num', '>', 1);
     }
 
@@ -411,7 +411,6 @@ class Meta extends Model
             ->publishedBefore($now);
 
         $query->fromSub($window, 'meta')
-            /** @phpstan-ignore argument.type */
             ->where('meta_row_num', 1);
     }
 

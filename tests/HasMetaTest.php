@@ -382,6 +382,12 @@ it('can set meta for the future by array', function () {
     expect(Post::first()->bar)->toBe(true);
 });
 
+it('throws an exception when saving meta without a key', function () {
+    $this->expectException(MetaException::class);
+
+    Post::factory()->create()->saveMeta(null, 'bar');
+});
+
 it('can save meta for the future', function () {
     $model = Post::factory()->create();
 
