@@ -604,9 +604,9 @@ trait HasMeta
     public function findMeta($key): ?Meta
     {
         /**
-         * Check the raw attribute, as `isset($this->id)` would run through `getAttribute()` again.
+         * Check the raw attribute, as `$this->getKey()` would run through `getAttribute()` again.
          */
-        if (!$this->exists || !isset($this->attributes['id'])) {
+        if (!$this->exists || !isset($this->attributes[$this->getKeyName()])) {
             return null;
         }
 
