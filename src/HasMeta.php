@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -45,13 +44,6 @@ trait HasMeta
      * @var Collection<string, Meta>|null
      */
     protected ?Collection $metaChanges = null;
-
-    /**
-     * Collection database columns overridden by meta.
-     *
-     * @var Collection<string, mixed>|null
-     */
-    protected ?Collection $fallbackValues = null;
 
     /**
      * The loaded `meta` collection the lookup was built from.
@@ -114,11 +106,7 @@ trait HasMeta
     public static function bootHasMeta(): void
     {
         static::retrieved(function (self $model) {
-            foreach ($model->getExplicitlyAllowedMetaKeys() as $key) {
-                if (isset($model->attributes[$key])) {
-                    $model->setFallbackValue($key, Arr::pull($model->attributes, $key));
-                }
-            }
+            $model->forgetExplicitlyAllowedMetaKeyAttributes();
         });
 
         static::saved(function (self $model) {
@@ -167,36 +155,6 @@ trait HasMeta
     public static function isMetaUnguarded(): bool
     {
         return static::$metaUnguarded;
-    }
-
-    /**
-     * Add value to the list of columns overridden by meta.
-     *
-     * @param  mixed  $value
-     */
-    public function setFallbackValue(string $key, $value = null): self
-    {
-        ($this->fallbackValues ??= new Collection)->put($key, $value);
-
-        return $this;
-    }
-
-    /**
-     * Get the fallback value for the given key.
-     *
-     * @return mixed|null
-     */
-    public function getFallbackValue(string $key)
-    {
-        return with($this->fallbackValues?->get($key), function ($value) use ($key) {
-            if ($value && is_scalar($value) && ($type = $this->getCastForMetaKey($key))) {
-                return $this->getMetaClassName()::getDataTypeRegistry()
-                    ->getHandlerForType($type)
-                    ->unserializeValue((string) $value);
-            }
-
-            return $value;
-        });
     }
 
     /**
@@ -265,8 +223,20 @@ trait HasMeta
         }
 
         $this->getExplicitlyAllowedMetaKeys(false);
+        $this->forgetExplicitlyAllowedMetaKeyAttributes();
 
         return $this->getMetaKeysProperty();
+    }
+
+    /**
+     * Explicitly allowed meta keys are handled by Multiplex only, so remove
+     * equally named database columns from the attributes to not get stale data.
+     */
+    protected function forgetExplicitlyAllowedMetaKeyAttributes(): void
+    {
+        foreach ($this->getExplicitlyAllowedMetaKeys() as $key) {
+            unset($this->attributes[$key]);
+        }
     }
 
     /**
@@ -512,10 +482,10 @@ trait HasMeta
      *
      * @return Collection<string, mixed>
      */
-    public function pluckMeta(bool $withFallbackValues = false): Collection
+    public function pluckMeta(): Collection
     {
         return collect($this->getExplicitlyAllowedMetaKeys())
-            ->mapWithKeys(fn($key) => [$key => $withFallbackValues ? $this->getFallbackValue($key) : null])
+            ->mapWithKeys(fn($key) => [$key => null])
             ->merge($this->meta->pluck('value', 'key'));
     }
 
@@ -572,20 +542,15 @@ trait HasMeta
          * There seems to be no attribute given and no relation so we either have a key
          * explicitly listed as a meta key or the wildcard (*) was used. Let’s get the meta
          * value for the given key and pipe the result through an accessor if possible.
-         * If the value is still `null` check if there is a fallback value which typically
-         * means there is an equal named database column which we pulled the value from earlier.
          */
         if ($meta = $this->findMeta($key)) {
             return $this->applyMetaAccessor($key, $meta->value);
         }
 
-        $value = $this->applyMetaAccessor($key, null)
-            ?? $this->applyMetaAccessor($key, $this->getFallbackValue($key));
-
         /**
          * Finally delegate back to `parent::getAttribute()` if no meta exists.
          */
-        return $value ?? parent::getAttribute($key);
+        return $this->applyMetaAccessor($key, null) ?? parent::getAttribute($key);
     }
 
     /**

@@ -256,7 +256,7 @@ it('looks up meta only once per attribute access', function (string $key, mixed 
     'existing meta with null value' => ['empty', null],
     'missing meta' => ['undefined', null],
     'missing meta with accessor' => ['defaulted', 'default'],
-    'missing meta with fallback value' => ['title', 'Column'],
+    'missing meta with equally named column' => ['title', null],
 ]);
 
 it('does not look up meta for model attributes', function () {

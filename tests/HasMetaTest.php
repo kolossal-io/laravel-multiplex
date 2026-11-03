@@ -539,21 +539,6 @@ it('will respect get meta accessors', function () {
     expect($model->title)->toBe('Testing Accessor passed.');
 });
 
-it('will use meta accessors for fallback values', function () {
-    $model = PostWithAccessor::factory()->create(['title' => null]);
-
-    DB::table('meta')->truncate();
-
-    expect($model->title)->toBeNull();
-
-    DB::table('sample_posts_accessor')->where('id', $model->id)
-        ->update(['title' => 'Fallback Accessor']);
-
-    $model = PostWithAccessor::first();
-
-    expect($model->refresh()->title)->toBe('Testing Fallback Accessor passed.');
-});
-
 it('will respect set meta mutators', function () {
     $model = Post::factory()->create();
 
@@ -954,21 +939,21 @@ it('will return null for undefined casted meta field', function () {
     expect(Post::first()->appendable_foo)->toBeNull();
 });
 
-it('will return column value for casted meta fields having equally named column', function () {
+it('will not return column value for casted meta fields having equally named column', function () {
     $model = Post::factory()->create(['title' => 'Title']);
 
     $model->metaKeys(['foo']);
 
     Schema::table('sample_posts', fn($table) => $table->string('appendable_foo')->nullable());
-    DB::table('sample_posts')->update(['appendable_foo' => 'Fallback']);
+    DB::table('sample_posts')->update(['appendable_foo' => 'Column']);
 
-    expect(Post::first()->appendable_foo)->toBe('Fallback');
+    expect(Post::first()->appendable_foo)->toBeNull();
 
     $model->saveMetaAt('appendable_foo', 8000.99, Carbon::now()->addDay());
 
     $this->travelTo(Carbon::now()->addHours(23)->addMinutes(50));
 
-    expect(Post::first()->appendable_foo)->toBe('Fallback');
+    expect(Post::first()->appendable_foo)->toBeNull();
 
     $this->travelTo(Carbon::now()->addMinutes(10));
 

@@ -20,8 +20,8 @@ class MetaAttribute implements CastsAttributes
      */
     public function get($model, $key, $value, $attributes): mixed
     {
-        if (method_exists($model, 'getMeta') && method_exists($model, 'getFallbackValue')) {
-            return $model->getMeta($key, $value ?? $model->getFallbackValue($key));
+        if (method_exists($model, 'getMeta')) {
+            return $model->getMeta($key);
         }
 
         return $value;
