@@ -1,3 +1,19 @@
+## [3.0.3](https://github.com/kolossal-io/laravel-multiplex/compare/v3.0.2...v3.0.3) (2026-11-03)
+
+
+### Bug Fixes
+
+* cache falsy meta values as well ([7f91475](https://github.com/kolossal-io/laravel-multiplex/commit/7f91475d2aab3161670c303f72740702eb782a23))
+* find meta of models with a custom primary key ([11d1630](https://github.com/kolossal-io/laravel-multiplex/commit/11d1630aeea49f1dbc6bf1bd3c104b8fe1469264))
+* keep Meta::newFactory() compatible with HasFactory in subclasses ([d9dcd18](https://github.com/kolossal-io/laravel-multiplex/commit/d9dcd18465e5bacef290a2be14a57aaebef8b509))
+
+
+### Performance Improvements
+
+* avoid redundant attribute resolution when checking meta keys ([de29ee1](https://github.com/kolossal-io/laravel-multiplex/commit/de29ee1b9f444de7712cde4520daf8cf83d0a21b))
+* look up meta by key in constant time ([388cd7a](https://github.com/kolossal-io/laravel-multiplex/commit/388cd7a7cd9749dd6ea293d1bb25644c20e18efe))
+* resolve meta attributes with a single lookup ([b06666a](https://github.com/kolossal-io/laravel-multiplex/commit/b06666a633de0266fd2fe52d3f4b601b86afa5c5))
+
 ## [3.0.2](https://github.com/kolossal-io/laravel-multiplex/compare/v3.0.1...v3.0.2) (2026-10-13)
 
 
