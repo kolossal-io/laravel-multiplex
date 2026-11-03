@@ -7,6 +7,7 @@ use Carbon\WeekDay;
 use Closure;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
@@ -51,6 +52,25 @@ trait HasMeta
      * @var Collection<string, mixed>|null
      */
     protected ?Collection $fallbackValues = null;
+
+    /**
+     * The loaded `meta` collection the lookup was built from.
+     *
+     * @var EloquentCollection<int, Meta>|null
+     */
+    protected ?EloquentCollection $metaLookupSource = null;
+
+    /**
+     * Number of items in the `meta` collection when the lookup was built.
+     */
+    protected int $metaLookupSourceCount = 0;
+
+    /**
+     * Current meta models indexed by key.
+     *
+     * @var array<string, Meta>
+     */
+    protected array $metaLookup = [];
 
     /**
      * Cache storage for table column names.
@@ -554,7 +574,54 @@ trait HasMeta
             return null;
         }
 
-        return $this->meta?->first(fn($meta) => $meta->key === $key);
+        return $this->getMetaLookup()[$key] ?? null;
+    }
+
+    /**
+     * Get the current meta models indexed by key.
+     *
+     * The lookup is bound to the loaded `meta` collection and rebuilt as soon as
+     * the relation is reloaded, replaced or unset. If a key occurs more than once
+     * the first model wins, just like `$this->meta->first()` would behave.
+     *
+     * @return array<string, Meta>
+     */
+    protected function getMetaLookup(): array
+    {
+        /**
+         * Avoid the magic getter if possible, as it would run through `getAttribute()` again.
+         */
+        $meta = $this->relationLoaded('meta') ? $this->getRelation('meta') : $this->meta;
+
+        if (!$meta instanceof EloquentCollection) {
+            return [];
+        }
+
+        /** @var EloquentCollection<int, Meta> $meta */
+        if ($meta === $this->metaLookupSource && $meta->count() === $this->metaLookupSourceCount) {
+            return $this->metaLookup;
+        }
+
+        $lookup = [];
+
+        foreach ($meta as $item) {
+            $lookup[$item->key] ??= $item;
+        }
+
+        $this->metaLookupSource = $meta;
+        $this->metaLookupSourceCount = $meta->count();
+
+        return $this->metaLookup = $lookup;
+    }
+
+    /**
+     * Discard the cached meta lookup.
+     */
+    protected function forgetMetaLookup(): void
+    {
+        $this->metaLookupSource = null;
+        $this->metaLookupSourceCount = 0;
+        $this->metaLookup = [];
     }
 
     /**
@@ -810,6 +877,8 @@ trait HasMeta
     {
         $this->allMeta()->delete();
 
+        $this->refreshMetaRelations();
+
         return $this;
     }
 
@@ -855,6 +924,8 @@ trait HasMeta
         if ($this->relationLoaded('meta')) {
             $this->unsetRelation('meta');
         }
+
+        $this->forgetMetaLookup();
 
         return $this;
     }

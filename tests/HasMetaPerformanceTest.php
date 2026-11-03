@@ -1,6 +1,8 @@
 <?php
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\Tests\Mocks\Post;
@@ -101,4 +103,133 @@ it('can eager load meta relations', function () {
             $post->another;
         });
     });
+});
+
+it('will not query again when reading the same meta repeatedly', function () {
+    Post::factory()
+        ->has(Meta::factory()->state(['key' => 'foo', 'value' => 'bar']))
+        ->create();
+
+    $this->assertQueryCountMatches(2, function () {
+        $post = Post::first();
+
+        for ($i = 0; $i < 50; $i++) {
+            expect($post->foo)->toBe('bar');
+            expect($post->getMeta('foo'))->toBe('bar');
+            expect($post->hasMeta('foo'))->toBeTrue();
+            expect($post->hasMeta('undefined'))->toBeFalse();
+        }
+    });
+});
+
+it('will not query again when reading eager loaded meta repeatedly', function () {
+    Post::factory(5)
+        ->has(Meta::factory()->state(['key' => 'foo', 'value' => 'bar']))
+        ->create();
+
+    $this->assertQueryCountMatches(2, function () {
+        Post::with('meta')->get()->each(function (Post $post) {
+            for ($i = 0; $i < 10; $i++) {
+                expect($post->foo)->toBe('bar');
+                expect($post->undefined)->toBeNull();
+            }
+        });
+    });
+});
+
+it('returns the first matching meta if a key occurs more than once', function () {
+    $post = Post::factory()->create();
+
+    $post->setRelation('meta', new Collection([
+        Meta::make(['key' => 'foo', 'value' => 'first']),
+        Meta::make(['key' => 'foo', 'value' => 'second']),
+    ]));
+
+    expect($post->foo)->toBe('first')
+        ->and($post->getMeta('foo'))->toBe('first')
+        ->and($post->findMeta('foo')->value)->toBe('first');
+});
+
+it('updates the meta lookup when the relation is replaced', function () {
+    $post = Post::factory()->create();
+
+    $post->setRelation('meta', new Collection([Meta::make(['key' => 'foo', 'value' => 'old'])]));
+
+    expect($post->foo)->toBe('old');
+
+    $post->setRelation('meta', new Collection([Meta::make(['key' => 'foo', 'value' => 'new'])]));
+
+    expect($post->foo)->toBe('new');
+
+    $post->unsetRelation('meta');
+
+    expect($post->foo)->toBeNull();
+});
+
+it('updates the meta lookup when items are added to the loaded relation', function () {
+    $post = Post::factory()->create();
+
+    expect($post->foo)->toBeNull();
+
+    $post->meta->push(Meta::make(['key' => 'foo', 'value' => 'pushed']));
+
+    expect($post->foo)->toBe('pushed');
+});
+
+it('updates the meta lookup when the relation is reloaded', function () {
+    $post = Post::factory()->create();
+    $post->saveMeta('foo', 'old');
+
+    expect($post->foo)->toBe('old');
+
+    Meta::query()->update(['value' => 'new']);
+
+    expect($post->foo)->toBe('old')
+        ->and($post->load('meta')->foo)->toBe('new');
+
+    Meta::query()->update(['value' => 'newer']);
+
+    expect($post->refreshMetaRelations()->foo)->toBe('newer');
+});
+
+it('updates the meta lookup when traveling in time', function () {
+    $post = Post::factory()->create();
+
+    $post->saveMetaAt('foo', 'past', '-2 days');
+    $post->saveMetaAt('foo', 'present', '-1 hour');
+    $post->saveMetaAt('foo', 'future', '+1 day');
+
+    expect($post->foo)->toBe('present')
+        ->and($post->withMetaAt('-1 day')->foo)->toBe('past')
+        ->and($post->withMetaAt('+2 days')->foo)->toBe('future')
+        ->and($post->setMetaTimestamp(Carbon::now()->subDays(3))->foo)->toBeNull()
+        ->and($post->withCurrentMeta()->foo)->toBe('present');
+});
+
+it('updates the meta lookup when meta is saved, deleted or purged', function () {
+    $post = Post::factory()->create();
+
+    $post->saveMeta('foo', 'old');
+    $post->saveMeta('bar', 'baz');
+
+    expect($post->foo)->toBe('old');
+
+    $post->foo = 'new';
+    $post->save();
+
+    expect($post->foo)->toBe('new');
+
+    $post->saveMeta('foo', 'newer');
+
+    expect($post->foo)->toBe('newer');
+
+    $post->deleteMeta('foo');
+
+    expect($post->foo)->toBeNull()
+        ->and($post->bar)->toBe('baz');
+
+    $post->purgeMeta();
+
+    expect($post->bar)->toBeNull()
+        ->and($post->hasMeta('bar'))->toBeFalse();
 });
