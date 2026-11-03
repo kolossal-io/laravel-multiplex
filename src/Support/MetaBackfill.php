@@ -26,6 +26,8 @@ class MetaBackfill
 
     protected int $chunkSize = 500;
 
+    protected bool $dryRun = false;
+
     /**
      * @param  class-string<Model>  $model
      * @param  array<string>  $columns
@@ -75,7 +77,18 @@ class MetaBackfill
     }
 
     /**
+     * Only count the meta records that would be created without inserting them.
+     */
+    public function dryRun(bool $enabled = true): self
+    {
+        $this->dryRun = $enabled;
+
+        return $this;
+    }
+
+    /**
      * Create the meta records and return the number of records created.
+     * In dry run mode nothing is inserted and the number of records that would be created is returned.
      */
     public function run(): int
     {
@@ -98,10 +111,11 @@ class MetaBackfill
                     fn(object $row) => $this->makeMeta($model, $row, $row->{$keyName})
                 ));
 
-                if ($records->isNotEmpty()) {
+                if ($records->isNotEmpty() && !$this->dryRun) {
                     $this->getMetaClassName()::query()->insert($records->all());
-                    $created += $records->count();
                 }
+
+                $created += $records->count();
             }, $keyName);
 
         return $created;

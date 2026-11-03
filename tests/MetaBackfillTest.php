@@ -219,6 +219,24 @@ it('creates ids matching the configured morph type', function () {
     };
 });
 
+it('only counts records in dry run mode', function () {
+    insertBackfillPost(['title' => 'A', 'body' => 'Body']);
+    insertBackfillPost(['title' => 'B', 'body' => null]);
+
+    $backfill = MetaBackfill::fromColumns(PostWithExistingColumn::class, ['title', 'body'])->chunk(1);
+
+    expect($backfill->dryRun()->run())->toBe(3)
+        ->and(Meta::count())->toBe(0);
+
+    expect($backfill->dryRun(false)->run())->toBe(3)
+        ->and(Meta::count())->toBe(3);
+
+    insertBackfillPost(['title' => 'C']);
+
+    expect($backfill->dryRun()->run())->toBe(1)
+        ->and(Meta::count())->toBe(3);
+});
+
 it('throws for models not using HasMeta', function () {
     MetaBackfill::fromColumns(Dummy::class, ['title']);
 })->throws(InvalidArgumentException::class, 'must be an Eloquent model using the `HasMeta` trait');

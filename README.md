@@ -660,6 +660,7 @@ MetaBackfill::fromColumns(Post::class, ['body'])
     ->publishedAt('updated_at')         // Take the time from another column…
     ->publishedAt(now()->startOfYear()) // …or a fixed time (`null` means now).
     ->chunk(1000)                       // Rows to process at once, defaults to 500.
+    ->dryRun()                          // Only count the records that would be created.
     ->run();                            // Returns the number of created meta records.
 ```
 
