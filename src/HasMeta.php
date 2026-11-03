@@ -7,6 +7,7 @@ use Carbon\WeekDay;
 use Closure;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
@@ -53,11 +54,37 @@ trait HasMeta
     protected ?Collection $fallbackValues = null;
 
     /**
+     * The loaded `meta` collection the lookup was built from.
+     *
+     * @var EloquentCollection<int, Meta>|null
+     */
+    protected ?EloquentCollection $metaLookupSource = null;
+
+    /**
+     * Number of items in the `meta` collection when the lookup was built.
+     */
+    protected int $metaLookupSourceCount = 0;
+
+    /**
+     * Current meta models indexed by key.
+     *
+     * @var array<string, Meta>
+     */
+    protected array $metaLookup = [];
+
+    /**
      * Cache storage for table column names.
      *
      * @var array<class-string, array<string>>
      */
     protected static array $metaSchemaColumnsCache = [];
+
+    /**
+     * Cache storage for keys determined to be model attributes, see `isStaticModelAttribute()`.
+     *
+     * @var array<class-string, array{casts: array<string, mixed>, keys: array<string, bool>}>
+     */
+    protected static array $metaModelAttributeCache = [];
 
     /**
      * Auto-save meta data when model is saved.
@@ -257,13 +284,31 @@ trait HasMeta
     {
         return
             $this->isRelation($key) ||
+            $this->isStaticModelAttribute($key) ||
+            array_key_exists($key, parent::getAttributes());
+    }
+
+    /**
+     * Determine if the given key is a model attribute regardless of the instance’s attributes.
+     *
+     * The result only depends on the class and its casts, so it is memoized per class and key.
+     * The cache is discarded once an instance with different casts comes along.
+     */
+    protected function isStaticModelAttribute(string $key): bool
+    {
+        $cache = &static::$metaModelAttributeCache[static::class];
+
+        if ($cache === null || $cache['casts'] !== $this->casts) {
+            $cache = ['casts' => $this->casts, 'keys' => []];
+        }
+
+        return $cache['keys'][$key] ??=
             $this->hasSetMutator($key) ||
             $this->hasAttributeSetMutator($key) ||
             $this->isEnumCastable($key) ||
             $this->isClassCastable($key) ||
             str_contains($key, '->') ||
-            $this->hasColumn($key) ||
-            array_key_exists($key, parent::getAttributes());
+            $this->hasColumn($key);
     }
 
     /**
@@ -274,7 +319,7 @@ trait HasMeta
      */
     public function getExplicitlyAllowedMetaKeys(bool $fromCache = true): array
     {
-        if ($this->explicitlyAllowedMetaKeys && $fromCache) {
+        if ($this->explicitlyAllowedMetaKeys !== null && $fromCache) {
             return $this->explicitlyAllowedMetaKeys;
         }
 
@@ -483,8 +528,17 @@ trait HasMeta
      */
     protected function getAttributeFromMetaAccessor($key, $value = null)
     {
-        $value ??= $this->getMeta($key);
+        return $this->applyMetaAccessor($key, $value ?? $this->getMeta($key));
+    }
 
+    /**
+     * Run the given value through the meta accessor if there is one.
+     *
+     * @param  mixed  $value
+     * @return mixed
+     */
+    protected function applyMetaAccessor(string $key, $value)
+    {
         $accessor = Str::camel('get_' . $key . '_meta');
 
         if (!method_exists($this, $accessor)) {
@@ -521,18 +575,17 @@ trait HasMeta
          * If the value is still `null` check if there is a fallback value which typically
          * means there is an equal named database column which we pulled the value from earlier.
          */
-        $value = $this->getAttributeFromMetaAccessor($key);
-
-        if ($value === null && !$this->hasMeta($key)) {
-            $value = $this->getAttributeFromMetaAccessor($key, $this->getFallbackValue($key));
+        if ($meta = $this->findMeta($key)) {
+            return $this->applyMetaAccessor($key, $meta->value);
         }
+
+        $value = $this->applyMetaAccessor($key, null)
+            ?? $this->applyMetaAccessor($key, $this->getFallbackValue($key));
 
         /**
          * Finally delegate back to `parent::getAttribute()` if no meta exists.
          */
-        return $value ?? value(
-            fn() => !$this->hasMeta($key) ? parent::getAttribute($key) : null
-        );
+        return $value ?? parent::getAttribute($key);
     }
 
     /**
@@ -550,11 +603,61 @@ trait HasMeta
      */
     public function findMeta($key): ?Meta
     {
-        if (!$this->exists || !isset($this->id)) {
+        /**
+         * Check the raw attribute, as `$this->getKey()` would run through `getAttribute()` again.
+         */
+        if (!$this->exists || !isset($this->attributes[$this->getKeyName()])) {
             return null;
         }
 
-        return $this->meta?->first(fn($meta) => $meta->key === $key);
+        return $this->getMetaLookup()[$key] ?? null;
+    }
+
+    /**
+     * Get the current meta models indexed by key.
+     *
+     * The lookup is bound to the loaded `meta` collection and rebuilt as soon as
+     * the relation is reloaded, replaced or unset. If a key occurs more than once
+     * the first model wins, just like `$this->meta->first()` would behave.
+     *
+     * @return array<string, Meta>
+     */
+    protected function getMetaLookup(): array
+    {
+        /**
+         * Avoid the magic getter if possible, as it would run through `getAttribute()` again.
+         */
+        $meta = $this->relationLoaded('meta') ? $this->getRelation('meta') : $this->meta;
+
+        if (!$meta instanceof EloquentCollection) {
+            return [];
+        }
+
+        /** @var EloquentCollection<int, Meta> $meta */
+        if ($meta === $this->metaLookupSource && $meta->count() === $this->metaLookupSourceCount) {
+            return $this->metaLookup;
+        }
+
+        $lookup = [];
+
+        foreach ($meta as $item) {
+            $lookup[$item->key] ??= $item;
+        }
+
+        $this->metaLookupSource = $meta;
+        $this->metaLookupSourceCount = $meta->count();
+
+        return $this->metaLookup = $lookup;
+    }
+
+    /**
+     * Discard the cached meta lookup.
+     */
+    protected function forgetMetaLookup(): void
+    {
+        $this->metaLookupSource = null;
+        $this->metaLookupSourceCount = 0;
+        $this->metaLookup = [];
     }
 
     /**
@@ -810,6 +913,8 @@ trait HasMeta
     {
         $this->allMeta()->delete();
 
+        $this->refreshMetaRelations();
+
         return $this;
     }
 
@@ -855,6 +960,8 @@ trait HasMeta
         if ($this->relationLoaded('meta')) {
             $this->unsetRelation('meta');
         }
+
+        $this->forgetMetaLookup();
 
         return $this;
     }

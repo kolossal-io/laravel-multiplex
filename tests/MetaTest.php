@@ -7,8 +7,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Kolossal\Multiplex\Database\Factories\MetaFactory;
 use Kolossal\Multiplex\Meta;
+use Kolossal\Multiplex\Tests\Factories\MetaWithFactoryFactory;
 use Kolossal\Multiplex\Tests\Mocks\BackedEnum;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
+use Kolossal\Multiplex\Tests\Mocks\MetaWithFactory;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
 use Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties;
@@ -80,6 +82,12 @@ it('resolves its factory without relying on factory name guessing', function () 
     Factory::guessFactoryNamesUsing(fn() => 'Missing\\Factory');
 
     expect(Meta::factory())->toBeInstanceOf(MetaFactory::class);
+});
+
+it('can be extended by models using the HasFactory trait', function () {
+    expect(MetaWithFactory::factory())->toBeInstanceOf(MetaWithFactoryFactory::class)
+        ->and(MetaWithFactory::factory()->make())->toBeInstanceOf(MetaWithFactory::class)
+        ->and(Meta::factory())->toBeInstanceOf(MetaFactory::class);
 });
 
 it('can get and set value', function () {
@@ -343,6 +351,45 @@ it('will reset cache when setting value', function () {
 
     expect($meta->value)->toBe(123);
     expect($this->getProtectedProperty($meta, 'cachedValue'))->toBe(123);
+});
+
+it('will cache falsy values when accessing', function (mixed $value) {
+    $meta = new Meta;
+    $meta->value = $value;
+
+    expect($this->getProtectedProperty($meta, 'hasCachedValue'))->toBeFalse();
+
+    expect($meta->value)->toBe($value);
+    expect($this->getProtectedProperty($meta, 'hasCachedValue'))->toBeTrue();
+
+    /**
+     * Change the raw value behind the cache's back to prove the cached value is used.
+     */
+    (fn() => $this->attributes['value'] = 'changed')->call($meta);
+
+    expect($meta->value)->toBe($value);
+})->with([
+    'zero' => [0],
+    'zero float' => [0.0],
+    'false' => [false],
+    'empty string' => [''],
+    'empty array' => [[]],
+]);
+
+it('will reset cache of falsy values when setting value', function () {
+    $meta = new Meta;
+    $meta->value = 0;
+
+    expect($meta->value)->toBe(0);
+
+    $meta->value = false;
+
+    expect($this->getProtectedProperty($meta, 'hasCachedValue'))->toBeFalse();
+    expect($meta->value)->toBeFalse();
+
+    $meta->value = 'truthy';
+
+    expect($meta->value)->toBe('truthy');
 });
 
 it('can be replicated', function () {

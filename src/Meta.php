@@ -91,6 +91,8 @@ class Meta extends Model
 
     protected mixed $cachedValue = null;
 
+    protected bool $hasCachedValue = false;
+
     protected ?string $forceType = null;
 
     public static function boot(): void
@@ -110,7 +112,15 @@ class Meta extends Model
         });
     }
 
-    protected static function newFactory(): MetaFactory
+    /**
+     * Resolve the factory explicitly instead of relying on factory name guessing.
+     *
+     * The signature intentionally matches `HasFactory::newFactory()` without a return type,
+     * so subclasses using the `HasFactory` trait themselves stay compatible.
+     *
+     * @return MetaFactory
+     */
+    protected static function newFactory()
     {
         return MetaFactory::new();
     }
@@ -147,7 +157,7 @@ class Meta extends Model
      */
     public function getValueAttribute(): mixed
     {
-        if ($this->cachedValue) {
+        if ($this->hasCachedValue) {
             return $this->cachedValue;
         }
 
@@ -161,9 +171,13 @@ class Meta extends Model
         /** @var string $value */
         $value = $this->attributes['value'];
 
-        return $this->cachedValue = $this->getDataTypeRegistry()
+        $this->cachedValue = $this->getDataTypeRegistry()
             ->getHandlerForType($type)
             ->unserializeValue($value);
+
+        $this->hasCachedValue = true;
+
+        return $this->cachedValue;
     }
 
     /**
@@ -185,7 +199,16 @@ class Meta extends Model
             ? $value
             : $registry->getHandlerForType($this->attributes['type'])->serializeValue($value);
 
+        $this->forgetCachedValue();
+    }
+
+    /**
+     * Discard the cached unserialized value.
+     */
+    protected function forgetCachedValue(): void
+    {
         $this->cachedValue = null;
+        $this->hasCachedValue = false;
     }
 
     /**
