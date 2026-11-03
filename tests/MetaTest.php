@@ -353,6 +353,45 @@ it('will reset cache when setting value', function () {
     expect($this->getProtectedProperty($meta, 'cachedValue'))->toBe(123);
 });
 
+it('will cache falsy values when accessing', function (mixed $value) {
+    $meta = new Meta;
+    $meta->value = $value;
+
+    expect($this->getProtectedProperty($meta, 'hasCachedValue'))->toBeFalse();
+
+    expect($meta->value)->toBe($value);
+    expect($this->getProtectedProperty($meta, 'hasCachedValue'))->toBeTrue();
+
+    /**
+     * Change the raw value behind the cache's back to prove the cached value is used.
+     */
+    (fn() => $this->attributes['value'] = 'changed')->call($meta);
+
+    expect($meta->value)->toBe($value);
+})->with([
+    'zero' => [0],
+    'zero float' => [0.0],
+    'false' => [false],
+    'empty string' => [''],
+    'empty array' => [[]],
+]);
+
+it('will reset cache of falsy values when setting value', function () {
+    $meta = new Meta;
+    $meta->value = 0;
+
+    expect($meta->value)->toBe(0);
+
+    $meta->value = false;
+
+    expect($this->getProtectedProperty($meta, 'hasCachedValue'))->toBeFalse();
+    expect($meta->value)->toBeFalse();
+
+    $meta->value = 'truthy';
+
+    expect($meta->value)->toBe('truthy');
+});
+
 it('can be replicated', function () {
     Post::factory()->has(Meta::factory())->create();
 

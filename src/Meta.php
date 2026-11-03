@@ -91,6 +91,8 @@ class Meta extends Model
 
     protected mixed $cachedValue = null;
 
+    protected bool $hasCachedValue = false;
+
     protected ?string $forceType = null;
 
     public static function boot(): void
@@ -155,7 +157,7 @@ class Meta extends Model
      */
     public function getValueAttribute(): mixed
     {
-        if ($this->cachedValue) {
+        if ($this->hasCachedValue) {
             return $this->cachedValue;
         }
 
@@ -169,9 +171,13 @@ class Meta extends Model
         /** @var string $value */
         $value = $this->attributes['value'];
 
-        return $this->cachedValue = $this->getDataTypeRegistry()
+        $this->cachedValue = $this->getDataTypeRegistry()
             ->getHandlerForType($type)
             ->unserializeValue($value);
+
+        $this->hasCachedValue = true;
+
+        return $this->cachedValue;
     }
 
     /**
@@ -193,7 +199,16 @@ class Meta extends Model
             ? $value
             : $registry->getHandlerForType($this->attributes['type'])->serializeValue($value);
 
+        $this->forgetCachedValue();
+    }
+
+    /**
+     * Discard the cached unserialized value.
+     */
+    protected function forgetCachedValue(): void
+    {
         $this->cachedValue = null;
+        $this->hasCachedValue = false;
     }
 
     /**
