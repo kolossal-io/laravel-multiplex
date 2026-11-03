@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-    <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/badge/Laravel-11.0+-green.svg?style=flat-square" alt="Laravel"></a>
+    <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/badge/Laravel-12.0+-green.svg?style=flat-square" alt="Laravel"></a>
     <a href="https://packagist.org/packages/kolossal-io/laravel-multiplex"><img src="https://img.shields.io/packagist/v/kolossal-io/laravel-multiplex.svg?style=flat-square" alt="Latest Version on Packagist"></a>
     <a href="https://codecov.io/gh/kolossal-io/laravel-multiplex" > 
     <img src="https://codecov.io/gh/kolossal-io/laravel-multiplex/branch/main/graph/badge.svg?token=330354GI30"/> 
@@ -57,7 +57,7 @@ $post->setMetaAt('likes', 6000, '+2 years');
 
 The main difference is that the metadata in Multiplex has a timestamp that defines validity. This allows changes to be tracked and planned. You can inspect all metadata on your model at a specific point in time and Multiplex will by default only give you the most current.
 
-Since Multiplex is storing the metadata in a [polymorphic](https://laravel.com/docs/9.x/eloquent-relationships#polymorphic-relationships) table, it can easily be plugged into existing projects to expand properties of your models. This even works without removing the relevant table columns of your model: They are used as a fallback ([deprecated](#extending-database-columns)).
+Since Multiplex is storing the metadata in a [polymorphic](https://laravel.com/docs/9.x/eloquent-relationships#polymorphic-relationships) table, it can easily be plugged into existing projects to expand properties of your models. Existing table columns can even be [moved to meta records](#moving-columns-to-meta).
 
 And it’s low profile: If you don't like it, just [remove the `HasMeta` Trait](#installation) and everything is back to normal.
 
@@ -79,6 +79,8 @@ And it’s low profile: If you don't like it, just [remove the `HasMeta` Trait](
 - [UUID and ULID Support](#uuid-and-ulid-support)
 
 ## Requirements
+
+**Multiplex** requires PHP **8.2+** and Laravel **12+**. If you are still using Laravel 11, use version 3.x.
 
 Since Version 2 **Multiplex** uses **SQL Window Functions** (such as `ROW_NUMBER() OVER (...)`) for efficient and scalable queries on meta data (e.g., to determine the latest or current meta per key). This enables much better performance for large datasets compared to classic subqueries or group-by/aggregate approaches. Your database must support SQL Window Functions. This has been tested on:
 
@@ -598,12 +600,9 @@ protected array $metaKeys = [
 
 ## Extending Database Columns
 
-> [!WARNING]
-> Using database columns as a fallback for meta values is deprecated and planned to be removed in version 4.0. Use the [`MetaBackfill` helper](#moving-columns-to-meta) to move existing column values to meta records.
+By default Multiplex will not touch columns of your model. But sometimes it might be useful to handle an existing table column with Multiplex instead, e.g. to track its changes over time.
 
-By default Multiplex will not touch columns of your model. But sometimes it might be useful to have meta records as an extension for your existing table columns.
-
-Consider having an existing `Post` model with only a `title` and a `body` column. By explicitely adding `body` to our array of meta keys `body` will be handled by Multiplex from now on – not touching the `posts` table, but using the database column as a fallback.
+Consider having an existing `Post` model with only a `title` and a `body` column. By explicitly adding `body` to our array of meta keys `body` will be handled by Multiplex from now on – the `body` column of the `posts` table is neither read nor written anymore.
 
 ```php
 class Post extends Model
@@ -618,22 +617,19 @@ class Post extends Model
 ```
 
 ```php
-\DB::table('posts')->create(['title' => 'A title', 'body' => 'A body.']);
+\DB::table('posts')->insert(['title' => 'A title', 'body' => 'A body.']);
 
 $post = Post::first();
 
-$post->body; // A body.
+$post->body; // null
 
 $post->body = 'This. Is. Meta.';
 $post->save();
 
 $post->body; // This. Is. Meta.
-$post->deleteMeta('body');
-
-$post->body; // A body.
 ```
 
-In case of using Multiplex for extending table columns, Multiplex will remove the original column when retrieving models from the database so you don’t get stale data.
+Multiplex will remove the original column from the model’s attributes when retrieving models from the database so you don’t get stale data. To keep the values of the column, [move them to meta records](#moving-columns-to-meta) first.
 
 ### Moving Columns to Meta
 
@@ -653,7 +649,7 @@ return new class extends Migration
 };
 ```
 
-For every row a meta record is created per non-null column, published at the time the row was created (`created_at`), so newer meta stays current and the column value becomes part of the history. Values are typecast as defined in `$metaKeys`, just like they are when used as a fallback.
+For every row a meta record is created per non-null column, published at the time the row was created (`created_at`), so newer meta stays current and the column value becomes part of the history. Column values of keys typecast in `$metaKeys` are converted to that type.
 
 ```php
 MetaBackfill::fromColumns(Post::class, ['body'])

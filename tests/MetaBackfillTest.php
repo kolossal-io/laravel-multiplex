@@ -36,7 +36,7 @@ function insertBackfillPost(array $data = []): mixed
     return insertBackfillRow('sample_posts_existing_column', PostWithExistingColumn::class, $data);
 }
 
-it('creates meta with the same values as the fallback values', function () {
+it('creates meta from typecast column values', function () {
     insertBackfillPost([
         'title' => 'Title',
         'body' => 'Body',
@@ -47,15 +47,7 @@ it('creates meta with the same values as the fallback values', function () {
 
     $keys = ['title', 'body', 'integer_field', 'float_field', 'boolean_field'];
 
-    $fallback = PostWithExistingColumn::first()->only($keys);
-
-    expect($fallback)->toBe([
-        'title' => 'Title',
-        'body' => 'Body',
-        'integer_field' => 120,
-        'float_field' => 120.0,
-        'boolean_field' => true,
-    ]);
+    expect(PostWithExistingColumn::first()->only($keys))->each->toBeNull();
 
     expect(MetaBackfill::fromColumns(PostWithExistingColumn::class, $keys)->run())->toBe(5);
 
@@ -72,7 +64,13 @@ it('creates meta with the same values as the fallback values', function () {
 
     $post = PostWithExistingColumn::first();
 
-    expect($post->only($keys))->toBe($fallback)
+    expect($post->only($keys))->toBe([
+        'title' => 'Title',
+        'body' => 'Body',
+        'integer_field' => 120,
+        'float_field' => 120.0,
+        'boolean_field' => true,
+    ])
         ->and($post->meta)->toHaveCount(5)
         ->and($post->findMeta('integer_field')->type)->toBe('integer')
         ->and($post->findMeta('boolean_field')->type)->toBe('boolean');
@@ -157,17 +155,17 @@ it('keeps newer meta current and adds the column value to the history', function
         ->and($post->withCurrentMeta()->historicMeta->pluck('value')->all())->toBe(['Column']);
 });
 
-it('uses meta values from the backfill instead of fallback values for planned meta only', function () {
+it('uses the column value until planned meta is published', function () {
     insertBackfillPost(['title' => 'Column']);
 
     PostWithExistingColumn::first()->saveMetaAt('title', 'Planned', '+1 week');
 
-    expect(PostWithExistingColumn::first()->title)->toBe('Column');
+    expect(PostWithExistingColumn::first()->title)->toBeNull();
 
     MetaBackfill::fromColumns(PostWithExistingColumn::class, ['title'])->run();
-    DB::table('sample_posts_existing_column')->update(['title' => 'Changed']);
 
-    expect(PostWithExistingColumn::first()->title)->toBe('Column');
+    expect(PostWithExistingColumn::first()->title)->toBe('Column')
+        ->and(PostWithExistingColumn::first()->withMetaAt('+2 weeks')->title)->toBe('Planned');
 });
 
 it('includes soft deleted rows', function () {

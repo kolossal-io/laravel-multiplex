@@ -70,7 +70,7 @@ it('will allow existing column to be allowed explicitely', function () {
         'foo',
     ]);
 
-    expect($model->title)->toBe('Initial title');
+    expect($model->title)->toBeNull();
 
     $model->setMeta('title', 'Changed title');
     $model->setMeta('foo', 'bar');
@@ -90,7 +90,7 @@ it('will prefer meta over existing column if defined explicitly', function () {
         'foo',
     ]);
 
-    expect($model->title)->toBe('Initial title');
+    expect($model->title)->toBeNull();
 
     $model->setMeta('title', 'Changed title');
 
@@ -105,7 +105,7 @@ it('will prefer meta over existing column if defined explicitly', function () {
     expect($model->title)->toBe('Changed again');
 });
 
-it('will fallback to existing column for explicitly defined meta keys', function () {
+it('will not fall back to existing column for explicitly defined meta keys', function () {
     $model = insertPostWithExistingColumn([
         'title' => 'Initial title',
     ]);
@@ -113,7 +113,7 @@ it('will fallback to existing column for explicitly defined meta keys', function
     $this->assertDatabaseCount('meta', 0);
     $this->assertDatabaseHas('sample_posts_existing_column', ['title' => 'Initial title']);
 
-    expect($model->title)->toBe('Initial title');
+    expect($model->title)->toBeNull();
 
     $model->saveMeta('title', 'Changed title');
     expect($model->title)->toBe('Changed title');
@@ -122,10 +122,12 @@ it('will fallback to existing column for explicitly defined meta keys', function
     expect($model->title)->toBeNull();
 
     $model->deleteMeta('title');
-    expect($model->title)->toBe('Initial title');
+    expect($model->title)->toBeNull();
+
+    $this->assertDatabaseHas('sample_posts_existing_column', ['title' => 'Initial title']);
 });
 
-it('will fallback to existing column for dynamically defined meta keys', function () {
+it('will not fall back to existing column for dynamically defined meta keys', function () {
     $model = Post::factory()->create(['title' => 'Initial title']);
 
     $model->metaKeys([
@@ -136,7 +138,7 @@ it('will fallback to existing column for dynamically defined meta keys', functio
     $this->assertDatabaseCount('meta', 0);
     $this->assertDatabaseHas('sample_posts', ['title' => 'Initial title']);
 
-    expect($model->title)->toBe('Initial title');
+    expect($model->title)->toBeNull();
 
     $model->saveMeta('title', 'Changed title');
     expect($model->title)->toBe('Changed title');
@@ -145,10 +147,12 @@ it('will fallback to existing column for dynamically defined meta keys', functio
     expect($model->title)->toBeNull();
 
     $model->deleteMeta('title');
-    expect($model->title)->toBe('Initial title');
+    expect($model->title)->toBeNull();
+
+    $this->assertDatabaseHas('sample_posts', ['title' => 'Initial title']);
 });
 
-it('will fallback to existing column for unpublished meta', function () {
+it('will not fall back to existing column for unpublished meta', function () {
     $model = insertPostWithExistingColumn([
         'title' => 'Initial title',
     ]);
@@ -156,16 +160,16 @@ it('will fallback to existing column for unpublished meta', function () {
     $this->assertDatabaseCount('meta', 0);
     $this->assertDatabaseHas('sample_posts_existing_column', ['title' => 'Initial title']);
 
-    expect($model->title)->toBe('Initial title');
+    expect($model->title)->toBeNull();
 
     $model->saveMetaAt('title', 'Changed title', Carbon::now()->addHour());
-    expect($model->refresh()->title)->toBe('Initial title');
+    expect($model->refresh()->title)->toBeNull();
 
     $this->travelTo(Carbon::now()->addHour());
     expect($model->refresh()->title)->toBe('Changed title');
 });
 
-it('will fallback to null for unpublished meta', function () {
+it('will return null for unpublished meta', function () {
     $model = insertPostWithExistingColumn([
         'title' => null,
     ]);
@@ -198,7 +202,7 @@ it('will not touch database for explicitly defined keys', function () {
     $this->assertDatabaseHas('sample_posts_existing_column', ['id' => $b->id, 'title' => null]);
     $this->assertDatabaseHas('sample_posts_existing_column', ['id' => $c->id, 'title' => null]);
 
-    expect($a->title)->toBe('Initial title');
+    expect($a->title)->toBeNull();
     expect($b->title)->toBeNull();
     expect($c->title)->toBe('Cee title');
 
@@ -227,7 +231,7 @@ it('will remove database attributes equals to explicit keys when retrieving', fu
         'title' => 'Title B',
     ]);
 
-    expect($modelA->getOriginal('title'))->toBe('Title A');
+    expect($modelA->getRawOriginal('title'))->toBe('Title A');
     $this->assertArrayNotHasKey('title', $this->getProtectedProperty($modelA, 'attributes'));
     expect($modelA->isDirty('title'))->toBeFalse();
     expect($modelA->isDirty())->toBeFalse();
@@ -247,7 +251,7 @@ it('will remove database attributes equals to explicit keys when retrieving', fu
     expect($modelB->isDirty('title'))->toBeTrue();
     expect($modelB->isMetaDirty('title'))->toBeFalse();
 
-    expect($modelA->title)->toBe('Title A');
+    expect($modelA->title)->toBeNull();
     expect($modelB->title)->toBe('Another Title B');
 });
 
@@ -264,9 +268,10 @@ it('will not change meta when using update method', function () {
     ]);
 
     $this->assertDatabaseCount('sample_posts_existing_column', 1);
+    $this->assertDatabaseHas('sample_posts_existing_column', ['title' => 'Updated Title']);
     $this->assertDatabaseCount('meta', 0);
 
-    expect(PostWithExistingColumn::first()->title)->toBe('Updated Title');
+    expect(PostWithExistingColumn::first()->title)->toBeNull();
 });
 
 it('will include meta value in collection if overriding column', function () {
@@ -279,8 +284,9 @@ it('will include meta value in collection if overriding column', function () {
     $this->assertDatabaseCount('sample_posts_existing_column', 10);
     $this->assertDatabaseCount('meta', 0);
 
-    PostWithExistingColumn::get()->each(function ($model) {
-        $model->title = 'Meta ' . $model->title;
+    PostWithExistingColumn::orderBy('id')->get()->each(function ($model, $i) {
+        $num = $i + 1;
+        $model->title = "Meta Title {$num}";
         $model->save();
     });
 
@@ -298,10 +304,9 @@ it('will include meta value in collection if overriding column', function () {
     $this->assertDatabaseCount('sample_posts_existing_column', 10);
     $this->assertDatabaseCount('meta', 0);
 
-    PostWithExistingColumn::orderBy('id')->get()->each(function ($model, $i) {
-        $num = $i + 1;
+    PostWithExistingColumn::orderBy('id')->get()->each(function ($model) {
         $this->assertArrayNotHasKey('title', $this->getProtectedProperty($model, 'attributes'));
-        expect($model->title)->toBe("Title {$num}");
+        expect($model->title)->toBeNull();
     });
 });
 
@@ -337,7 +342,7 @@ it('can append overwriting meta values in array', function () {
 
     $this->assertDatabaseCount('meta', 0);
 
-    expect(PostWithExistingColumn::first()->toArray()['title'])->toBe('Title');
+    expect(PostWithExistingColumn::first()->toArray()['title'])->toBeNull();
 
     $model = PostWithExistingColumn::first();
     $model->title = 'Meta Title';
@@ -349,7 +354,7 @@ it('can append overwriting meta values in array', function () {
 
     DB::table('meta')->delete();
 
-    expect(PostWithExistingColumn::first()->toArray()['title'])->toBe('Title');
+    expect(PostWithExistingColumn::first()->toArray()['title'])->toBeNull();
 });
 
 it('can append overwriting meta values in collection array', function () {
@@ -363,7 +368,7 @@ it('can append overwriting meta values in collection array', function () {
 
     PostWithExistingColumn::orderBy('id')->get()->each(function ($model, $i) {
         $num = $i + 1;
-        expect($model->toArray()['title'])->toBe("Title {$num}");
+        expect($model->toArray()['title'])->toBeNull();
 
         $model->title = "Meta Title {$num}";
         $model->save();
@@ -394,7 +399,7 @@ it('can assign meta when creating by array', function () {
     expect(PostWithExistingColumn::first()->foo)->toBe('bar');
 });
 
-it('will cast fallback fields as expected', function () {
+it('will cast meta fields having equally named columns as expected', function () {
     $this->assertDatabaseCount('meta', 0);
 
     insertPostWithExistingColumn([
@@ -408,9 +413,9 @@ it('will cast fallback fields as expected', function () {
 
     $post = PostWithExistingColumn::first();
 
-    expect($post->boolean_field)->toBe(true);
-    expect($post->float_field)->toBe(120.0);
-    expect($post->integer_field)->toBe(120);
+    expect($post->boolean_field)->toBeNull();
+    expect($post->float_field)->toBeNull();
+    expect($post->integer_field)->toBeNull();
 
     $post->boolean_field = 0;
     $post->float_field = '123';

@@ -15,16 +15,8 @@ jobs:
         morphtype: [ integer, uuid, ulid ]
         db: [ sqlite, mysql, pgsql ]
         include:
-          - laravel: 11.*
-            php: 8.2
-            testbench: 9.*
-            morphtype: integer
-            db: sqlite
-            # Laravel 11 is EOL and every release is affected by unpatched security advisories,
-            # which Composer refuses to install by default.
-            allow-insecure: true
           - laravel: 12.*
-            php: 8.4
+            php: 8.2
             testbench: 10.*
             morphtype: integer
             db: sqlite
@@ -88,10 +80,6 @@ jobs:
             hashFiles('composer.json') }}
           restore-keys: |
             ${{ runner.os }}-php-${{ matrix.php }}-laravel-${{ matrix.laravel }}-composer-
-
-      - if: matrix.allow-insecure
-        name: Allow packages affected by security advisories
-        run: composer config policy.advisories.block false
 
       - name: Install dependencies
         run: |

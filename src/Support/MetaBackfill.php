@@ -162,8 +162,8 @@ class MetaBackfill
     }
 
     /**
-     * Get the value the same way it would have been used as a fallback value:
-     * Typecast columns hold the serialized value of the type given in `$metaKeys`.
+     * Get the value to store for the given column value: Columns of keys typecast
+     * in `$metaKeys` are expected to hold the serialized value of that type.
      */
     protected function getValue(mixed $value, ?string $cast): mixed
     {
