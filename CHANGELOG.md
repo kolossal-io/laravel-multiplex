@@ -1,3 +1,21 @@
+# [4.0.0](https://github.com/kolossal-io/laravel-multiplex/compare/v3.1.0...v4.0.0) (2026-11-03)
+
+
+### Build System
+
+* drop support for Laravel 11 ([6ebd7cb](https://github.com/kolossal-io/laravel-multiplex/commit/6ebd7cb9e23c971f9c884bd4ae426923466d013b))
+
+
+### Features
+
+* remove fallback to database columns ([81cdb0d](https://github.com/kolossal-io/laravel-multiplex/commit/81cdb0d9aae1a02b12a1d2c7e109a053e0157a6f))
+
+
+### BREAKING CHANGES
+
+* Explicitly allowed meta keys no longer fall back to equally named table columns. Move existing column values to meta records first, e.g. using `MetaBackfill::fromColumns()`. `setFallbackValue()` and `getFallbackValue()` were removed and `pluckMeta()` no longer accepts the `$withFallbackValues` argument.
+* Laravel 12+ is required now. Stay on version 3.x if you are still using Laravel 11.
+
 # [3.1.0](https://github.com/kolossal-io/laravel-multiplex/compare/v3.0.3...v3.1.0) (2026-11-03)
 
 
