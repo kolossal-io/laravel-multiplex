@@ -57,7 +57,7 @@ $post->setMetaAt('likes', 6000, '+2 years');
 
 The main difference is that the metadata in Multiplex has a timestamp that defines validity. This allows changes to be tracked and planned. You can inspect all metadata on your model at a specific point in time and Multiplex will by default only give you the most current.
 
-Since Multiplex is storing the metadata in a [polymorphic](https://laravel.com/docs/9.x/eloquent-relationships#polymorphic-relationships) table, it can easily be plugged into existing projects to expand properties of your models. This even works without removing the relevant table columns of your model: They are used as a fallback.
+Since Multiplex is storing the metadata in a [polymorphic](https://laravel.com/docs/9.x/eloquent-relationships#polymorphic-relationships) table, it can easily be plugged into existing projects to expand properties of your models. This even works without removing the relevant table columns of your model: They are used as a fallback ([deprecated](#extending-database-columns)).
 
 And it’s low profile: If you don't like it, just [remove the `HasMeta` Trait](#installation) and everything is back to normal.
 
@@ -600,6 +600,9 @@ protected array $metaKeys = [
 
 ## Extending Database Columns
 
+> [!WARNING]
+> Using database columns as a fallback for meta values is deprecated and planned to be removed in version 4.0. Use the [`MetaBackfill` helper](#moving-columns-to-meta) to move existing column values to meta records.
+
 By default Multiplex will not touch columns of your model. But sometimes it might be useful to have meta records as an extension for your existing table columns.
 
 Consider having an existing `Post` model with only a `title` and a `body` column. By explicitely adding `body` to our array of meta keys `body` will be handled by Multiplex from now on – not touching the `posts` table, but using the database column as a fallback.
@@ -633,6 +636,37 @@ $post->body; // A body.
 ```
 
 In case of using Multiplex for extending table columns, Multiplex will remove the original column when retrieving models from the database so you don’t get stale data.
+
+### Moving Columns to Meta
+
+To move the values of existing columns to meta records entirely, e.g. before dropping the columns, use the `MetaBackfill` helper inside a migration:
+
+```php
+use App\Models\Post;
+use Illuminate\Database\Migrations\Migration;
+use Kolossal\Multiplex\Support\MetaBackfill;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        MetaBackfill::fromColumns(Post::class, ['body', 'color'])->run();
+    }
+};
+```
+
+For every row a meta record is created per non-null column, published at the time the row was created (`created_at`), so newer meta stays current and the column value becomes part of the history. Values are typecast as defined in `$metaKeys`, just like they are when used as a fallback.
+
+```php
+MetaBackfill::fromColumns(Post::class, ['body'])
+    ->publishedAt('updated_at')         // Take the time from another column…
+    ->publishedAt(now()->startOfYear()) // …or a fixed time (`null` means now).
+    ->chunk(1000)                       // Rows to process at once, defaults to 500.
+    ->dryRun()                          // Only count the records that would be created.
+    ->run();                            // Returns the number of created meta records.
+```
+
+The table rows are read without global scopes, so soft deleted rows are included. Meta records are inserted in bulk without dispatching any [events](#events). Running the helper again will not create duplicates for the same model, key and publishing time. The columns themselves are left untouched, so drop them afterwards if you no longer need them.
 
 ## Deleting Metadata
 

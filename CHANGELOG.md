@@ -1,3 +1,11 @@
+# [3.1.0](https://github.com/kolossal-io/laravel-multiplex/compare/v3.0.3...v3.1.0) (2026-11-03)
+
+
+### Features
+
+* add dry run mode to MetaBackfill ([121a685](https://github.com/kolossal-io/laravel-multiplex/commit/121a685a7308e53a9d5389b89db5e794c83b2b2e))
+* add MetaBackfill helper to move column values to meta ([3b20669](https://github.com/kolossal-io/laravel-multiplex/commit/3b20669a024c9c03adf2de02ac50c84771ea0186))
+
 ## [3.0.3](https://github.com/kolossal-io/laravel-multiplex/compare/v3.0.2...v3.0.3) (2026-11-03)
 
 
