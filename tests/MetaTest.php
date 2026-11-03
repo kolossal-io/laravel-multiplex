@@ -7,8 +7,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Kolossal\Multiplex\Database\Factories\MetaFactory;
 use Kolossal\Multiplex\Meta;
+use Kolossal\Multiplex\Tests\Factories\MetaWithFactoryFactory;
 use Kolossal\Multiplex\Tests\Mocks\BackedEnum;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
+use Kolossal\Multiplex\Tests\Mocks\MetaWithFactory;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\SampleSerializable;
 use Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties;
@@ -80,6 +82,12 @@ it('resolves its factory without relying on factory name guessing', function () 
     Factory::guessFactoryNamesUsing(fn() => 'Missing\\Factory');
 
     expect(Meta::factory())->toBeInstanceOf(MetaFactory::class);
+});
+
+it('can be extended by models using the HasFactory trait', function () {
+    expect(MetaWithFactory::factory())->toBeInstanceOf(MetaWithFactoryFactory::class)
+        ->and(MetaWithFactory::factory()->make())->toBeInstanceOf(MetaWithFactory::class)
+        ->and(Meta::factory())->toBeInstanceOf(MetaFactory::class);
 });
 
 it('can get and set value', function () {

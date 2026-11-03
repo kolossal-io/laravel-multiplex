@@ -110,7 +110,15 @@ class Meta extends Model
         });
     }
 
-    protected static function newFactory(): MetaFactory
+    /**
+     * Resolve the factory explicitly instead of relying on factory name guessing.
+     *
+     * The signature intentionally matches `HasFactory::newFactory()` without a return type,
+     * so subclasses using the `HasFactory` trait themselves stay compatible.
+     *
+     * @return MetaFactory
+     */
+    protected static function newFactory()
     {
         return MetaFactory::new();
     }
