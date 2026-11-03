@@ -3,9 +3,11 @@
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\Tests\Mocks\Post;
+use Kolossal\Multiplex\Tests\Mocks\PostCountingMetaLookups;
 use Mattiasgeniar\PhpunitQueryCountAssertions\AssertsQueryCounts;
 
 uses(RefreshDatabase::class);
@@ -232,4 +234,31 @@ it('updates the meta lookup when meta is saved, deleted or purged', function () 
 
     expect($post->bar)->toBeNull()
         ->and($post->hasMeta('bar'))->toBeFalse();
+});
+
+it('looks up meta only once per attribute access', function (string $key, mixed $expected) {
+    $post = PostCountingMetaLookups::query()->forceCreate([]);
+    $post->saveMeta('foo', 'bar');
+    $post->saveMeta('empty', null);
+
+    DB::table('sample_posts')->update(['title' => 'Column']);
+
+    $post = PostCountingMetaLookups::first();
+
+    expect($post->{$key})->toBe($expected)
+        ->and($post->metaLookups)->toBe(1);
+})->with([
+    'existing meta' => ['foo', 'bar'],
+    'existing meta with null value' => ['empty', null],
+    'missing meta' => ['undefined', null],
+    'missing meta with accessor' => ['defaulted', 'default'],
+    'missing meta with fallback value' => ['title', 'Column'],
+]);
+
+it('does not look up meta for model attributes', function () {
+    $post = PostCountingMetaLookups::query()->forceCreate(['body' => 'Body']);
+
+    expect($post->body)->toBe('Body')
+        ->and($post->id)->not->toBeNull()
+        ->and($post->metaLookups)->toBe(0);
 });

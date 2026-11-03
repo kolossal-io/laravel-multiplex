@@ -503,8 +503,17 @@ trait HasMeta
      */
     protected function getAttributeFromMetaAccessor($key, $value = null)
     {
-        $value ??= $this->getMeta($key);
+        return $this->applyMetaAccessor($key, $value ?? $this->getMeta($key));
+    }
 
+    /**
+     * Run the given value through the meta accessor if there is one.
+     *
+     * @param  mixed  $value
+     * @return mixed
+     */
+    protected function applyMetaAccessor(string $key, $value)
+    {
         $accessor = Str::camel('get_' . $key . '_meta');
 
         if (!method_exists($this, $accessor)) {
@@ -541,18 +550,17 @@ trait HasMeta
          * If the value is still `null` check if there is a fallback value which typically
          * means there is an equal named database column which we pulled the value from earlier.
          */
-        $value = $this->getAttributeFromMetaAccessor($key);
-
-        if ($value === null && !$this->hasMeta($key)) {
-            $value = $this->getAttributeFromMetaAccessor($key, $this->getFallbackValue($key));
+        if ($meta = $this->findMeta($key)) {
+            return $this->applyMetaAccessor($key, $meta->value);
         }
+
+        $value = $this->applyMetaAccessor($key, null)
+            ?? $this->applyMetaAccessor($key, $this->getFallbackValue($key));
 
         /**
          * Finally delegate back to `parent::getAttribute()` if no meta exists.
          */
-        return $value ?? value(
-            fn() => !$this->hasMeta($key) ? parent::getAttribute($key) : null
-        );
+        return $value ?? parent::getAttribute($key);
     }
 
     /**
