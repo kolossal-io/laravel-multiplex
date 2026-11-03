@@ -6,12 +6,16 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Kolossal\Multiplex\Meta;
+use Kolossal\Multiplex\Tests\Mocks\BackedEnum;
 use Kolossal\Multiplex\Tests\Mocks\Post;
 use Kolossal\Multiplex\Tests\Mocks\PostCountingMetaLookups;
+use Kolossal\Multiplex\Tests\Mocks\PostWithoutSoftDelete;
+use Kolossal\Multiplex\Tests\Traits\AccessesProtectedProperties;
 use Mattiasgeniar\PhpunitQueryCountAssertions\AssertsQueryCounts;
 
 uses(RefreshDatabase::class);
 uses(AssertsQueryCounts::class);
+uses(AccessesProtectedProperties::class);
 
 function getRawQueriesExecuted(): array
 {
@@ -261,4 +265,67 @@ it('does not look up meta for model attributes', function () {
     expect($post->body)->toBe('Body')
         ->and($post->id)->not->toBeNull()
         ->and($post->metaLookups)->toBe(0);
+});
+
+it('determines model attributes per instance casts', function () {
+    $post = Post::factory()->create();
+    $other = Post::factory()->create();
+
+    expect($post->isModelAttribute('status'))->toBeFalse()
+        ->and($post->isValidMetaKey('status'))->toBeTrue();
+
+    $post->mergeCasts(['status' => BackedEnum::class]);
+
+    expect($post->isModelAttribute('status'))->toBeTrue()
+        ->and($post->isValidMetaKey('status'))->toBeFalse()
+        ->and($other->isModelAttribute('status'))->toBeFalse()
+        ->and($other->isValidMetaKey('status'))->toBeTrue()
+        ->and($post->isModelAttribute('status'))->toBeTrue();
+});
+
+it('determines model attributes per instance attributes', function () {
+    $post = Post::factory()->create();
+    $other = Post::factory()->create();
+
+    expect($post->isModelAttribute('dynamic'))->toBeFalse();
+
+    $post->setRawAttributes(array_merge($post->getAttributes(), ['dynamic' => 'value']));
+
+    expect($post->isModelAttribute('dynamic'))->toBeTrue()
+        ->and($post->isValidMetaKey('dynamic'))->toBeFalse()
+        ->and($other->isModelAttribute('dynamic'))->toBeFalse()
+        ->and($other->isValidMetaKey('dynamic'))->toBeTrue();
+});
+
+it('respects unguarded meta and changed meta keys for model attributes', function () {
+    $post = Post::factory()->create();
+
+    expect($post->isModelAttribute('title'))->toBeTrue()
+        ->and($post->isValidMetaKey('title'))->toBeFalse();
+
+    Post::unguardMeta();
+
+    expect($post->isValidMetaKey('title'))->toBeTrue();
+
+    Post::reguardMeta();
+
+    expect($post->isValidMetaKey('title'))->toBeFalse();
+
+    $post->metaKeys(['title']);
+
+    expect($post->isModelAttribute('title'))->toBeTrue()
+        ->and($post->isValidMetaKey('title'))->toBeTrue()
+        ->and(Post::factory()->create()->isValidMetaKey('title'))->toBeFalse();
+});
+
+it('caches an empty list of explicitly allowed meta keys', function () {
+    $post = PostWithoutSoftDelete::factory()->create();
+
+    expect($post->getExplicitlyAllowedMetaKeys())->toBe([])
+        ->and($this->getProtectedProperty($post, 'explicitlyAllowedMetaKeys'))->toBe([])
+        ->and($post->isExplicitlyAllowedMetaKey('title'))->toBeFalse();
+
+    $post->metaKeys(['title']);
+
+    expect($post->isExplicitlyAllowedMetaKey('title'))->toBeTrue();
 });

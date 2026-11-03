@@ -80,6 +80,13 @@ trait HasMeta
     protected static array $metaSchemaColumnsCache = [];
 
     /**
+     * Cache storage for keys determined to be model attributes, see `isStaticModelAttribute()`.
+     *
+     * @var array<class-string, array{casts: array<string, mixed>, keys: array<string, bool>}>
+     */
+    protected static array $metaModelAttributeCache = [];
+
+    /**
      * Auto-save meta data when model is saved.
      */
     protected bool $autosaveMeta = true;
@@ -277,13 +284,31 @@ trait HasMeta
     {
         return
             $this->isRelation($key) ||
+            $this->isStaticModelAttribute($key) ||
+            array_key_exists($key, parent::getAttributes());
+    }
+
+    /**
+     * Determine if the given key is a model attribute regardless of the instance’s attributes.
+     *
+     * The result only depends on the class and its casts, so it is memoized per class and key.
+     * The cache is discarded once an instance with different casts comes along.
+     */
+    protected function isStaticModelAttribute(string $key): bool
+    {
+        $cache = &static::$metaModelAttributeCache[static::class];
+
+        if ($cache === null || $cache['casts'] !== $this->casts) {
+            $cache = ['casts' => $this->casts, 'keys' => []];
+        }
+
+        return $cache['keys'][$key] ??=
             $this->hasSetMutator($key) ||
             $this->hasAttributeSetMutator($key) ||
             $this->isEnumCastable($key) ||
             $this->isClassCastable($key) ||
             str_contains($key, '->') ||
-            $this->hasColumn($key) ||
-            array_key_exists($key, parent::getAttributes());
+            $this->hasColumn($key);
     }
 
     /**
@@ -294,7 +319,7 @@ trait HasMeta
      */
     public function getExplicitlyAllowedMetaKeys(bool $fromCache = true): array
     {
-        if ($this->explicitlyAllowedMetaKeys && $fromCache) {
+        if ($this->explicitlyAllowedMetaKeys !== null && $fromCache) {
             return $this->explicitlyAllowedMetaKeys;
         }
 
@@ -578,7 +603,10 @@ trait HasMeta
      */
     public function findMeta($key): ?Meta
     {
-        if (!$this->exists || !isset($this->id)) {
+        /**
+         * Check the raw attribute, as `isset($this->id)` would run through `getAttribute()` again.
+         */
+        if (!$this->exists || !isset($this->attributes['id'])) {
             return null;
         }
 
