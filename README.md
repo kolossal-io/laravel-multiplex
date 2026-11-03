@@ -80,6 +80,8 @@ And it’s low profile: If you don't like it, just [remove the `HasMeta` Trait](
 
 ## Requirements
 
+**Multiplex** requires PHP **8.2+** and Laravel **12+**. If you are still using Laravel 11, use version 3.x.
+
 Since Version 2 **Multiplex** uses **SQL Window Functions** (such as `ROW_NUMBER() OVER (...)`) for efficient and scalable queries on meta data (e.g., to determine the latest or current meta per key). This enables much better performance for large datasets compared to classic subqueries or group-by/aggregate approaches. Your database must support SQL Window Functions. This has been tested on:
 
 - MySQL **8.0+**

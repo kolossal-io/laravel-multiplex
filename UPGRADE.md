@@ -1,5 +1,11 @@
 # Upgrade Multiplex
 
+## 3.x to 4.x
+
+### Laravel 12+
+
+Version 4.x requires Laravel 12 or higher. Laravel 11 no longer receives security fixes. If you are still using Laravel 11, you should continue using version 3.x of `laravel-multiplex`.
+
 ## 2.x to 3.x
 
 ### Laravel 11+
