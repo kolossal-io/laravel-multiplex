@@ -326,6 +326,16 @@ it('can return fallback if meta is not found', function () {
     expect(Post::first()->getMeta('bar', 'fallback'))->toBe(123);
 });
 
+it('returns fallback if the meta relation is not a collection', function () {
+    $model = Post::factory()->create();
+
+    $model->saveMeta('foo', 'bar');
+
+    $model->setRelation('meta', null);
+
+    expect($model->getMeta('foo', 'fallback'))->toBe('fallback');
+});
+
 it('will show if meta exists', function () {
     $model = Post::factory()->create();
 

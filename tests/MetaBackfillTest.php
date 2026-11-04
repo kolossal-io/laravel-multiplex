@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Kolossal\Multiplex\Events\MetaHasBeenAdded;
+use Kolossal\Multiplex\Exceptions\MetaException;
 use Kolossal\Multiplex\Meta;
 use Kolossal\Multiplex\Support\MetaBackfill;
 use Kolossal\Multiplex\Tests\Mocks\Dummy;
@@ -217,6 +218,14 @@ it('creates ids matching the configured morph type', function () {
     };
 });
 
+it('skips chunks without any values', function () {
+    insertBackfillPost(['title' => null]);
+    insertBackfillPost(['title' => 'Title']);
+
+    expect(MetaBackfill::fromColumns(PostWithExistingColumn::class, ['title'])->chunk(1)->run())->toBe(1)
+        ->and(Meta::count())->toBe(1);
+});
+
 it('only counts records in dry run mode', function () {
     insertBackfillPost(['title' => 'A', 'body' => 'Body']);
     insertBackfillPost(['title' => 'B', 'body' => null]);
@@ -238,6 +247,14 @@ it('only counts records in dry run mode', function () {
 it('throws for models not using HasMeta', function () {
     MetaBackfill::fromColumns(Dummy::class, ['title']);
 })->throws(InvalidArgumentException::class, 'must be an Eloquent model using the `HasMeta` trait');
+
+it('throws if the configured meta model is invalid', function () {
+    config(['multiplex.model' => Dummy::class]);
+
+    insertBackfillPost(['title' => 'Title']);
+
+    MetaBackfill::fromColumns(PostWithExistingColumn::class, ['title'])->run();
+})->throws(MetaException::class);
 
 it('throws for invalid chunk sizes', function () {
     MetaBackfill::fromColumns(Post::class, ['title'])->chunk(0);

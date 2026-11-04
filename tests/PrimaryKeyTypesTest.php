@@ -1,9 +1,12 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Kolossal\Multiplex\Meta;
+use Kolossal\Multiplex\Support\MetaBackfill;
 use Kolossal\Multiplex\Tests\Mocks\Post;
+use Kolossal\Multiplex\Tests\Mocks\PostWithExistingColumn;
 
 it('uses the configured column type', function (string $type, array $column_types) {
     $this->refreshDatabaseWithType($type);
@@ -52,6 +55,24 @@ it('resolves unique id models by key', function () {
     expect($meta->is($meta->resolveRouteBinding($meta->id)))->toBeTrue();
     expect($meta->is($meta->resolveRouteBinding($meta->id, 'id')))->toBeTrue();
 });
+
+it('backfills meta with ids matching the configured morph type', function (string $type) {
+    $this->refreshDatabaseWithType($type);
+
+    $post = PostWithExistingColumn::factory()->create();
+
+    DB::table('sample_posts_existing_column')->where('id', $post->id)->update(['title' => 'Title']);
+
+    expect(MetaBackfill::fromColumns(PostWithExistingColumn::class, ['title'])->run())->toBe(1);
+
+    $id = Meta::first()->id;
+
+    match ($type) {
+        'uuid' => expect(Str::isUuid($id))->toBeTrue(),
+        'ulid' => expect(Str::isUlid($id))->toBeTrue(),
+        default => expect($id)->toBeInt(),
+    };
+})->with('morphTypes');
 
 it('throws exception for invalid morph type configuration', function () {
     $this->expectException(Exception::class);

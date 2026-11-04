@@ -490,18 +490,6 @@ trait HasMeta
     }
 
     /**
-     * Get the attribute for the given key and run it through the meta accessor.
-     *
-     * @param  string  $key
-     * @param  mixed  $value
-     * @return mixed
-     */
-    protected function getAttributeFromMetaAccessor($key, $value = null)
-    {
-        return $this->applyMetaAccessor($key, $value ?? $this->getMeta($key));
-    }
-
-    /**
      * Run the given value through the meta accessor if there is one.
      *
      * @param  mixed  $value
